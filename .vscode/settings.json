@@ -2,6 +2,12 @@
   "[typescript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
+
+    "terminal.integrated.env.linux": {
+    "SUPABASE_ACCESS_TOKEN": "sbp_a85ae7180339dd0898a0a333e0502eb69493d5cb"
+  },
+
+
   "css.customData": [],
   "css.lint.unknownAtRules": "ignore",
   "deno.enablePaths": [
