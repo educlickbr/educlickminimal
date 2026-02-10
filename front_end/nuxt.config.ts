@@ -1,10 +1,23 @@
 export default defineNuxtConfig({
   // 1. Registro de Módulos (A tríade sagrada)
+  app: {
+    head: {
+      style: [
+        {
+          innerHTML:
+            "html, body { background-color: #0a0a0c !important; color: white; margin: 0; padding: 0; } #__nuxt { display: none; }",
+        },
+      ],
+    },
+  },
   modules: [
     "@nuxtjs/tailwindcss",
     "@pinia/nuxt",
     "@nuxtjs/supabase",
   ],
+
+  // CSS Global (Variáveis CSS, Reset, Fontes)
+  css: ["./app/assets/css/style.css"],
 
   // 2. Configuração do Supabase (Segurança JWT)
   supabase: {

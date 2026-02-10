@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    /* Primary */
+    --color-primary: #3824b8;
+    --color-primary-hover: #221a57;
+
+    /* Secondary */
+    --color-secondary: #8c878d;
+    --color-secondary-hover: #585458;
+    --color-secondary-surface: #eeb94915;
+    --color-secondary-surface-hover: #eeb94930;
+
+    /* State Colors */
+    --color-danger: #de5955;
+    --color-danger-hover: #c12a25;
+
+    --color-success: #6d9f71;
+    --color-success-hover: #4b734f;
+
+    /* Warning Colors */
+    --color-warning: #eeb949;
+    --color-warning-hover: #d69814;
+
+    /* Base Text & Background (Default to Dark to avoid flash) */
+    --color-text: #e8e6e8;
+    --color-background: #0a0a0c;
+
+    /* Rounding (Design Tokens) */
+    --radius-xs: 2px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+
+    font-family: Roboto, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="dark"] {
+    --color-text: #e8e6e8;
+    --color-background: #16161e;
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    color: var(--color-text);
+    background-color: var(--color-background);
+    transition: color 0.3s, background-color 0.3s;
+}
