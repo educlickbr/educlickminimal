@@ -5,7 +5,7 @@ export default defineNuxtConfig({
       style: [
         {
           innerHTML:
-            "html, body { background-color: #0a0a0c !important; color: white; margin: 0; padding: 0; } #__nuxt { display: none; }",
+            "html, body { background-color: #0a0a0c !important; color: white; margin: 0; padding: 0; }",
         },
       ],
     },
@@ -24,7 +24,7 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: "/login", // Onde mandar o usuário se não estiver logado
       callback: "/confirm", // Para onde o Supabase volta após login social
-      exclude: ["/"], // Páginas públicas (ex: Landing Page)
+      exclude: ["/", "/teste-layout"], // Páginas públicas (ex: Landing Page)
     },
   },
 

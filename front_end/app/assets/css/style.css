@@ -3,26 +3,27 @@
 @tailwind utilities;
 
 :root {
-    /* Primary */
-    --color-primary: #3824b8;
-    --color-primary-hover: #221a57;
+    /* Primary — Violet/Purple */
+    --color-primary: #8b5cf6;
+    --color-primary-hover: #7c3aed;
+    --color-primary-rgb: 139, 92, 246;
 
     /* Secondary */
     --color-secondary: #8c878d;
     --color-secondary-hover: #585458;
-    --color-secondary-surface: #eeb94915;
-    --color-secondary-surface-hover: #eeb94930;
+    --color-secondary-surface: #8c878d15;
+    --color-secondary-surface-hover: #8c878d30;
 
     /* State Colors */
-    --color-danger: #de5955;
-    --color-danger-hover: #c12a25;
+    --color-danger: #E7333F;
+    --color-danger-hover: #9b2028;
 
-    --color-success: #6d9f71;
-    --color-success-hover: #4b734f;
+    --color-success: #95C11E;
+    --color-success-hover: #6e8d18;
 
     /* Warning Colors */
-    --color-warning: #eeb949;
-    --color-warning-hover: #d69814;
+    --color-warning: #FFD753;
+    --color-warning-hover: #ccac41;
 
     /* Base Text & Background (Default to Dark to avoid flash) */
     --color-text: #e8e6e8;
@@ -46,7 +47,7 @@
 
 [data-theme="dark"] {
     --color-text: #e8e6e8;
-    --color-background: #16161e;
+    --color-background: #13131a;
 }
 
 body {
@@ -57,3 +58,99 @@ body {
     background-color: var(--color-background);
     transition: color 0.3s, background-color 0.3s;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — FORM FIELDS
+   Regra global: todo input / select / textarea do projeto usa
+   a superfície dos cards como fundo (mesmo tom, mesma hierarquia).
+   Não é necessário adicionar nenhuma classe.
+   ─────────────────────────────────────────────────────────────── */
+
+:root {
+    /* Superfície dos campos — mesma dos cards em repouso */
+    --field-bg:           rgba(255, 255, 255, 0.04);
+    /* Cor opaca equivalente para SELECT (browsers não renderizam rgba em options) */
+    /* rgba(255,255,255,0.04) sobre #13131a ≈ #16161e */
+    --field-bg-select:    #16161e;
+    --field-bg-option:    #181825;  /* options ligeiramente mais escuras */
+    /* Hover — leve tinte violeta, igual ao hover dos cards */
+    --field-bg-hover:     rgba(139, 92, 246, 0.08);
+    --field-bg-select-hover: #1c1a2e; /* hover opaco para select */
+    /* Borda idle — igual à borda dos cards */
+    --field-border:       rgba(255, 255, 255, 0.07);
+    /* Borda em foco */
+    --field-border-focus: rgba(139, 92, 246, 0.45);
+    /* Textos */
+    --field-text:         rgba(232, 230, 240, 0.9);
+    --field-placeholder:  rgba(255, 255, 255, 0.22);
+    /* Glow de foco */
+    --field-shadow-focus: 0 0 0 3px rgba(139, 92, 246, 0.10);
+}
+
+/* ── Regra global (aplica em todo o projeto) ── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+select,
+textarea {
+    background:    var(--field-bg) !important;
+    border-color:  var(--field-border) !important;
+    color:         var(--field-text) !important;
+    transition:    border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"])::placeholder,
+textarea::placeholder {
+    color: var(--field-placeholder);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):hover,
+select:hover,
+textarea:hover {
+    background: var(--field-bg-hover);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):focus,
+select:focus,
+textarea:focus {
+    border-color: var(--field-border-focus);
+    box-shadow:   var(--field-shadow-focus);
+    outline:      none;
+}
+
+/* ── Select: cor opaca pois browsers não compõem rgba no rendering nativo ── */
+select {
+    background:  var(--field-bg-select) !important;
+    border-color: var(--field-border) !important;
+    color:        var(--field-text) !important;
+    transition:   border-color 0.18s ease, box-shadow 0.18s ease;
+}
+select:hover  { background: var(--field-bg-select-hover) !important; }
+select:focus  { border-color: var(--field-border-focus) !important; box-shadow: var(--field-shadow-focus) !important; outline: none !important; }
+select:disabled { opacity: 0.45 !important; cursor: not-allowed !important; }
+
+/* Options: sempre opaco + dark */
+option {
+    background: var(--field-bg-option) !important;
+    color:       var(--field-text) !important;
+}
+option:checked,
+option:hover {
+    background: #2d1f5e !important; /* violet-dark ao selecionar */
+    color: #e8e6f0 !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):disabled,
+select:disabled,
+textarea:disabled {
+    opacity: 0.45;
+    cursor:  not-allowed;
+}
+
+/* Alias .vi-field — retrocompatibilidade com componentes antigos */
+.vi-field {
+    background:   var(--field-bg) !important;
+    border-color: var(--field-border) !important;
+    color:        var(--field-text) !important;
+}
+.vi-field:hover  { background: var(--field-bg-hover) !important; }
+.vi-field:focus  { border-color: var(--field-border-focus) !important; box-shadow: var(--field-shadow-focus) !important; outline: none !important; }
+.vi-field::placeholder { color: var(--field-placeholder) !important; }

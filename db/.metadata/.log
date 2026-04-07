@@ -1,0 +1,20 @@
+!SESSION 2026-03-30 09:54:13.085 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=21.0.8
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=en
+Framework arguments:  -eclipse.keyring /home/eikmeier/.local/share/DBeaverData/secure/secure_storage -nosplash
+Command-line arguments:  -os linux -ws gtk -arch x86_64 -data /home/eikmeier/Documentos/dev/nuxt/educlickminimal/db -eclipse.keyring /home/eikmeier/.local/share/DBeaverData/secure/secure_storage -nosplash
+
+!ENTRY org.eclipse.ui 2 2 2026-03-30 09:54:17.452
+!MESSAGE Invalid preference category path: org.eclipse.debug.ui.ConsolePreferencePage (bundle: org.eclipse.ui.console, page: org.eclipse.ui.internal.console.ansi.preferences.AnsiConsolePreferencePage)
+!SESSION 2026-03-31 10:36:15.568 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=21.0.8
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=en
+Framework arguments:  -eclipse.keyring /home/eikmeier/.local/share/DBeaverData/secure/secure_storage
+Command-line arguments:  -os linux -ws gtk -arch x86_64 -eclipse.keyring /home/eikmeier/.local/share/DBeaverData/secure/secure_storage
+
+!ENTRY org.eclipse.ui 2 2 2026-03-31 10:36:25.141
+!MESSAGE Invalid preference category path: org.eclipse.debug.ui.ConsolePreferencePage (bundle: org.eclipse.ui.console, page: org.eclipse.ui.internal.console.ansi.preferences.AnsiConsolePreferencePage)

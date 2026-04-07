@@ -15,6 +15,7 @@ export const useAppStore = defineStore("app", {
         user: null as any,
         profile: null as any,
         company: null as any,
+        entidades: [] as any[],
         role: null as any,
 
         // Expanded Profile Data
@@ -44,9 +45,12 @@ export const useAppStore = defineStore("app", {
                 const data = await $fetch("/api/me") as any;
 
                 // Map BFF fields to store state
-                this.user = data.user;
-                this.profile = data.profile;
-                this.company = data.company;
+                this.user = data.user || data.usuario || null;
+                this.profile = data.profile || null;
+                this.entidades = data.entidades || [];
+                this.company = data.company ||
+                    this.entidades.find((ent: any) => ent.tipo === "empresa") ||
+                    this.entidades[0] || null;
                 this.role = data.role;
                 this.hash_base = data.hash_base;
 
@@ -67,6 +71,8 @@ export const useAppStore = defineStore("app", {
         clearProfile() {
             this.user = null;
             this.profile = null;
+            this.company = null;
+            this.entidades = [];
             this.role = null;
             this.user_expandido_id = null;
             this.nome = null;

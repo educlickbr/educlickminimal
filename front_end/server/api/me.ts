@@ -19,11 +19,10 @@ export default defineEventHandler(async (event) => {
             },
         });
 
-        // 2. Fetch Expanded Profile Data from DB
-        // Using userId explicitly to ensure we don't send undefined
-        const { data: profileData, error: rpcError } =
+        // 2. Fetch Full Session Data from DB
+        const { data: sessionData, error: rpcError } =
             await (client.rpc as any)(
-                "get_user_expandido",
+                "nxt_get_user_session_v1",
                 {
                     p_auth_id: userId,
                 },
@@ -33,33 +32,31 @@ export default defineEventHandler(async (event) => {
             console.error("RPC Error in /api/me:", rpcError);
         }
 
-        const expanded = (profileData as any) || {};
+        const session = (sessionData as any) || {};
+        const usuario = session.usuario || {};
 
+        // Limpeza radical: Uma única estrutura de verdade
         return {
-            user: user,
+            success: session.success || false,
+            usuario: {
+                id: usuario.id || null,
+                id_auth: usuario.id_user || userId,
+                email: usuario.email || user.email,
+                nome_completo: usuario.nome_completo || null,
+            },
+            // Facilita o acesso direto no front-end para compatibilidade
+            user_expandido_id: usuario.id || null,
+            nome_completo: usuario.nome_completo || null,
+            
+            // Dados de acesso
+            entidades: session.entidades || [],
             hash_base: hashData?.url || null,
-            // Expanded fields
-            user_expandido_id: expanded.user_expandido_id || null,
-            nome: expanded.nome || null,
-            sobrenome: expanded.sobrenome || null,
-            imagem_user: expanded.imagem_user || null,
-            eixo: expanded.eixo || null,
-            // Debugging
-            _rpc_error: rpcError || null,
-            _debug_user_id_used: userId,
-            _debug_raw_profile: profileData || null,
-            // Original fields
-            profile: null,
-            role: null,
-            company: null,
         };
     } catch (err) {
         console.error("General error in /api/me:", err);
         return {
-            user: user,
-            hash_base: null,
-            error: true,
-            _debug_error_msg: (err as any).message,
+            success: false,
+            error: (err as any).message,
         };
     }
 });

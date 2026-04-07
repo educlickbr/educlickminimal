@@ -1,0 +1,130 @@
+2026-03-30 09:54:14.725 - DBeaver 26.0.1.202603221810 is starting
+2026-03-30 09:54:14.726 - OS: Linux 6.12.74+deb13+1-amd64 (amd64)
+2026-03-30 09:54:14.726 - Java version: 21.0.8 by Eclipse Adoptium (64bit)
+2026-03-30 09:54:14.726 - Install path: '/usr/share/dbeaver-ce'
+2026-03-30 09:54:14.726 - Instance path: 'file:/home/eikmeier/Documentos/dev/nuxt/educlickminimal/db/'
+2026-03-30 09:54:14.729 - Memory available 64Mb/1024Mb
+2026-03-30 09:54:14.734 - Initialize desktop platform...
+2026-03-30 09:54:15.058 - BounceCastle bundle found. Use JCE provider BC
+> Start Core File Systems [org.eclipse.core.filesystem 1.11.400.v20251107-0507]
+> Start Core Resource Management [org.eclipse.core.resources 3.23.200.v20251217-0810]
+> Start Team Support Core [org.eclipse.team.core 3.10.1000.v20260112-1030]
+> Start DBeaver UI Navigator [org.jkiss.dbeaver.ui.navigator 1.0.175.202603221810]
+> Start JFace Text [org.eclipse.jface.text 3.30.0.v20260203-0841]
+2026-03-30 09:54:15.434 - Initialize base platform...
+2026-03-30 09:54:15.448 - Platform initialized (714ms)
+> Start Equinox Java Authentication and Authorization Service (JAAS) [org.eclipse.equinox.security 1.4.700.v20250622-1644]
+> Start Internet Connection Management UI [org.eclipse.ui.net 1.6.0.v20251219-1227]
+> Start Internet Connection Management [org.eclipse.core.net 1.5.800.v20250613-1119]
+2026-03-30 09:54:15.479 - Proxy service 'org.eclipse.core.net.proxy.IProxyService' loaded
+2026-03-30 09:54:15.481 - Create display
+2026-03-30 09:54:15.792 - Starting instance server at http://localhost:33451
+2026-03-30 09:54:15.798 - Run workbench
+> Start Eclipse IDE UI [org.eclipse.ui.ide 3.23.0.v20260103-1639]
+> Start Eclipse e4 Workbench SWT [org.eclipse.e4.ui.workbench.swt 0.18.0.v20260119-0835]
+> Start Eclipse Application Services [org.eclipse.e4.core.services 2.5.300.v20251112-1253]
+> Start Eclipse UI Application Services [org.eclipse.e4.ui.services 1.6.600.v20251023-1358]
+> Start Eclipse e4 Progress View [org.eclipse.e4.ui.progress 0.5.0.v20251217-1052]
+> Start Eclipse Bindings Support [org.eclipse.e4.ui.bindings 0.15.0.v20251216-1230]
+> Start Eclipse e4 core commands [org.eclipse.e4.core.commands 1.1.700.v20250916-0927]
+> Start EMF XML/XMI Persistence [org.eclipse.emf.ecore.xmi 2.40.0.v20251210-1145]
+> Start Eclipse CSS SWT Theme Support [org.eclipse.e4.ui.css.swt.theme 0.15.0.v20251216-1230]
+> Start Eclipse e4 Workbench Add-ons [org.eclipse.e4.ui.workbench.addons.swt 1.6.0.v20251216-1230]
+> Start Eclipse e4 Workbench SWT Renderer [org.eclipse.e4.ui.workbench.renderers.swt 0.17.0.v20260131-0926]
+> Start Eclipse Dependency Injection Extensions [org.eclipse.e4.core.di.extensions 0.18.300.v20240413-1529]
+> Start DBeaver AI Model [org.jkiss.dbeaver.model.ai 2.0.18.202603221810]
+> Start DBeaver AI UI [org.jkiss.dbeaver.ui.ai 1.0.77.202603221810]
+> Start Eclipse CSS SWT Support [org.eclipse.e4.ui.css.swt 0.16.0.v20251216-1230]
+> Start GEF Classic Draw2d [org.eclipse.draw2d 3.22.0.202602231721]
+> Start GEF Classic GEF (MVC) [org.eclipse.gef 3.25.0.202602162234]
+2026-03-30 09:54:17.530 - Configure workbench window
+> Start DBeaver SQL Model [org.jkiss.dbeaver.model.sql 1.0.165.202603221810]
+2026-03-30 09:54:17.677 - Total database drivers: 127 (127)
+> Start Help System Core [org.eclipse.help 3.11.0.v20251227-1159]
+2026-03-30 09:54:17.765 - Create actions
+> Start Default Text Editor [org.eclipse.ui.editors 3.21.0.v20260218-1452]
+> Start Text Editor Framework [org.eclipse.ui.workbench.texteditor 3.20.0.v20260127-1637]
+2026-03-30 09:54:19.204 - Initialize workbench window
+2026-03-30 09:54:19.221 - Finish initialization
+> Start DBeaver UI Editors - Data [org.jkiss.dbeaver.ui.editors.data 1.0.175.202603221810]
+> Start DBeaver UI Editors - SQL [org.jkiss.dbeaver.ui.editors.sql 1.0.175.202603221810]
+> Start DBeaver Dashboard UI [org.jkiss.dbeaver.ui.dashboard 1.0.172.202603221810]
+> Start DBeaver ERD UI [org.jkiss.dbeaver.ui.editors.erd 3.1.16.202603221810]
+> Start DBeaver ERD Model [org.jkiss.dbeaver.model.erd 1.1.16.202603221810]
+> Start DBeaver Sample Database [org.jkiss.dbeaver.ui.config.sample 1.0.212.202603221810]
+2026-03-30 09:54:25.156 - Open [https://dbeaver.io/product/version.xml]
+> Start DBeaver PostgreSQL UI [org.jkiss.dbeaver.ext.postgresql.ui 1.0.151.202603221810]
+> Start DBeaver JDBC Model [org.jkiss.dbeaver.model.jdbc 1.0.68.202603221810]
+> Start DBeaver PostgreSQL Model [org.jkiss.dbeaver.ext.postgresql 2.1.248.202603221810]
+2026-03-30 09:54:32.422 - Service 'org.jkiss.dbeaver.ui.UIServiceConnectionEditor' not found
+2026-03-30 09:54:32.495 - Service 'org.jkiss.dbeaver.runtime.ui.UIServiceSecurity' not found
+2026-03-30 09:55:16.032 - Open [https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.2/postgresql-42.7.2.pom]
+2026-03-30 09:55:17.622 - Open [https://repo1.maven.org/maven2/org/checkerframework/checker-qual/3.42.0/checker-qual-3.42.0.pom]
+2026-03-30 09:55:17.720 - Open [https://repo1.maven.org/maven2/net/postgis/postgis-jdbc/2.5.0/postgis-jdbc-2.5.0.pom]
+2026-03-30 09:55:17.787 - Open [https://repo1.maven.org/maven2/net/postgis/postgis-java-aggregator/2.5.0/postgis-java-aggregator-2.5.0.pom]
+2026-03-30 09:55:17.852 - Open [https://repo1.maven.org/maven2/org/testcontainers/testcontainers-bom/1.13.0/testcontainers-bom-1.13.0.pom]
+2026-03-30 09:55:17.916 - Open [https://repo1.maven.org/maven2/net/postgis/postgis-geometry/2.5.0/postgis-geometry-2.5.0.pom]
+2026-03-30 09:55:17.970 - Open [https://repo1.maven.org/maven2/com/github/waffle/waffle-jna/3.5.1/waffle-jna-3.5.1.pom]
+2026-03-30 09:55:18.024 - Open [https://repo1.maven.org/maven2/com/github/waffle/waffle/3.5.1/waffle-3.5.1.pom]
+2026-03-30 09:55:18.159 - Open [https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.16.0/jna-5.16.0.pom]
+2026-03-30 09:55:18.211 - Open [https://repo1.maven.org/maven2/net/java/dev/jna/jna-platform/5.16.0/jna-platform-5.16.0.pom]
+2026-03-30 09:55:18.263 - Open [https://repo1.maven.org/maven2/org/slf4j/jcl-over-slf4j/2.0.16/jcl-over-slf4j-2.0.16.pom]
+2026-03-30 09:55:18.322 - Open [https://repo1.maven.org/maven2/org/slf4j/slf4j-parent/2.0.16/slf4j-parent-2.0.16.pom]
+2026-03-30 09:55:18.429 - Open [https://repo1.maven.org/maven2/org/slf4j/slf4j-bom/2.0.16/slf4j-bom-2.0.16.pom]
+2026-03-30 09:55:18.490 - Open [https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.pom]
+2026-03-30 09:55:18.543 - Open [https://repo1.maven.org/maven2/com/github/ben-manes/caffeine/caffeine/3.1.8/caffeine-3.1.8.pom]
+2026-03-30 09:55:18.591 - Open [https://repo1.maven.org/maven2/org/checkerframework/checker-qual/3.48.3/checker-qual-3.48.3.pom]
+2026-03-30 09:55:18.642 - Open [https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy/1.15.11/byte-buddy-1.15.11.pom]
+2026-03-30 09:55:18.710 - Open [https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy-parent/1.15.11/byte-buddy-parent-1.15.11.pom]
+2026-03-30 09:55:18.780 - Open [https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.pom]
+2026-03-30 09:55:18.836 - Open [https://repo1.maven.org/maven2/org/checkerframework/checker-qual/3.37.0/checker-qual-3.37.0.pom]
+2026-03-30 09:55:18.889 - Open [https://repo1.maven.org/maven2/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.pom]
+2026-03-30 09:55:18.939 - Open [https://repo1.maven.org/maven2/com/google/errorprone/error_prone_parent/2.21.1/error_prone_parent-2.21.1.pom]
+2026-03-30 09:55:20.423 - Open [https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.2/postgresql-42.7.2.jar]
+2026-03-30 09:55:20.785 - Open [https://repo1.maven.org/maven2/org/checkerframework/checker-qual/3.42.0/checker-qual-3.42.0.jar]
+2026-03-30 09:55:21.860 - Open [https://repo1.maven.org/maven2/net/postgis/postgis-jdbc/2.5.0/postgis-jdbc-2.5.0.jar]
+2026-03-30 09:55:21.912 - Open [https://repo1.maven.org/maven2/net/postgis/postgis-geometry/2.5.0/postgis-geometry-2.5.0.jar]
+2026-03-30 09:55:21.976 - Open [https://repo1.maven.org/maven2/com/github/waffle/waffle-jna/3.5.1/waffle-jna-3.5.1.jar]
+2026-03-30 09:55:22.054 - Open [https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.16.0/jna-5.16.0.jar]
+2026-03-30 09:55:22.476 - Open [https://repo1.maven.org/maven2/net/java/dev/jna/jna-platform/5.16.0/jna-platform-5.16.0.jar]
+2026-03-30 09:55:22.836 - Open [https://repo1.maven.org/maven2/org/slf4j/jcl-over-slf4j/2.0.16/jcl-over-slf4j-2.0.16.jar]
+2026-03-30 09:55:22.917 - Open [https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.jar]
+2026-03-30 09:55:23.020 - Open [https://repo1.maven.org/maven2/com/github/ben-manes/caffeine/caffeine/3.1.8/caffeine-3.1.8.jar]
+2026-03-30 09:55:23.253 - Open [https://repo1.maven.org/maven2/org/checkerframework/checker-qual/3.48.3/checker-qual-3.48.3.jar]
+2026-03-30 09:55:23.414 - Open [https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy/1.15.11/byte-buddy-1.15.11.jar]
+2026-03-30 09:55:25.455 - Open [https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar]
+2026-03-30 09:55:25.602 - Open [https://repo1.maven.org/maven2/org/checkerframework/checker-qual/3.37.0/checker-qual-3.37.0.jar]
+2026-03-30 09:55:25.762 - Open [https://repo1.maven.org/maven2/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.jar]
+2026-03-30 09:55:25.882 - Connect with 'postgres' (postgres-jdbc-19d3ed00e53-52b07b3e767b0886)
+> Start DBeaver GIS Support [org.jkiss.dbeaver.data.gis 1.0.199.202603221810]
+2026-03-30 09:55:26.004 - Execution context opened (postgres; Main <postgres>; 0)
+2026-03-30 09:55:26.028 - Initiate connection to PostgreSQL database [postgres@aws-1-sa-east-1.pooler.supabase.com] for Main <postgres>
+2026-03-30 09:55:29.014 - Connected (postgres-jdbc-19d3ed00e53-52b07b3e767b0886, PostgreSQL JDBC Driver [42.7.2])
+2026-03-30 09:55:29.079 - Execution context closed (postgres, 0)
+2026-03-30 09:55:29.080 - Disconnected (postgres-jdbc-19d3ed00e53-52b07b3e767b0886)
+2026-03-30 09:55:34.813 - Connect with 'postgres' (postgres-jdbc-19d3ecf601e-460ffb8683828b8d)
+2026-03-30 09:55:34.814 - Execution context opened (postgres; Main <postgres>; 1)
+2026-03-30 09:55:34.815 - Initiate connection to PostgreSQL database [postgres@aws-1-sa-east-1.pooler.supabase.com] for Main <postgres>
+2026-03-30 09:55:35.499 - Execution context opened (postgres; Metadata <postgres>; 2)
+2026-03-30 09:55:35.500 - Initiate connection to PostgreSQL database [postgres@aws-1-sa-east-1.pooler.supabase.com] for Metadata <postgres>
+2026-03-30 09:55:36.802 - Connected (postgres-jdbc-19d3ecf601e-460ffb8683828b8d, PostgreSQL JDBC Driver [42.7.2])
+> Start DBeaver SQL Language Semantic Model [org.jkiss.dbeaver.model.lsm 1.0.70.202603221810]
+> Start DBeaver SQL Terminal [org.jkiss.dbeaver.ui.editors.sql.terminal 1.0.151.202603221810]
+> Start Core Compare Support [org.eclipse.compare.core 3.8.800.v20250718-1505]
+> Start Console [org.eclipse.ui.console 3.16.0.v20260123-1616]
+> Start Debug Core [org.eclipse.debug.core 3.23.200.v20251107-0507]
+2026-03-30 10:00:44.482 - Service 'org.jkiss.dbeaver.ui.UIServiceConnectionEditor' not found
+2026-03-30 10:00:44.532 - Service 'org.jkiss.dbeaver.runtime.ui.UIServiceSecurity' not found
+2026-03-30 14:05:22.312 - Execution context closed (educlick_aca, 1)
+2026-03-30 14:05:22.324 - Execution context closed (educlick_aca, 2)
+2026-03-30 14:05:22.325 - Disconnected (postgres-jdbc-19d3ecf601e-460ffb8683828b8d)
+2026-03-30 16:34:02.546 - Dispose navigator model
+2026-03-30 16:34:02.687 - DBeaver is stopping
+2026-03-30 16:34:02.697 - Stop instance server
+2026-03-30 16:34:03.700 - Instance server has been stopped
+2026-03-30 16:34:03.707 - DBeaver shutdown completed
+2026-03-30 16:34:03.793 - Shutdown desktop platform...
+2026-03-30 16:34:03.809 - Send collected statistics
+2026-03-30 16:34:03.818 - Open [https://stats.dbeaver.com/send-statistics?session=b659420e-05c9-4028-9f49-65c0bb981dc7&time=1774899243]
+2026-03-30 16:34:04.700 - Statistics sent (OK)
+2026-03-30 16:34:04.808 - Platform shutdown completed (1008ms)

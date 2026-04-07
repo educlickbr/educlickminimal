@@ -1,4 +1,5 @@
 <script setup>
+import { useAppStore } from '../../stores/app'
 const store = useAppStore()
 const isMenuOpen = useState('menu-open', () => false)
 
@@ -10,6 +11,8 @@ onMounted(() => {
 const route = useRoute()
 const pageTitle = computed(() => {
    if (route.path === '/') return 'Dashboard'
+   if (route.path === '/teste-layout') return 'Teste de Layout'
+   if (route.path === '/academico_oferta') return 'Acadêmico - Oferta'
    return 'EduClick'
 })
 </script>
@@ -38,7 +41,7 @@ const pageTitle = computed(() => {
                </div>
                <div class="flex flex-col leading-none gap-0.5">
                   <h1 class="text-[12px] md:text-xs font-black text-primary uppercase tracking-[0.2em]">{{ pageTitle }}</h1>
-                  <p class="text-[10px] md:text-[10px] text-secondary font-bold opacity-80">EduClick Min</p>
+                  <p class="text-[10px] md:text-[10px] text-secondary font-bold opacity-80">EduClick</p>
                </div>
          </div>
 
