@@ -13,6 +13,7 @@ const pageTitle = computed(() => {
    if (route.path === '/') return 'Dashboard'
    if (route.path === '/teste-layout') return 'Teste de Layout'
    if (route.path === '/academico_oferta') return 'Acadêmico - Oferta'
+   if (route.path === '/academico_calendario') return 'Acadêmico - Calendário'
    return 'EduClick'
 })
 </script>
@@ -26,7 +27,7 @@ const pageTitle = computed(() => {
     <!-- Main Content Panel (Contains Header + Content) -->
     <main class="flex-1 flex flex-col gap-4 h-full overflow-hidden relative">
       
-         <header class="bg-transparent md:bg-div-15 px-2 py-1 md:px-4 md:py-3 rounded-lg shrink-0 flex items-center justify-between shadow-none md:shadow-sm border-0 md:border border-secondary/5 transition-all">
+         <header class="bg-transparent md:bg-div-15 px-2 py-1 md:px-4 md:py-3 rounded-xl shrink-0 flex items-center justify-between shadow-none md:shadow-sm border-0 md:border border-white/5 transition-all">
          
          <!-- Brand / User Avatar -->
          <div class="flex items-center gap-3">
@@ -70,10 +71,10 @@ const pageTitle = computed(() => {
       </header>
 
       <!-- Main Scrollable Content -->
-      <div class="flex-1 overflow-y-auto rounded-lg custom-scrollbar flex flex-col gap-4 px-1">
+      <div class="flex-1 overflow-y-auto rounded-xl custom-scrollbar flex flex-col gap-4 px-1">
          <slot />
          
-         <footer class="py-6 text-center text-[9px] uppercase tracking-widest text-secondary/30 font-bold border-t border-secondary/5 mt-auto">
+         <footer class="py-6 text-center text-[9px] uppercase tracking-widest text-white/20 font-bold border-t border-white/5 mt-auto">
             © {{ new Date().getFullYear() }} EduClick
          </footer>
       </div>
@@ -82,7 +83,7 @@ const pageTitle = computed(() => {
 
     <!-- Sidebar (Right Side) -->
     <aside class="w-full md:w-[320px] lg:w-[380px] shrink-0 hidden lg:flex flex-col gap-4 h-full">
-       <div class="bg-div-15 h-full rounded-lg border border-secondary/5 p-5 shadow-sm overflow-y-auto flex flex-col gap-6">
+       <div class="bg-div-15 h-full rounded-xl border border-white/5 p-5 shadow-sm overflow-y-auto flex flex-col gap-6">
           <slot name="sidebar">
               <!-- Default Content / Skeleton can go here if needed -->
           </slot>

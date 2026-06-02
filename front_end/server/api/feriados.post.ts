@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
     data,
     nome,
     recorrente_anual: !!recorrente_anual,
+    is_global: false, // UI created holidays are never global
     modificado_por: usuario_id,
     modificado_em: new Date().toISOString()
   }

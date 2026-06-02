@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
   // 2. Insere novos
   const payload = dias.map(d => ({
     id_ciclo,
-    n_dia_sem: d.n_dia_sem,
+    n_dia_sem: d.dia_sem !== undefined ? d.dia_sem : d.n_dia_sem,
     dia_sem_txt: d.dia_sem_txt,
     hora_ini: d.hora_ini,
     hora_fim: d.hora_fim,

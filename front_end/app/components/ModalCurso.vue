@@ -25,6 +25,7 @@
         >
           {{ tab.label }}
           <span v-if="tab.key === 'grade' && modulosDoCurso.length > 0" class="modal-tab-badge">{{ modulosDoCurso.length }}</span>
+          <span v-if="tab.key === 'areas' && areasDisponiveis.length > 0" class="modal-tab-badge">{{ areasDisponiveis.length }}</span>
         </button>
       </div>
 
@@ -43,14 +44,15 @@
               />
             </div>
             <div class="flex flex-col gap-2">
-              <label class="text-[10px] font-black text-secondary/60 uppercase tracking-widest px-1">Tipo / Modelo</label>
+              <label class="text-[10px] font-black text-secondary/60 uppercase tracking-widest px-1">Área Educacional</label>
               <select 
-                v-model="formCurso.tipo_modelo"
+                v-model="formCurso.id_area"
                 class="w-full px-4 py-3 rounded-lg border border-secondary/10 bg-background text-sm font-bold text-primary focus:border-primary/50 transition-all outline-none"
               >
-                <option value="simples">Modelo Simples</option>
-                <option value="projeto">Projeto Final</option>
-                <option value="extensao">Extensão</option>
+                <option :value="null">Selecione uma área...</option>
+                <option v-for="a in areasDisponiveis" :key="a.id" :value="a.id">
+                  {{ a.nome_area }}
+                </option>
               </select>
             </div>
           </div>
@@ -61,6 +63,76 @@
               placeholder="Descreva os objetivos e o público-alvo deste curso..."
             />
           </div>
+        </div>
+
+        <!-- TAB: ÁREAS (GERENCIAMENTO) -->
+        <div v-if="activeTab === 'areas'" class="flex flex-col gap-6">
+           <!-- Formulário de Nova Área -->
+           <div class="p-5 rounded-xl border border-primary/10 bg-primary/5 flex flex-col gap-4">
+              <h4 class="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                <Icon name="ph:plus-circle-bold" />
+                {{ formArea.id ? 'Editar Área' : 'Nova Área Educacional' }}
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="flex flex-col gap-1.5 md:col-span-2">
+                  <label class="text-[9px] font-black text-secondary/60 uppercase tracking-widest px-1">Nome da Área</label>
+                  <input 
+                    v-model="formArea.nome_area"
+                    placeholder="Ex: Exatas, Saúde, Humanas..."
+                    class="w-full px-3 py-2.5 rounded-lg border border-secondary/10 bg-background text-xs font-bold text-primary outline-none"
+                  />
+                </div>
+                <div class="flex flex-col gap-1.5 justify-end">
+                   <div class="flex gap-2">
+                      <button 
+                        @click="handleSaveArea"
+                        :disabled="loadingArea || !formArea.nome_area.trim()"
+                        class="flex-1 px-4 py-2.5 rounded bg-primary text-white text-[9px] font-black uppercase tracking-widest hover:brightness-110 disabled:opacity-40 transition-all"
+                      >
+                        {{ loadingArea ? 'Savin...' : (formArea.id ? 'Atualizar' : 'Criar Área') }}
+                      </button>
+                      <button 
+                        v-if="formArea.id"
+                        @click="resetFormArea"
+                        class="px-3 py-2.5 rounded border border-secondary/10 text-secondary hover:bg-white/5 transition-all"
+                      >
+                        <Icon name="ph:x-bold" />
+                      </button>
+                   </div>
+                </div>
+              </div>
+           </div>
+
+           <!-- Lista de Áreas -->
+           <div class="flex flex-col gap-3">
+              <p class="text-[10px] font-black text-secondary/40 uppercase tracking-[0.2em] px-1">
+                Áreas Cadastradas ({{ areasDisponiveis.length }})
+              </p>
+              
+              <div v-if="loadingListAreas" class="py-4 flex justify-center">
+                <div class="w-5 h-5 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"></div>
+              </div>
+
+              <div v-else-if="areasDisponiveis.length === 0" class="py-8 text-center text-[10px] text-secondary/30 uppercase font-bold tracking-widest bg-div-5 rounded-lg border border-secondary/5">
+                Nenhuma área cadastrada para esta entidade.
+              </div>
+
+              <div 
+                v-for="a in areasDisponiveis" 
+                :key="a.id"
+                class="flex items-center justify-between px-4 py-3 rounded-lg border border-secondary/5 bg-div-10 group hover:border-primary/20 transition-all"
+              >
+                  <span class="text-xs font-black text-primary">{{ a.nome_area }}</span>
+                  <div class="flex items-center gap-2">
+                    <button @click="editArea(a)" class="p-1.5 text-secondary/30 hover:text-primary transition-all">
+                      <Icon name="ph:pencil-simple-bold" />
+                    </button>
+                    <button @click="handleDeleteArea(a.id)" class="p-1.5 text-secondary/30 hover:text-red-400 transition-all">
+                      <Icon name="ph:trash-bold" />
+                    </button>
+                  </div>
+              </div>
+           </div>
         </div>
 
         <!-- TAB: GRADE (MÓDULOS) -->
@@ -212,8 +284,9 @@ const store = useAppStore()
 const toast = useToast()
 
 const tabs = [
-  { key: 'geral', label: 'Informações Gerais' },
-  { key: 'grade', label: 'Grade Curricular' }
+  { key: 'areas', label: '1. Áreas' },
+  { key: 'geral', label: '2. Informações Gerais' },
+  { key: 'grade', label: '3. Grade Curricular' }
 ]
 const activeTab = ref('geral')
 
@@ -227,8 +300,94 @@ const loadingCurso = ref(false)
 const formCurso = reactive({
   nome_curso: '',
   descricao: '',
-  tipo_modelo: 'simples'
+  id_area: null as string | null
 })
+
+// ============================================================
+// Áreas — Gestão
+// ============================================================
+const loadingArea = ref(false)
+const loadingListAreas = ref(false)
+const areasDisponiveis = ref<any[]>([])
+const formArea = reactive({
+  id: null as string | null,
+  nome_area: '',
+  descricao: ''
+})
+
+function resetFormArea() {
+  formArea.id = null
+  formArea.nome_area = ''
+  formArea.descricao = ''
+}
+
+function editArea(area: any) {
+  formArea.id = area.id
+  formArea.nome_area = area.nome_area
+  formArea.descricao = area.descricao || ''
+}
+
+async function fetchAreas() {
+  const id_entidade = props.idEntidade || (store as any).entidades?.[0]?.id || (store as any).company?.id
+  if (!id_entidade) return
+
+  loadingListAreas.value = true
+  try {
+    const data = await $fetch('/api/areas', {
+      method: 'GET',
+      params: { id_entidade }
+    }) as any
+    areasDisponiveis.value = data?.itens || []
+  } catch (e) {
+    console.error('Erro ao buscar áreas', e)
+  } finally {
+    loadingListAreas.value = false
+  }
+}
+
+async function handleSaveArea() {
+  const id_entidade = props.idEntidade || (store as any).entidades?.[0]?.id || (store as any).company?.id
+  if (!id_entidade) return
+
+  loadingArea.value = true
+  try {
+    const res = await $fetch('/api/areas', {
+      method: 'POST',
+      body: {
+        ...formArea,
+        id_entidade,
+        usuario_id: store.user_expandido_id
+      }
+    }) as any
+
+    if (res?.success) {
+      toast.showToast(formArea.id ? 'Área atualizada!' : 'Área criada!', { type: 'success' })
+      resetFormArea()
+      await fetchAreas()
+    }
+  } catch (e: any) {
+    toast.showToast(e.message, { type: 'error' })
+  } finally {
+    loadingArea.value = false
+  }
+}
+
+async function handleDeleteArea(id: string) {
+  if (!confirm('Tem certeza? Isso pode afetar cursos vinculados.')) return
+  
+  try {
+    const { error } = await (store as any).$client
+      .from('aca_area')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+    toast.showToast('Área removida', { type: 'success' })
+    await fetchAreas()
+  } catch (e: any) {
+    toast.showToast(e.message, { type: 'error' })
+  }
+}
 
 // ============================================================
 // Grade Curricular — Tab Grade
@@ -253,7 +412,10 @@ async function fetchModulosDoCurso() {
   try {
     const data = await $fetch('/api/curso_modulo', {
       method: 'GET',
-      params: { id_curso: currentCursoId.value }
+      params: { 
+        id_curso: currentCursoId.value,
+        _t: Date.now()
+      }
     }) as any
     modulosDoCurso.value = Array.isArray(data?.itens) ? data.itens : []
     // Define ordem padrão para o próximo inserido
@@ -342,7 +504,7 @@ async function handleSaveCurso() {
         id_entidade,
         nome_curso: formCurso.nome_curso,
         descricao: formCurso.descricao,
-        tipo_modelo: formCurso.tipo_modelo,
+        id_area: formCurso.id_area,
         usuario_id: store.user_expandido_id
       }
     }) as any
@@ -365,20 +527,23 @@ async function handleSaveCurso() {
 // Watchers
 watch(() => props.modelValue, async (val) => {
   if (val) {
-    activeTab.value = 'geral'
+    activeTab.value = props.isEdit ? 'geral' : 'areas'
     savedCursoId.value = null
+    await fetchAreas()
+    
     if (props.initialData) {
       formCurso.nome_curso = props.initialData.nome_curso || ''
       formCurso.descricao = props.initialData.descricao || ''
-      formCurso.tipo_modelo = props.initialData.tipo_modelo || 'simples'
+      formCurso.id_area = props.initialData.id_area || null
       if (props.cursoId) await fetchModulosDoCurso()
     } else {
       formCurso.nome_curso = ''
       formCurso.descricao = ''
-      formCurso.tipo_modelo = 'simples'
+      formCurso.id_area = null
       modulosDoCurso.value = []
     }
     formCM.id_modulo = null
+    resetFormArea()
   }
 }, { immediate: true })
 
@@ -403,17 +568,25 @@ textarea {
   transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
 }
 select {
-  background: var(--field-bg-select) !important;
+  background-color: var(--field-bg-select) !important;
   border-color: var(--field-border) !important;
   color: var(--field-text) !important;
   transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%238b5cf6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+  background-position: right 1rem center !important;
+  background-repeat: no-repeat !important;
+  background-size: 1.2em 1.2em !important;
+  padding-right: 2.5rem !important;
 }
 select option { background: var(--field-bg-option) !important; color: var(--field-text) !important; }
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"])::placeholder,
 textarea::placeholder { color: var(--field-placeholder) !important; }
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):hover,
 textarea:hover { background: var(--field-bg-hover) !important; }
-select:hover { background: var(--field-bg-select-hover) !important; }
+select:hover { background-color: var(--field-bg-select-hover) !important; }
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
 select:focus, textarea:focus {
   border-color: var(--field-border-focus) !important;

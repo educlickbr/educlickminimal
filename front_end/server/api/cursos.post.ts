@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     id_entidade,
     nome_curso,
     descricao,
-    tipo_modelo,
+    id_area,
     usuario_id
   } = body
 
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
     p_id_entidade:   id_entidade,
     p_nome_curso:    nome_curso,
     p_descricao:     descricao ?? null,
-    p_tipo_modelo:   tipo_modelo ?? 'simples',
+    p_id_area:       id_area || null,
     p_usuario_id:    usuario_id || null
   } as any)
 

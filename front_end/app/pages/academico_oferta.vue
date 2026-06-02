@@ -8,8 +8,12 @@ import ModalModulo from '../components/ModalModulo.vue'
 import ModalCurso from '../components/ModalCurso.vue'
 import ModalPrograma from '../components/ModalPrograma.vue'
 import ModalCiclo from '../components/ModalCiclo.vue'
+import ModalArea from '../components/ModalArea.vue'
+import ModalConfirmacao from '../components/ModalConfirmacao.vue'
 import { useAppStore } from '../../stores/app'
 import { useToast } from '../../composables/useToast'
+
+const client = useSupabaseClient()
 
 interface Componente {
   id: string
@@ -35,7 +39,8 @@ interface Curso {
   id: string
   nome_curso: string
   descricao?: string | null
-  tipo_modelo: string
+  id_area?: string | null
+  nome_area?: string | null
   qtd_modulos?: number
   criado_em: string
 }
@@ -49,12 +54,21 @@ interface Programa {
   criado_em: string
 }
 
+interface Area {
+  id: string
+  nome_area: string
+  descricao?: string | null
+  id_entidade: string
+  criado_em: string
+}
+
 interface ComponentePayload {
   nome_componente: string
   descricao?: string | null
 }
 
 const tabs = [
+  { key: 'areas', label: 'Áreas' },
   { key: 'componentes', label: 'Componentes' },
   { key: 'modulos', label: 'Módulos' },
   { key: 'cursos', label: 'Cursos' },
@@ -63,7 +77,7 @@ const tabs = [
 ]
 const route = useRoute()
 const router = useRouter()
-const activeTab = ref('componentes')
+const activeTab = ref('areas')
 
 // State
 const store = useAppStore()
@@ -76,6 +90,23 @@ const componenteEditData = ref<Componente | null>(null)
 const componentes = ref<Componente[]>([])
 const loadingComponentes = ref<boolean>(false)
 
+// Exclusão de Componente
+const showConfirmDeleteComponente = ref<boolean>(false)
+const componenteToDelete = ref<string | null>(null)
+const isDeletingComponente = ref<boolean>(false)
+
+// Áreas State
+const showModalArea = ref<boolean>(false)
+const isEditArea = ref<boolean>(false)
+const areaEditData = ref<Area | null>(null)
+const loadingAreas = ref<boolean>(false)
+const areas = ref<Area[]>([])
+
+// Exclusão de Área
+const showConfirmDeleteArea = ref<boolean>(false)
+const areaToDelete = ref<string | null>(null)
+const isDeletingArea = ref<boolean>(false)
+
 // Modulos State
 const showModalModulo = ref<boolean>(false)
 const isEditModulo = ref<boolean>(false)
@@ -83,12 +114,22 @@ const moduloEditData = ref<Modulo | null>(null)
 const modulos = ref<Modulo[]>([])
 const loadingModulos = ref<boolean>(false)
 
+// Exclusão de Módulo
+const showConfirmDeleteModulo = ref<boolean>(false)
+const moduloToDelete = ref<string | null>(null)
+const isDeletingModulo = ref<boolean>(false)
+
 // Cursos State
 const showModalCurso = ref<boolean>(false)
 const isEditCurso = ref<boolean>(false)
 const cursoEditData = ref<Curso | null>(null)
 const cursos = ref<Curso[]>([])
 const loadingCursos = ref<boolean>(false)
+
+// Exclusão de Curso
+const showConfirmDeleteCurso = ref<boolean>(false)
+const cursoToDelete = ref<string | null>(null)
+const isDeletingCurso = ref<boolean>(false)
 
 // Programas State
 const showModalPrograma = ref<boolean>(false)
@@ -104,6 +145,11 @@ const cicloEditData = ref<any | null>(null)
 const loadingCiclos = ref<boolean>(false)
 const ciclos = ref<any[]>([])
 const moduloSelecionadoParaCiclo = ref<any | null>(null)
+
+// Exclusão de Ciclo
+const showConfirmDeleteCiclo = ref<boolean>(false)
+const cicloToDelete = ref<string | null>(null)
+const isDeletingCiclo = ref<boolean>(false)
 
 function getEntidadeAtivaId(): string | null {
   // Exemplo: pega a primeira entidade do tipo empresa com produto acadêmico
@@ -184,6 +230,10 @@ async function fetchCursos(): Promise<void> {
   loadingCursos.value = true
   try {
     let id_entidade = getEntidadeAtivaId()
+    if (!id_entidade) {
+      await store.initSession()
+      id_entidade = getEntidadeAtivaId()
+    }
     if (!id_entidade) throw new Error('Entidade ativa não encontrada')
     const res = await $fetch('/api/cursos', {
       method: 'GET',
@@ -197,10 +247,192 @@ async function fetchCursos(): Promise<void> {
   }
 }
 
+async function fetchAreas(): Promise<void> {
+  loadingAreas.value = true
+  try {
+    let id_entidade = getEntidadeAtivaId()
+    if (!id_entidade) {
+      await store.initSession()
+      id_entidade = getEntidadeAtivaId()
+    }
+    if (!id_entidade) throw new Error('Entidade ativa não encontrada')
+    const res = await $fetch('/api/areas', {
+      method: 'GET',
+      params: { id_entidade }
+    }) as any
+    areas.value = Array.isArray(res?.itens) ? res.itens : []
+  } catch (e) {
+    toast.showToast('Erro ao buscar áreas', { type: 'error' })
+  } finally {
+    loadingAreas.value = true
+    loadingAreas.value = false
+  }
+}
+
+function openNovaArea() {
+  isEditArea.value = false
+  areaEditData.value = null
+  showModalArea.value = true
+}
+
+function handleSavedArea() {
+  fetchAreas()
+}
+
+function confirmDeleteArea(id: string) {
+  areaToDelete.value = id
+  showConfirmDeleteArea.value = true
+}
+
+function confirmDeleteComponente(id: string) {
+  componenteToDelete.value = id
+  showConfirmDeleteComponente.value = true
+}
+
+function confirmDeleteModulo(id: string) {
+  moduloToDelete.value = id
+  showConfirmDeleteModulo.value = true
+}
+
+function confirmDeleteCurso(id: string) {
+  cursoToDelete.value = id
+  showConfirmDeleteCurso.value = true
+}
+
+async function handleDeleteCurso() {
+  if (!cursoToDelete.value) return
+  isDeletingCurso.value = true
+  try {
+    let id_entidade = getEntidadeAtivaId()
+    if (!id_entidade) throw new Error('Entidade ativa não encontrada')
+
+    const res = await $fetch('/api/cursos', {
+      method: 'DELETE',
+      body: { 
+        id: cursoToDelete.value,
+        id_entidade 
+      }
+    }) as any
+
+    if (res?.success === false) {
+      throw new Error(res?.message || 'Erro ao remover curso')
+    }
+
+    toast.showToast('Curso removido', { type: 'success' })
+    await fetchCursos()
+  } catch (e: any) {
+    toast.showToast(e.message || 'Erro ao remover curso', { type: 'error' })
+  } finally {
+    isDeletingCurso.value = false
+    showConfirmDeleteCurso.value = false
+    cursoToDelete.value = null
+  }
+}
+
+async function handleDeleteModulo() {
+  if (!moduloToDelete.value) return
+  isDeletingModulo.value = true
+  try {
+    let id_entidade = getEntidadeAtivaId()
+    if (!id_entidade) throw new Error('Entidade ativa não encontrada')
+
+    const res = await $fetch('/api/modulos', {
+      method: 'DELETE',
+      body: { 
+        id: moduloToDelete.value,
+        id_entidade 
+      }
+    }) as any
+
+    if (res?.success === false) {
+      throw new Error(res?.message || 'Erro ao remover módulo')
+    }
+
+    toast.showToast('Módulo removido', { type: 'success' })
+    await fetchModulos()
+  } catch (e: any) {
+    toast.showToast(e.message || 'Erro ao remover módulo', { type: 'error' })
+  } finally {
+    isDeletingModulo.value = false
+    showConfirmDeleteModulo.value = false
+    moduloToDelete.value = null
+  }
+}
+
+async function handleDeleteComponente() {
+  if (!componenteToDelete.value) return
+  isDeletingComponente.value = true
+  try {
+    let id_entidade = getEntidadeAtivaId()
+    if (!id_entidade) throw new Error('Entidade ativa não encontrada')
+
+    const res = await $fetch('/api/componentes', {
+      method: 'DELETE',
+      body: { 
+        id: componenteToDelete.value,
+        id_entidade 
+      }
+    }) as any
+
+    if (res?.success === false) {
+      throw new Error(res?.message || 'Erro ao remover componente')
+    }
+
+    toast.showToast('Componente removido', { type: 'success' })
+    await fetchComponentes()
+  } catch (e: any) {
+    toast.showToast(e.message || 'Erro ao remover componente', { type: 'error' })
+  } finally {
+    isDeletingComponente.value = false
+    showConfirmDeleteComponente.value = false
+    componenteToDelete.value = null
+  }
+}
+
+async function handleDeleteArea() {
+  if (!areaToDelete.value) return
+  isDeletingArea.value = true
+  try {
+    let id_entidade = getEntidadeAtivaId()
+    if (!id_entidade) throw new Error('Entidade ativa não encontrada')
+
+    const res = await $fetch('/api/areas', {
+      method: 'DELETE',
+      body: { 
+        id: areaToDelete.value,
+        id_entidade 
+      }
+    }) as any
+
+    if (res?.success === false) {
+      throw new Error(res?.message || 'Erro ao remover área')
+    }
+
+    toast.showToast('Área removida', { type: 'success' })
+    await fetchAreas()
+  } catch (e: any) {
+    toast.showToast(e.message || 'Erro ao remover área', { type: 'error' })
+  } finally {
+    isDeletingArea.value = false
+    showConfirmDeleteArea.value = false
+    areaToDelete.value = null
+  }
+}
+
+function editArea(area: Area) {
+  isEditArea.value = true
+  areaEditData.value = area
+  showModalArea.value = true
+}
+
 async function fetchProgramas(): Promise<void> {
   loadingProgramas.value = true
   try {
     let id_entidade = getEntidadeAtivaId()
+    if (!id_entidade) {
+      await store.initSession()
+      id_entidade = getEntidadeAtivaId()
+    }
     if (!id_entidade) throw new Error('Entidade ativa não encontrada')
     const res = await $fetch('/api/programas', {
       method: 'GET',
@@ -283,6 +515,10 @@ async function fetchCiclos() {
   loadingCiclos.value = true
   try {
     let id_entidade = getEntidadeAtivaId()
+    if (!id_entidade) {
+      await store.initSession()
+      id_entidade = getEntidadeAtivaId()
+    }
     if (!id_entidade) return
     const res = await $fetch('/api/ciclos', { params: { id_entidade } }) as any
     ciclos.value = Array.isArray(res?.itens) ? res.itens : []
@@ -290,6 +526,41 @@ async function fetchCiclos() {
     toast.showToast('Erro ao carregar ciclos', { type: 'error' })
   } finally {
     loadingCiclos.value = false
+  }
+}
+
+function confirmDeleteCiclo(id: string) {
+  cicloToDelete.value = id
+  showConfirmDeleteCiclo.value = true
+}
+
+async function handleDeleteCiclo() {
+  if (!cicloToDelete.value) return
+  isDeletingCiclo.value = true
+  try {
+    let id_entidade = getEntidadeAtivaId()
+    if (!id_entidade) throw new Error('Entidade ativa não encontrada')
+
+    const res = await $fetch('/api/ciclos', {
+      method: 'DELETE',
+      body: { 
+        id: cicloToDelete.value,
+        id_entidade 
+      }
+    }) as any
+
+    if (res?.success === false) {
+      throw new Error(res?.message || 'Erro ao remover ciclo')
+    }
+
+    toast.showToast('Ciclo acadêmico removido', { type: 'success' })
+    await fetchCiclos()
+  } catch (e: any) {
+    toast.showToast(e.message || 'Erro ao remover ciclo', { type: 'error' })
+  } finally {
+    isDeletingCiclo.value = false
+    showConfirmDeleteCiclo.value = false
+    cicloToDelete.value = null
   }
 }
 
@@ -334,6 +605,7 @@ async function handleSaveComponente(data: ComponentePayload): Promise<void> {
     const res = await $fetch('/api/componentes', {
       method: 'POST',
       body: {
+        id: isEditComponente.value ? componenteEditData.value?.id : undefined,
         id_entidade,
         nome_componente,
         descricao,
@@ -359,12 +631,15 @@ if (import.meta.client) {
       activeTab.value = tabFromQuery
     }
 
-    if (activeTab.value === 'componentes') {
+    if (activeTab.value === 'areas') {
+      await fetchAreas()
+    } else if (activeTab.value === 'componentes') {
       await fetchComponentes()
     } else if (activeTab.value === 'modulos') {
       await fetchComponentes()
       await fetchModulos()
     } else if (activeTab.value === 'cursos') {
+      await fetchAreas()
       await fetchCursos()
       await fetchModulos()
     } else if (activeTab.value === 'programas') {
@@ -378,18 +653,22 @@ if (import.meta.client) {
   })
 
   watch(activeTab, async (val) => {
-    if (val === 'componentes') {
+    if (val === 'areas') {
+      await fetchAreas()
+    } else if (val === 'componentes') {
       await fetchComponentes()
     } else if (val === 'modulos') {
       await fetchComponentes()
       await fetchModulos()
     } else if (val === 'cursos') {
+      await fetchAreas()
       await fetchCursos()
       await fetchModulos()
     } else if (val === 'programas') {
       await fetchProgramas()
       await fetchCursos()
     } else if (val === 'ciclos') {
+      await fetchModulos()
       await fetchCiclos()
     }
   }, { immediate: false })
@@ -413,7 +692,11 @@ if (import.meta.client) {
       </nav>
 
       <!-- Action Button (contextual) -->
-      <button v-if="activeTab === 'componentes'" @click="openNovoComponente" class="add-btn">
+      <button v-if="activeTab === 'areas'" @click="openNovaArea" class="add-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>
+        Nova Área
+      </button>
+      <button v-else-if="activeTab === 'componentes'" @click="openNovoComponente" class="add-btn">
         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>
         Novo Componente
       </button>
@@ -440,6 +723,71 @@ if (import.meta.client) {
 
     <!-- Tab Content -->
     <div>
+      <div v-if="activeTab === 'areas'" class="flex flex-col gap-6">
+
+         <!-- List area -->
+         <div v-if="loadingAreas" class="py-16 flex flex-col items-center justify-center gap-3">
+            <div class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"></div>
+            <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">Carregando áreas...</span>
+          </div>
+
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+             <div v-if="areas.length === 0" class="col-span-full empty-state">
+                <div class="empty-icon"><Icon name="ph:folders-bold" class="w-8 h-8" /></div>
+                <p class="empty-title">Nenhuma área cadastrada</p>
+                <p class="empty-subtitle">Use categorias para organizar seus cursos (ex: Exatas, Saúde, Humanas)</p>
+                <button @click="openNovaArea" class="empty-cta mt-4">
+                  Nova Área Educacional
+                </button>
+             </div>
+
+             <div 
+               v-for="a in areas" 
+               :key="a.id" 
+               class="comp-card"
+             >
+                <div class="comp-card-accent"></div>
+                <!-- Avatar com inicial da Área -->
+                <div class="comp-avatar">
+                  {{ (a.nome_area || '?').charAt(0).toUpperCase() }}
+                </div>
+                <div class="flex-1 min-w-0">
+                   <p class="text-xs font-black text-primary truncate">{{ a.nome_area }}</p>
+                   <p class="text-[9px] text-secondary/40 font-medium truncate">{{ a.descricao || 'Sem descrição' }}</p>
+                </div>
+                <div class="comp-actions group-hover:opacity-100">
+                   <button @click="editArea(a)" class="comp-action-btn comp-action-edit" title="Editar área">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM51.31,168,136,83.31,152.69,100,68,184.69ZM48,208V196.69l11.31,11.31Zm48,0H79.31L192,95.31l16.69,16.69Z"/>
+                      </svg>
+                   </button>
+                   <button @click="confirmDeleteArea(a.id)" class="comp-action-btn comp-action-delete" title="Excluir área">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/>
+                      </svg>
+                   </button>
+                </div>
+             </div>
+          </div>
+
+          <ModalArea 
+            v-model="showModalArea"
+            :isEdit="isEditArea"
+            :initialData="areaEditData"
+            :idEntidade="getEntidadeAtivaId()"
+            @saved="handleSavedArea"
+          />
+
+          <ModalConfirmacao
+            v-model="showConfirmDeleteArea"
+            title="Excluir Área Educacional"
+            message="Tem certeza? A exclusão desta área pode afetar cursos e programas vinculados a ela."
+            type="danger"
+            confirmText="Excluir Área"
+            :loading="isDeletingArea"
+            @confirm="handleDeleteArea"
+          />
+      </div>
       <div v-if="activeTab === 'componentes'">
         <div class="flex flex-col gap-4">
           
@@ -499,6 +847,7 @@ if (import.meta.client) {
                   </svg>
                 </button>
                 <button
+                  @click.stop="confirmDeleteComponente(c.id)"
                   class="comp-action-btn comp-action-delete"
                   title="Excluir componente"
                 >
@@ -516,6 +865,15 @@ if (import.meta.client) {
           :isEdit="isEditComponente"
           :initialData="componenteEditData ? { nome_componente: componenteEditData.nome_componente, descricao: componenteEditData.descricao ?? '' } : null"
           @save="handleSaveComponente"
+        />
+        <ModalConfirmacao
+          v-model="showConfirmDeleteComponente"
+          title="Excluir Componente Educacional"
+          message="Tem certeza que quer excluir este componente? Esta operação não pode ser desfeita e pode afetar os módulos que o contêm."
+          type="danger"
+          confirmText="Excluir Componente"
+          :loading="isDeletingComponente"
+          @confirm="handleDeleteComponente"
         />
       </div>
 
@@ -552,13 +910,22 @@ if (import.meta.client) {
                 <button @click.stop="openEditarModulo(m)" class="comp-action-btn comp-action-edit" title="Editar módulo">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63Z"/></svg>
                 </button>
-                <button class="comp-action-btn comp-action-delete" title="Excluir módulo">
+                <button @click.stop="confirmDeleteModulo(m.id)" class="comp-action-btn comp-action-delete" title="Excluir módulo">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16Z"/></svg>
                 </button>
               </div>
             </div>
           </div>
           <ModalModulo v-model="showModalModulo" :isEdit="isEditModulo" :moduloId="moduloEditData?.id" :initialData="moduloEditData" :componentes="componentes" :idEntidade="getEntidadeAtivaId()" @saved="handleSavedModulo" />
+          <ModalConfirmacao
+            v-model="showConfirmDeleteModulo"
+            title="Excluir Módulo Educacional"
+            message="Tem certeza que quer excluir este módulo? Esta operação não pode ser desfeita."
+            type="danger"
+            confirmText="Excluir Módulo"
+            :loading="isDeletingModulo"
+            @confirm="handleDeleteModulo"
+          />
       </div>
 
       <div v-if="activeTab === 'cursos'">
@@ -584,6 +951,9 @@ if (import.meta.client) {
             <div class="comp-content">
               <div class="comp-name">{{ c.nome_curso || '-' }}</div>
               <div class="comp-meta">
+                <span v-if="c.nome_area" class="item-badge item-badge--secondary" style="background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.3);">
+                  {{ c.nome_area }}
+                </span>
                 <span class="item-badge item-badge--primary">{{ c.qtd_modulos || 0 }} módulos</span>
                 <span class="comp-desc" v-if="c.descricao">{{ c.descricao.replace(/<[^>]*>/g, '').substring(0,80) }}</span>
                 <span class="comp-date">{{ c.criado_em ? new Date(c.criado_em).toLocaleDateString('pt-BR') : '' }}</span>
@@ -593,10 +963,22 @@ if (import.meta.client) {
               <button @click.stop="openEditarCurso(c)" class="comp-action-btn comp-action-edit" title="Editar curso">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63Z"/></svg>
               </button>
+              <button @click.stop="confirmDeleteCurso(c.id)" class="comp-action-btn comp-action-delete" title="Excluir curso">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16Z"/></svg>
+              </button>
             </div>
           </div>
         </div>
-        <ModalCurso v-model="showModalCurso" :isEdit="isEditCurso" :cursoId="cursoEditData?.id" :initialData="cursoEditData" :modulos="modulos" :idEntidade="getEntidadeAtivaId()" @saved="handleSavedCurso" />
+        <ModalCurso v-model="showModalCurso" :isEdit="isEditCurso" :cursoId="cursoEditData?.id" :initialData="cursoEditData" :modulos="modulos" :areas="areas" :idEntidade="getEntidadeAtivaId()" @saved="handleSavedCurso" />
+        <ModalConfirmacao
+          v-model="showConfirmDeleteCurso"
+          title="Excluir Curso Educacional"
+          message="Tem certeza que quer excluir este curso? Esta operação não pode ser desfeita."
+          type="danger"
+          confirmText="Excluir Curso"
+          :loading="isDeletingCurso"
+          @confirm="handleDeleteCurso"
+        />
       </div>
 
       <div v-if="activeTab === 'ciclos'">
@@ -613,7 +995,7 @@ if (import.meta.client) {
             <p class="empty-subtitle">Ciclos definem os períodos de turmas com datas de início e fim</p>
             <button @click="openNovoCicloGlobal" class="empty-cta">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>
-              Agendar primeira turma
+              Agendar primeiro ciclo
             </button>
           </div>
           <div v-for="c in ciclos" :key="c.id" class="ciclo-card">
@@ -634,9 +1016,23 @@ if (import.meta.client) {
               </span>
             </div>
             <button @click="openEditarCiclo(c)" class="ciclo-adjust-btn">Ajustar</button>
+            <div class="comp-actions" style="margin-left: 0;">
+              <button @click.stop="confirmDeleteCiclo(c.id)" class="comp-action-btn comp-action-delete" title="Excluir ciclo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16Z"/></svg>
+              </button>
+            </div>
           </div>
         </div>
         <ModalCiclo v-model="showModalCiclo" :isEdit="isEditCiclo" :cicloId="cicloEditData?.id || cicloEditData?.id_ciclo" :initialData="cicloEditData" :modulos="modulos" :programas="programas" :idEntidade="getEntidadeAtivaId()" @saved="handleSavedCiclo" />
+        <ModalConfirmacao
+          v-model="showConfirmDeleteCiclo"
+          title="Excluir Ciclo Acadêmico"
+          message="Tem certeza que quer excluir este ciclo permanentemente? O calendário atrelado a ele será excluído."
+          type="danger"
+          confirmText="Excluir Ciclo"
+          :loading="isDeletingCiclo"
+          @confirm="handleDeleteCiclo"
+        />
       </div>
 
       <div v-if="activeTab === 'programas'">
@@ -744,7 +1140,7 @@ if (import.meta.client) {
   align-items: center;
   gap: 7px;
   padding: 8px 18px;
-  border-radius: 10px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #7c3aed, #8b5cf6);
   border: 1px solid rgba(139, 92, 246, 0.4);
   color: #fff;
@@ -894,7 +1290,7 @@ if (import.meta.client) {
 .comp-action-btn {
   width: 30px;
   height: 30px;
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -933,7 +1329,7 @@ if (import.meta.client) {
   gap: 12px;
   padding: 64px 32px;
   border: 1px dashed rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.01);
   text-align: center;
 }
@@ -941,7 +1337,7 @@ if (import.meta.client) {
 .empty-icon {
   width: 56px;
   height: 56px;
-  border-radius: 16px;
+  border-radius: 12px;
   background: rgba(139, 92, 246, 0.08);
   border: 1px solid rgba(139, 92, 246, 0.15);
   display: flex;
@@ -971,7 +1367,7 @@ if (import.meta.client) {
   gap: 7px;
   margin-top: 4px;
   padding: 9px 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   background: rgba(139, 92, 246, 0.1);
   border: 1px solid rgba(139, 92, 246, 0.2);
   color: #a78bfa;
@@ -1033,6 +1429,10 @@ if (import.meta.client) {
   top: 15%;
   bottom: 15%;
 }
+.ciclo-card:hover .comp-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
 
 .ciclo-year-badge {
   width: 42px;
@@ -1079,7 +1479,7 @@ if (import.meta.client) {
 .ciclo-adjust-btn {
   flex-shrink: 0;
   padding: 7px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   background: rgba(139, 92, 246, 0.1);
   border: 1px solid rgba(139, 92, 246, 0.2);
   color: #a78bfa;

@@ -35,6 +35,11 @@ export default defineEventHandler(async (event) => {
         const session = (sessionData as any) || {};
         const usuario = session.usuario || {};
 
+        const nome_completo_str = usuario.nome_completo || "";
+        const parts = nome_completo_str.trim().split(" ");
+        const nome_str = parts[0] || null;
+        const sobrenome_str = parts.length > 1 ? parts.slice(1).join(" ") : null;
+
         // Limpeza radical: Uma única estrutura de verdade
         return {
             success: session.success || false,
@@ -42,11 +47,13 @@ export default defineEventHandler(async (event) => {
                 id: usuario.id || null,
                 id_auth: usuario.id_user || userId,
                 email: usuario.email || user.email,
-                nome_completo: usuario.nome_completo || null,
+                nome_completo: nome_completo_str || null,
             },
             // Facilita o acesso direto no front-end para compatibilidade
             user_expandido_id: usuario.id || null,
-            nome_completo: usuario.nome_completo || null,
+            nome_completo: nome_completo_str || null,
+            nome: nome_str,
+            sobrenome: sobrenome_str,
             
             // Dados de acesso
             entidades: session.entidades || [],

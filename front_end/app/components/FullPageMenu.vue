@@ -86,7 +86,7 @@ const userInitial = computed(() => {
     <main class="flex-1 overflow-y-auto px-2 space-y-8 max-w-7xl mx-auto w-full custom-scrollbar">
       
       <!-- Menu Grid Structure -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 pb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 pb-8">
         
         <!-- ISLAND: Acadêmico -->
         <div class="space-y-3">
@@ -116,17 +116,39 @@ const userInitial = computed(() => {
               </div>
               <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-violet-500 transition-colors">Matrículas</span></div>
             </button>
+            <button @click="handleNavigation('/academico_calendario')" class="menu-item group" :class="isActive('/academico_calendario') ? 'bg-violet-500/5' : ''">
+              <div class="menu-icon bg-violet-500/10 text-violet-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              </div>
+              <div class="flex flex-col text-left">
+                <span class="text-sm font-bold transition-colors" :class="isActive('/academico_calendario') ? 'text-violet-500' : 'text-text group-hover:text-violet-500'">Calendário Escolar</span>
+              </div>
+            </button>
+            <button @click="handleNavigation('/calendario_salas')" class="menu-item group disabled:opacity-50">
+              <div class="menu-icon bg-violet-500/5 text-violet-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              </div>
+              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-violet-500 transition-colors">Calendário de Salas</span></div>
+            </button>
+            <button @click="handleNavigation('/atribuicao')" class="menu-item group disabled:opacity-50">
+              <div class="menu-icon bg-violet-500/5 text-violet-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5c-1.1 0-2 .9-2 2v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+              </div>
+              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-violet-500 transition-colors">Atribuição</span></div>
+            </button>
+            <button @click="handleNavigation('/programacao_atividades')" class="menu-item group" :class="isActive('/programacao_atividades') ? 'bg-violet-500/5' : ''">
+              <div class="menu-icon bg-violet-500/10 text-violet-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              </div>
+              <div class="flex flex-col text-left">
+                <span class="text-sm font-bold transition-colors" :class="isActive('/programacao_atividades') ? 'text-violet-500' : 'text-text group-hover:text-violet-500'">Programação Atividades</span>
+              </div>
+            </button>
             <button @click="handleNavigation('/avaliacoes')" class="menu-item group disabled:opacity-50">
               <div class="menu-icon bg-violet-500/5 text-violet-400">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
               </div>
               <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-violet-500 transition-colors">Avaliações</span></div>
-            </button>
-            <button @click="handleNavigation('/certificados')" class="menu-item group disabled:opacity-50">
-              <div class="menu-icon bg-violet-500/5 text-violet-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8.5V12a10 10 0 1 1-20 0V8.5"></path><path d="M22 8.5C22 10.43 17.52 12 12 12S2 10.43 2 8.5"></path><path d="M2 8.5C2 6.57 6.48 5 12 5s10 1.57 10 3.5"></path></svg>
-              </div>
-              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-violet-500 transition-colors">Certificados</span></div>
             </button>
             <button @click="handleNavigation('/diario_classe')" class="menu-item group disabled:opacity-50">
               <div class="menu-icon bg-violet-500/5 text-violet-400">
@@ -134,20 +156,14 @@ const userInitial = computed(() => {
               </div>
               <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-violet-500 transition-colors">Diário de Classe</span></div>
             </button>
-            <button @click="handleNavigation('/gestao_faltas')" class="menu-item group disabled:opacity-50">
-              <div class="menu-icon bg-violet-500/5 text-violet-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="9" y1="16" x2="15" y2="16"></line><line x1="12" y1="13" x2="12" y2="19"></line></svg>
-              </div>
-              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-violet-500 transition-colors">Gestão de Faltas</span></div>
-            </button>
           </div>
         </div>
 
-        <!-- ISLAND: Processo Seletivo -->
+        <!-- ISLAND: Comercial -->
         <div class="space-y-3">
           <div class="flex items-center gap-2 px-1">
              <div class="w-2 h-2 rounded-full bg-emerald-500/80 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
-             <h3 class="text-xs font-black text-secondary tracking-[0.2em] uppercase">Processo Seletivo</h3>
+             <h3 class="text-xs font-black text-secondary tracking-[0.2em] uppercase">Comercial</h3>
           </div>
           
           <div class="bg-div-15 border border-secondary/5 rounded-xl overflow-hidden shadow-sm flex flex-col">
@@ -157,63 +173,58 @@ const userInitial = computed(() => {
               </div>
               <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-emerald-500 transition-colors">Processos</span></div>
             </button>
-            <button @click="handleNavigation('/meus_processos')" class="menu-item group">
-              <div class="menu-icon bg-emerald-500/5 text-emerald-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-              </div>
-              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-emerald-500 transition-colors">Meus Processos</span></div>
-            </button>
-          </div>
-        </div>
-
-        <!-- ISLAND: Vendas -->
-        <div class="space-y-3">
-          <div class="flex items-center gap-2 px-1">
-             <div class="w-2 h-2 rounded-full bg-amber-500/80 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></div>
-             <h3 class="text-xs font-black text-secondary tracking-[0.2em] uppercase">Vendas</h3>
-          </div>
-          
-          <div class="bg-div-15 border border-secondary/5 rounded-xl overflow-hidden shadow-sm flex flex-col">
             <button @click="handleNavigation('/produtos')" class="menu-item group">
-              <div class="menu-icon bg-amber-500/10 text-amber-500">
+              <div class="menu-icon bg-emerald-500/5 text-emerald-400">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
               </div>
-              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-amber-500 transition-colors">Produtos</span></div>
+              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-emerald-500 transition-colors">Produtos</span></div>
             </button>
             <button @click="handleNavigation('/vendas')" class="menu-item group">
-              <div class="menu-icon bg-amber-500/5 text-amber-400">
+              <div class="menu-icon bg-emerald-500/5 text-emerald-400">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
               </div>
-              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-amber-500 transition-colors">Vendas</span></div>
+              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-emerald-500 transition-colors">Vendas</span></div>
             </button>
             <button @click="handleNavigation('/dashboard_vendas')" class="menu-item group">
-              <div class="menu-icon bg-amber-500/5 text-amber-400">
+              <div class="menu-icon bg-emerald-500/5 text-emerald-400">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
               </div>
-              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-amber-500 transition-colors">Dashboard</span></div>
+              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-emerald-500 transition-colors">Dashboard</span></div>
             </button>
           </div>
         </div>
 
-        <!-- ISLAND: Educacional -->
+        <!-- ISLAND: Portal do Aluno -->
         <div class="space-y-3">
           <div class="flex items-center gap-2 px-1">
-             <div class="w-2 h-2 rounded-full bg-rose-500/80 shadow-[0_0_8px_rgba(244,63,94,0.6)]"></div>
-             <h3 class="text-xs font-black text-secondary tracking-[0.2em] uppercase">Educacional</h3>
+             <div class="w-2 h-2 rounded-full bg-sky-500/80 shadow-[0_0_8px_rgba(14,165,233,0.6)]"></div>
+             <h3 class="text-xs font-black text-secondary tracking-[0.2em] uppercase">Portal do Aluno</h3>
           </div>
           
           <div class="bg-div-15 border border-secondary/5 rounded-xl overflow-hidden shadow-sm flex flex-col">
-            <button @click="handleNavigation('/programacao_atividades')" class="menu-item group">
-              <div class="menu-icon bg-rose-500/10 text-rose-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <button @click="handleNavigation('/meus_processos')" class="menu-item group">
+              <div class="menu-icon bg-sky-500/10 text-sky-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
               </div>
-              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-rose-500 transition-colors">Programação Atividades</span></div>
+              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-sky-500 transition-colors">Meus Processos</span></div>
             </button>
             <button @click="handleNavigation('/minhas_atividades')" class="menu-item group">
-              <div class="menu-icon bg-rose-500/5 text-rose-400">
+              <div class="menu-icon bg-sky-500/5 text-sky-400">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
               </div>
-              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-rose-500 transition-colors">Minhas Atividades</span></div>
+              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-sky-500 transition-colors">Minhas Atividades</span></div>
+            </button>
+            <button @click="handleNavigation('/certificados')" class="menu-item group disabled:opacity-50">
+              <div class="menu-icon bg-sky-500/5 text-sky-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8.5V12a10 10 0 1 1-20 0V8.5"></path><path d="M22 8.5C22 10.43 17.52 12 12 12S2 10.43 2 8.5"></path><path d="M2 8.5C2 6.57 6.48 5 12 5s10 1.57 10 3.5"></path></svg>
+              </div>
+              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-sky-500 transition-colors">Meus Certificados</span></div>
+            </button>
+            <button @click="handleNavigation('/gestao_faltas')" class="menu-item group disabled:opacity-50">
+              <div class="menu-icon bg-sky-500/5 text-sky-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="9" y1="16" x2="15" y2="16"></line><line x1="12" y1="13" x2="12" y2="19"></line></svg>
+              </div>
+              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-sky-500 transition-colors">Gestão de Faltas</span></div>
             </button>
           </div>
         </div>

@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     return { success: false, message: 'Faltam parâmetros obrigatórios' }
   }
 
-  const { data, error } = await client.rpc('aca_simular_calendario_ciclo', {
+  const { data, error } = await client.rpc('aca_calcular_cronograma_aulas', {
     p_id_entidade: id_entidade,
     p_id_modulo: id_modulo,
     p_data_inicio: data_inicio,

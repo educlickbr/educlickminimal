@@ -11,6 +11,7 @@ export default defineEventHandler(async (event) => {
     id_modulo,
     id_programa,
     descricao,
+    ano_semestre,
     data_ini,
     data_fim,
     usuario_id
@@ -26,6 +27,7 @@ export default defineEventHandler(async (event) => {
     p_id_modulo:     id_modulo,
     p_id_programa:   id_programa || null,
     p_descricao:     descricao || null,
+    p_ano_semestre:  ano_semestre || null,
     p_data_ini:      data_ini || null,
     p_data_fim:      data_fim || null,
     p_usuario_id:    usuario_id || null

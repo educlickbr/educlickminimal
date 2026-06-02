@@ -42,23 +42,36 @@
                 :disabled="isEdit"
               >
                 <option :value="null" disabled>Selecione um Módulo</option>
-                <option v-for="m in modulos" :key="m.id" :value="m.id">{{ m.nome_modulo }} ({{ formatCarga(m.carga_horaria) }})</option>
+                <option v-for="m in modulos" :key="m.id" :value="m.id">{{ m.nome_modulo }}{{ m.carga_horaria > 0 ? ' · ' + formatCarga(m.carga_horaria) : '' }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-2">
+              <label class="text-[10px] font-black text-secondary/60 uppercase tracking-widest px-1">Data de Início</label>
+              <input 
+                type="date"
+                v-model="formGeral.data_ini"
+                class="w-full px-4 py-3 rounded-lg border border-secondary/10 bg-background text-sm font-bold text-primary focus:border-primary/50 transition-all outline-none"
+              />
+              <p class="text-[9px] text-secondary/40 px-1 italic">Fim automático pela carga horária.</p>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-[10px] font-black text-secondary/60 uppercase tracking-widest px-1">Ano/Semestre Letivo</label>
+              <select 
+                v-model="formGeral.ano_semestre"
+                class="w-full px-4 py-3 rounded-lg border border-secondary/10 bg-background text-sm font-bold text-primary focus:border-primary/50 transition-all outline-none"
+              >
+                <option :value="null">Selecione...</option>
+                <option v-for="s in semestreOptions" :key="s.id" :value="s.id">{{ s.nome }}</option>
               </select>
             </div>
           </div>
 
           <div class="flex flex-col gap-2">
-            <label class="text-[10px] font-black text-secondary/60 uppercase tracking-widest px-1">Data de Início</label>
-            <input 
-              type="date"
-              v-model="formGeral.data_ini"
-              class="w-full px-4 py-3 rounded-lg border border-secondary/10 bg-background text-sm font-bold text-primary focus:border-primary/50 transition-all outline-none"
-            />
-            <p class="text-[9px] text-secondary/40 px-1 italic">Obs: A data de fim será gerada automaticamente com base na carga horária e na configuração dos dias.</p>
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label class="text-[10px] font-black text-secondary/60 uppercase tracking-widest px-1">Observação do Ciclo</label>
+            <label class="text-[10px] font-black text-secondary/60 uppercase tracking-widest px-1">Título do Ciclo</label>
             <input 
               v-model="formGeral.descricao" 
               placeholder="Ex: Turma A - Manhã"
@@ -137,7 +150,7 @@
             <div v-if="simulacaoData && simulacaoData.success" class="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div class="p-3 rounded-xl border border-secondary/10 bg-div-5 flex flex-col items-center">
                 <span class="text-[8px] font-black text-secondary/40 uppercase tracking-tighter">Encontros</span>
-                <span class="text-lg font-black text-primary">{{ simulacaoData.dias_gerados?.length || 0 }}</span>
+                <span class="text-lg font-black text-primary">{{ simulacaoData.dias_gerados?.filter((d: any) => ['regular', 'extra'].includes(d.tipo)).length || 0 }}</span>
               </div>
               <div class="p-3 rounded-xl border border-secondary/10 bg-div-5 flex flex-col items-center">
                 <span class="text-[8px] font-black text-secondary/40 uppercase tracking-tighter">Início / Fim</span>
@@ -218,21 +231,49 @@
               4. Cronograma Detalhado Gerado
             </h4>
             <div class="max-h-64 overflow-y-auto custom-scrollbar border border-secondary/10 rounded-xl bg-div-5 flex flex-col divide-y divide-secondary/5">
-              <div v-for="(dia, i) in (simulacaoData.dias_gerados || [])" :key="i" class="flex items-center px-4 py-2.5 hover:bg-div-10 transition-colors">
-                <div class="w-8 shrink-0 font-black text-[9px] text-secondary/25">#{{ Number(i) + 1 }}</div>
+              <div 
+                v-for="(dia, i) in (simulacaoData.dias_gerados || [])" :key="i" 
+                class="flex items-center px-4 py-2.5 hover:bg-div-10 transition-colors border-l-4"
+                :class="{
+                  'border-primary/40': dia.tipo === 'regular',
+                  'border-orange-500/40': dia.tipo === 'extra',
+                  'border-red-500/40 bg-red-500/5': dia.tipo === 'feriado',
+                  'border-amber-500/40 bg-amber-500/5': dia.tipo === 'evento'
+                }"
+              >
+                <div class="w-8 shrink-0 font-black text-[9px] text-secondary/25">
+                  <span v-if="['regular', 'extra'].includes(dia.tipo)">#{{ getAulaNumber(dia, i) }}</span>
+                  <Icon v-else-if="dia.tipo === 'feriado'" name="ph:calendar-x-bold" class="w-3 h-3 text-red-500/40" />
+                  <Icon v-else-if="dia.tipo === 'evento'" name="ph:warning-bold" class="w-3 h-3 text-amber-500/40" />
+                </div>
                 <div class="w-24 shrink-0 flex flex-col">
-                  <span class="text-[11px] font-black text-primary tabular-nums">{{ formatDateShort(dia.data) }}</span>
-                  <span class="text-[8px] font-bold text-secondary/30 uppercase">{{ getDowLabel(new Date(dia.data + 'T12:00:00').getDay()).substring(0,3) }}</span>
+                  <span class="text-[11px] font-black text-primary tabular-nums" :class="{ 'text-red-400': dia.tipo === 'feriado', 'text-amber-400': dia.tipo === 'evento' }">{{ formatDateShort(dia.data) }}</span>
+                  <span class="text-[8px] font-bold text-secondary/30 uppercase">{{ getDowLabel(new Date(dia.data + 'T12:00:00').getUTCDay()).substring(0,3) }}</span>
                 </div>
                 <div class="flex-1 flex flex-col min-w-0">
                   <div class="flex items-center gap-1.5">
-                    <span class="text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter" :class="dia.tipo === 'regular' ? 'bg-primary/10 text-primary' : 'bg-orange-500/10 text-orange-500'">{{ dia.tipo }}</span>
+                    <span 
+                      class="text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter shadow-sm" 
+                      :class="{
+                        'bg-primary/10 text-primary': dia.tipo === 'regular',
+                        'bg-orange-500/10 text-orange-500': dia.tipo === 'extra',
+                        'bg-red-500/20 text-red-400 border border-red-500/30': dia.tipo === 'feriado',
+                        'bg-amber-500/20 text-amber-400 border border-amber-500/30': dia.tipo === 'evento'
+                      }"
+                    >
+                      {{ dia.tipo }}
+                    </span>
                     <span class="text-[10px] font-bold text-secondary/80 truncate">{{ dia.observacao }}</span>
                   </div>
                 </div>
                 <div class="shrink-0 text-right">
-                   <p class="text-[10px] font-black text-primary tabular-nums">{{ dia.hora_ini }} <span class="text-secondary/30">-</span> {{ dia.hora_fim }}</p>
-                   <p class="text-[8px] font-bold text-secondary/40 uppercase tracking-tighter">{{ formatCarga(dia.duracao_minutos) }}</p>
+                  <template v-if="dia.hora_ini && dia.hora_fim">
+                    <p class="text-[10px] font-black text-primary tabular-nums">{{ dia.hora_ini }} <span class="text-secondary/30">-</span> {{ dia.hora_fim }}</p>
+                    <p class="text-[8px] font-bold text-secondary/40 uppercase tracking-tighter">{{ formatCarga(dia.duracao_minutos) }}</p>
+                  </template>
+                  <template v-else>
+                    <p class="text-[10px] font-black italic text-secondary/40 uppercase tracking-widest">Suspenso</p>
+                  </template>
                 </div>
               </div>
             </div>
@@ -259,6 +300,7 @@
 <script setup lang="ts">
 import { useAppStore } from '../../stores/app'
 import { useToast } from '../../composables/useToast'
+import { getAnoSemestre, getAnoSemestreList } from '../../utils/ano_semestre'
 
 const props = defineProps<{
   modelValue: boolean
@@ -314,13 +356,42 @@ function formatDateShort(dateStr: string) {
   return `${d}/${m}/${y}`
 }
 
+function getAulaNumber(dia: any, index: number | string) {
+  const numericIndex = Number(index)
+  if (!simulacaoData.value?.dias_gerados) return numericIndex + 1
+  const classDays = simulacaoData.value.dias_gerados.filter((d: any, idx: number) => 
+    idx <= numericIndex && ['regular', 'extra'].includes(d.tipo)
+  )
+  return classDays.length
+}
+
 // ------------------------------------------------------------
 // STATE
 // ------------------------------------------------------------
 const formGeral = reactive({
   id_modulo: null as string | null,
   data_ini: '',
-  descricao: ''
+  descricao: '',
+  ano_semestre: null as string | null
+})
+
+const semestreOptions = computed(() => getAnoSemestreList(10))
+
+watch(() => formGeral.data_ini, (newDate) => {
+  if (newDate) {
+    if (!formGeral.ano_semestre) {
+      formGeral.ano_semestre = getAnoSemestre(newDate + 'T12:00:00')
+    }
+  }
+})
+
+watch([() => formGeral.id_modulo, () => formGeral.ano_semestre], ([newModuloId, newSemestre]) => {
+  if (newModuloId && newSemestre && !formGeral.descricao) {
+    const mod = props.modulos?.find(m => m.id === newModuloId)
+    if (mod) {
+      formGeral.descricao = `${mod.nome_modulo} - ${newSemestre}`
+    }
+  }
 })
 
 const diasSemana = ref<any[]>([])
@@ -428,7 +499,7 @@ async function simularCalendario() {
     const id_entidade = props.idEntidade || (store as any).entidades?.[0]?.id || (store as any).company?.id
     if (!id_entidade) throw new Error('Entidade ativa não encontrada')
     
-    const res = await $fetch('/api/ciclos/simular', {
+    const res = await $fetch('/api/ciclos/calcular_cronograma', {
       method: 'POST',
       body: {
         id_entidade,
@@ -486,6 +557,7 @@ async function handleSaveFinal() {
         id_entidade,
         id_modulo: finalModuloId,
         descricao: formGeral.descricao,
+        ano_semestre: formGeral.ano_semestre,
         data_ini: formGeral.data_ini,
         data_fim: simulacaoData.value.data_fim,
         usuario_id: store.user_expandido_id
@@ -552,11 +624,14 @@ watch(() => props.modelValue, async (val) => {
       formGeral.id_modulo = props.initialData.id_modulo || props.idModulo || null
       formGeral.data_ini = props.initialData.data_ini || ''
       formGeral.descricao = props.initialData.descricao || ''
+      formGeral.ano_semestre = props.initialData.ano_semestre || null
       await fetchDiasConfig(props.cicloId)
+      await simularCalendario()
     } else {
       formGeral.id_modulo = props.idModulo || null
       formGeral.data_ini = ''
       formGeral.descricao = ''
+      formGeral.ano_semestre = null
       diasSemana.value = []
       diasExtras.value = []
     }
@@ -579,17 +654,25 @@ textarea {
   transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
 }
 select {
-  background: var(--field-bg-select) !important;
+  background-color: var(--field-bg-select) !important;
   border-color: var(--field-border) !important;
   color: var(--field-text) !important;
   transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%238b5cf6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+  background-position: right 1rem center !important;
+  background-repeat: no-repeat !important;
+  background-size: 1.2em 1.2em !important;
+  padding-right: 2.5rem !important;
 }
 select option { background: var(--field-bg-option) !important; color: var(--field-text) !important; }
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"])::placeholder,
 textarea::placeholder { color: var(--field-placeholder) !important; }
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):hover,
 textarea:hover { background: var(--field-bg-hover) !important; }
-select:hover { background: var(--field-bg-select-hover) !important; }
+select:hover { background-color: var(--field-bg-select-hover) !important; }
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
 select:focus, textarea:focus {
   border-color: var(--field-border-focus) !important;

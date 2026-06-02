@@ -265,9 +265,14 @@
                   </div>
                   <p class="text-[10px] text-secondary/50 truncate mt-0.5">{{ p.ementa?.replace(/<[^>]*>/g, '') || 'Sem ementa' }}</p>
                 </div>
-                <button @click="editPlano(p)" class="p-2 text-secondary/40 hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
-                  <Icon name="ph:pencil-simple-bold" class="w-4 h-4" />
-                </button>
+                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button @click="editPlano(p)" class="p-2 text-secondary/40 hover:text-primary transition-colors rounded">
+                    <Icon name="ph:pencil-simple-bold" class="w-4 h-4" />
+                  </button>
+                  <button @click="confirmDeletePlano(p.id!)" class="p-2 text-secondary/40 hover:text-danger hover:bg-danger/10 transition-colors rounded" title="Excluir Plano">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -282,6 +287,16 @@
         </button>
       </div>
     </div>
+    
+    <ModalConfirmacao
+      v-model="showConfirmDeletePlano"
+      title="Excluir Plano de Aula"
+      message="Tem certeza que quer excluir este plano de aula? As referências vinculadas a ele também serão excluídas."
+      type="danger"
+      confirmText="Excluir Plano"
+      :loading="isDeletingPlano"
+      @confirm="handleDeletePlano"
+    />
   </div>
 </template>
 
@@ -495,6 +510,10 @@ const formPlano = reactive<PlanoAula>({
   ementa: ''
 })
 
+const showConfirmDeletePlano = ref(false)
+const planoToDelete = ref<string | null>(null)
+const isDeletingPlano = ref(false)
+
 async function fetchPlanos() {
   if (!currentModuloId.value) return
   loadingPlanos.value = true
@@ -559,6 +578,40 @@ function resetPlanoForm() {
   formPlano.id_componente = null
   formPlano.titulo_plano = ''
   formPlano.ementa = ''
+}
+
+function confirmDeletePlano(id: string) {
+  planoToDelete.value = id
+  showConfirmDeletePlano.value = true
+}
+
+async function handleDeletePlano() {
+  if (!planoToDelete.value) return
+  isDeletingPlano.value = true
+  try {
+    const id_entidade = props.idEntidade || (store as any).entidades?.[0]?.id || (store as any).company?.id
+    if (!id_entidade) throw new Error('Entidade ativa não encontrada')
+
+    const res = await $fetch('/api/plano_aula', {
+      method: 'DELETE',
+      body: {
+        id: planoToDelete.value,
+        id_entidade
+      }
+    }) as any
+
+    if (res?.success === false) {
+      throw new Error(res?.message || 'Erro ao remover plano')
+    }
+    toast.showToast('Plano de aula removido', { type: 'success' })
+    fetchPlanos()
+  } catch(e: any) {
+    toast.showToast(e.message || 'Erro ao remover plano', { type: 'error' })
+  } finally {
+    isDeletingPlano.value = false
+    showConfirmDeletePlano.value = false
+    planoToDelete.value = null
+  }
 }
 
 // ============================================================
@@ -664,10 +717,18 @@ textarea {
   transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
 }
 select {
-  background: var(--field-bg-select) !important;
+  background-color: var(--field-bg-select) !important;
   border-color: var(--field-border) !important;
   color: var(--field-text) !important;
   transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%238b5cf6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+  background-position: right 1rem center !important;
+  background-repeat: no-repeat !important;
+  background-size: 1.2em 1.2em !important;
+  padding-right: 2.5rem !important;
 }
 select option { background: var(--field-bg-option) !important; color: var(--field-text) !important; }
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"])::placeholder,
@@ -678,7 +739,7 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):hover,
 textarea:hover {
   background: var(--field-bg-hover) !important;
 }
-select:hover { background: var(--field-bg-select-hover) !important; }
+select:hover { background-color: var(--field-bg-select-hover) !important; }
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
 select:focus, textarea:focus {
   border-color: var(--field-border-focus) !important;

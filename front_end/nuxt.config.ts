@@ -14,17 +14,18 @@ export default defineNuxtConfig({
     "@nuxtjs/tailwindcss",
     "@pinia/nuxt",
     "@nuxtjs/supabase",
+    "@nuxt/icon",
   ],
 
   // CSS Global (Variáveis CSS, Reset, Fontes)
-  css: ["./app/assets/css/style.css"],
+  css: ["~/assets/css/style.css"],
 
   // 2. Configuração do Supabase (Segurança JWT)
   supabase: {
     redirectOptions: {
       login: "/login", // Onde mandar o usuário se não estiver logado
       callback: "/confirm", // Para onde o Supabase volta após login social
-      exclude: ["/", "/teste-layout"], // Páginas públicas (ex: Landing Page)
+      exclude: ["/", "/teste-layout", "/oferta", "/test", "/form/**"], // Páginas públicas (ex: Landing Page)
     },
   },
 

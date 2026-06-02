@@ -91,10 +91,11 @@ body {
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
 select,
 textarea {
-    background:    var(--field-bg) !important;
+    background-color: var(--field-bg) !important;
     border-color:  var(--field-border) !important;
     color:         var(--field-text) !important;
-    transition:    border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    transition:    border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    color-scheme: dark;
 }
 
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"])::placeholder,
@@ -105,7 +106,7 @@ textarea::placeholder {
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):hover,
 select:hover,
 textarea:hover {
-    background: var(--field-bg-hover);
+    background-color: var(--field-bg-hover);
 }
 
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):focus,
@@ -118,18 +119,18 @@ textarea:focus {
 
 /* ── Select: cor opaca pois browsers não compõem rgba no rendering nativo ── */
 select {
-    background:  var(--field-bg-select) !important;
+    background-color: var(--field-bg-select) !important;
     border-color: var(--field-border) !important;
     color:        var(--field-text) !important;
-    transition:   border-color 0.18s ease, box-shadow 0.18s ease;
+    transition:   border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
-select:hover  { background: var(--field-bg-select-hover) !important; }
+select:hover  { background-color: var(--field-bg-select-hover) !important; }
 select:focus  { border-color: var(--field-border-focus) !important; box-shadow: var(--field-shadow-focus) !important; outline: none !important; }
 select:disabled { opacity: 0.45 !important; cursor: not-allowed !important; }
 
 /* Options: sempre opaco + dark */
 option {
-    background: var(--field-bg-option) !important;
+    background-color: var(--field-bg-option) !important;
     color:       var(--field-text) !important;
 }
 option:checked,

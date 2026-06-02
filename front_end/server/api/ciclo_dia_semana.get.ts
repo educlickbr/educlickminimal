@@ -14,5 +14,11 @@ export default defineEventHandler(async (event) => {
     .eq('id_ciclo', id_ciclo)
 
   if (error) return { success: false, message: error.message }
-  return { success: true, itens: data || [] }
+  
+  const mapped = (data as any[] || []).map((d: any) => ({
+    ...d,
+    dia_sem: d.n_dia_sem // Map to frontend expected key
+  }))
+  
+  return { success: true, itens: mapped }
 })
