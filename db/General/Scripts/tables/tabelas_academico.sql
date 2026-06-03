@@ -232,6 +232,28 @@ CREATE TABLE public.aca_programa (
 ALTER TABLE public.aca_programa ENABLE ROW LEVEL SECURITY;
 
 
+-- public.aca_processo_seletivo definition
+
+-- Drop table
+
+-- DROP TABLE public.aca_processo_seletivo;
+
+CREATE TABLE public.aca_processo_seletivo (
+	id uuid DEFAULT gen_random_uuid() NOT NULL,
+	id_programa uuid NOT NULL,
+	nome_processo text NOT NULL,
+	data_inicio timestamptz NOT NULL,
+	data_fim timestamptz NOT NULL,
+	criado_por uuid NULL,
+	criado_em timestamptz DEFAULT now() NULL,
+	modificado_por uuid NULL,
+	modificado_em timestamptz DEFAULT now() NULL,
+	id_entidade uuid NOT NULL,
+	CONSTRAINT aca_processo_seletivo_pkey PRIMARY KEY (id)
+);
+ALTER TABLE public.aca_processo_seletivo ENABLE ROW LEVEL SECURITY;
+
+
 -- public.aca_ref_plano_de_aula definition
 
 -- Drop table
@@ -341,6 +363,14 @@ ALTER TABLE public.aca_programa ADD CONSTRAINT aca_programa_criado_por_fkey FORE
 ALTER TABLE public.aca_programa ADD CONSTRAINT aca_programa_id_curso_fkey FOREIGN KEY (id_curso) REFERENCES public.aca_curso(id);
 ALTER TABLE public.aca_programa ADD CONSTRAINT aca_programa_id_entidade_fkey FOREIGN KEY (id_entidade) REFERENCES public.user_entidades(id) ON DELETE CASCADE;
 ALTER TABLE public.aca_programa ADD CONSTRAINT aca_programa_modificado_por_fkey FOREIGN KEY (modificado_por) REFERENCES public.user_expandido(id);
+
+
+-- public.aca_processo_seletivo foreign keys
+
+ALTER TABLE public.aca_processo_seletivo ADD CONSTRAINT aca_processo_seletivo_criado_por_fkey FOREIGN KEY (criado_por) REFERENCES public.user_expandido(id);
+ALTER TABLE public.aca_processo_seletivo ADD CONSTRAINT aca_processo_seletivo_id_entidade_fkey FOREIGN KEY (id_entidade) REFERENCES public.user_entidades(id) ON DELETE CASCADE;
+ALTER TABLE public.aca_processo_seletivo ADD CONSTRAINT aca_processo_seletivo_id_programa_fkey FOREIGN KEY (id_programa) REFERENCES public.aca_programa(id) ON DELETE CASCADE;
+ALTER TABLE public.aca_processo_seletivo ADD CONSTRAINT aca_processo_seletivo_modificado_por_fkey FOREIGN KEY (modificado_por) REFERENCES public.user_expandido(id);
 
 
 -- public.aca_ref_plano_de_aula foreign keys

@@ -1,6 +1,17 @@
 import { defineEventHandler, readBody } from 'h3'
 import { serverSupabaseClient, serverSupabaseUser } from '#supabase/server'
 
+const BRAZIL_TIME_ZONE = 'America/Sao_Paulo'
+
+function formatBrazilTime(date: Date) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: BRAZIL_TIME_ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).format(date)
+}
+
 export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)
   const user = await serverSupabaseUser(event)
@@ -32,7 +43,7 @@ export default defineEventHandler(async (event) => {
         console.error('Erro ao atualizar user_expandido:', updErr)
         return { success: false, message: updErr.message, details: updErr }
       }
-      return { success: true, salvo_em: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }
+      return { success: true, salvo_em: formatBrazilTime(new Date()) }
     }
   }
 

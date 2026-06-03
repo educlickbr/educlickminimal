@@ -35,9 +35,11 @@
           <tags>persp.editorOnboardingCommand:Open File...$$$Ctrl+O</tags>
           <tags>persp.editorOnboardingCommand:Show Key Assist$$$Shift+Ctrl+L</tags>
           <tags>persp.editorOnboardingCommand:Find Actions$$$Ctrl+3</tags>
-          <children xsi:type="basic:PartSashContainer" xmi:id="_VdC7tF8-EfG8KY2ojLIIpg" selectedElement="_VdC7vV8-EfG8KY2ojLIIpg" horizontal="true">
-            <children xsi:type="basic:PartSashContainer" xmi:id="_VdC7tV8-EfG8KY2ojLIIpg" containerData="3000" selectedElement="_VdC7ul8-EfG8KY2ojLIIpg">
+          <children xsi:type="basic:PartSashContainer" xmi:id="_VdC7tF8-EfG8KY2ojLIIpg" selectedElement="_VdC7tV8-EfG8KY2ojLIIpg" horizontal="true">
+            <children xsi:type="basic:PartSashContainer" xmi:id="_VdC7tV8-EfG8KY2ojLIIpg" containerData="3000" selectedElement="_VdC7tl8-EfG8KY2ojLIIpg">
               <children xsi:type="basic:PartStack" xmi:id="_VdC7tl8-EfG8KY2ojLIIpg" elementId="navigation" containerData="7000" selectedElement="_VdC7uF8-EfG8KY2ojLIIpg">
+                <tags>active</tags>
+                <tags>noFocus</tags>
                 <children xsi:type="advanced:Placeholder" xmi:id="_VdC7t18-EfG8KY2ojLIIpg" elementId="org.jkiss.dbeaver.core.databaseNavigator" ref="_VdC9ZF8-EfG8KY2ojLIIpg" closeable="true">
                   <tags>View</tags>
                   <tags>categoryTag:Database</tags>
@@ -136,7 +138,6 @@
       <children xsi:type="basic:PartStack" xmi:id="_VdC9W18-EfG8KY2ojLIIpg" elementId="org.eclipse.e4.primaryDataStack" selectedElement="_VdC9X18-EfG8KY2ojLIIpg">
         <tags>EditorStack</tags>
         <tags>org.eclipse.e4.primaryDataStack</tags>
-        <tags>active</tags>
         <tags>noFocus</tags>
         <children xsi:type="basic:Part" xmi:id="_VdC9XF8-EfG8KY2ojLIIpg" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="&lt;none> tabelas_academico" iconURI="platform:/plugin/org.jkiss.dbeaver.model/icons/tree/script.svg" closeable="true">
           <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;editor id=&quot;org.jkiss.dbeaver.ui.editors.sql.SQLEditor&quot; name=&quot;tabelas_academico.sql&quot; partName=&quot;&amp;lt;none&amp;gt; tabelas_academico&quot; title=&quot;&amp;lt;none&amp;gt; tabelas_academico&quot; tooltip=&quot;General/Scripts/tables/tabelas_academico.sql&quot;>&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/General/Scripts/tables/tabelas_academico.sql&quot;/>&#xA;&lt;editorState selectionHorizontalPixel=&quot;0&quot; selectionLength=&quot;0&quot; selectionOffset=&quot;14563&quot; selectionTopPixel=&quot;5389&quot;/>&#xA;&lt;/editor>"/>
@@ -151,11 +152,10 @@
           <tags>org.jkiss.dbeaver.ui.editors.entity.FolderEditor</tags>
         </children>
         <children xsi:type="basic:Part" xmi:id="_VdC9X18-EfG8KY2ojLIIpg" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="&lt;none> tabelas_usuario" iconURI="platform:/plugin/org.jkiss.dbeaver.model/icons/tree/script.svg" closeable="true">
-          <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;editor id=&quot;org.jkiss.dbeaver.ui.editors.sql.SQLEditor&quot; name=&quot;tabelas_usuario.sql&quot; partName=&quot;&amp;lt;none&amp;gt; tabelas_usuario&quot; title=&quot;&amp;lt;none&amp;gt; tabelas_usuario&quot; tooltip=&quot;General/Scripts/tables/tabelas_usuario.sql&quot;>&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/General/Scripts/tables/tabelas_usuario.sql&quot;/>&#xA;&lt;editorState selectionHorizontalPixel=&quot;0&quot; selectionLength=&quot;0&quot; selectionOffset=&quot;6242&quot; selectionTopPixel=&quot;0&quot;/>&#xA;&lt;/editor>"/>
+          <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;editor id=&quot;org.jkiss.dbeaver.ui.editors.sql.SQLEditor&quot; name=&quot;tabelas_usuario.sql&quot; partName=&quot;&amp;lt;none&amp;gt; tabelas_usuario&quot; title=&quot;&amp;lt;none&amp;gt; tabelas_usuario&quot; tooltip=&quot;General/Scripts/tables/tabelas_usuario.sql&quot;>&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/General/Scripts/tables/tabelas_usuario.sql&quot;/>&#xA;&lt;editorState selectionHorizontalPixel=&quot;0&quot; selectionLength=&quot;0&quot; selectionOffset=&quot;6242&quot; selectionTopPixel=&quot;3349&quot;/>&#xA;&lt;/editor>"/>
           <tags>Editor</tags>
           <tags>removeOnHide</tags>
           <tags>org.jkiss.dbeaver.ui.editors.sql.SQLEditor</tags>
-          <tags>active</tags>
         </children>
       </children>
     </sharedElements>
@@ -177,11 +177,13 @@
       <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;view/>"/>
       <tags>View</tags>
       <tags>categoryTag:Database</tags>
+      <tags>active</tags>
+      <tags>activeOnClose</tags>
       <menus xmi:id="_VdC9aF8-EfG8KY2ojLIIpg" elementId="org.jkiss.dbeaver.core.projectNavigator">
         <tags>ViewMenu</tags>
         <tags>menuContribution:menu</tags>
       </menus>
-      <toolbar xmi:id="_VdC9e18-EfG8KY2ojLIIpg" elementId="org.jkiss.dbeaver.core.projectNavigator"/>
+      <toolbar xmi:id="_VdC9e18-EfG8KY2ojLIIpg" elementId="org.jkiss.dbeaver.core.projectNavigator" visible="false"/>
     </sharedElements>
     <sharedElements xsi:type="basic:Part" xmi:id="_VdC9hF8-EfG8KY2ojLIIpg" elementId="org.eclipse.ui.texteditor.TemplatesView" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" label="Templates" iconURI="platform:/plugin/org.jkiss.dbeaver.ui.app.standalone/icons/templates_view.svg" tooltip="" closeable="true">
       <persistedState key="originalCompatibilityViewClass" value="org.eclipse.ui.texteditor.templates.TemplatesView"/>
@@ -199,7 +201,7 @@
         <tags>ViewMenu</tags>
         <tags>menuContribution:menu</tags>
       </menus>
-      <toolbar xmi:id="_VdC9k18-EfG8KY2ojLIIpg" elementId="org.jkiss.dbeaver.core.projectExplorer"/>
+      <toolbar xmi:id="_VdC9k18-EfG8KY2ojLIIpg" elementId="org.jkiss.dbeaver.core.projectExplorer" visible="false"/>
     </sharedElements>
     <sharedElements xsi:type="basic:Part" xmi:id="_VdC9mF8-EfG8KY2ojLIIpg" elementId="org.jkiss.dbeaver.core.databaseBrowser" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" label="Database Browser" iconURI="platform:/plugin/org.jkiss.dbeaver.ui/icons/database_navigator.svg" tooltip="Browse database connection elements" closeable="true">
       <persistedState key="originalCompatibilityViewClass" value="org.jkiss.dbeaver.ui.navigator.database.DatabaseBrowserView"/>
@@ -297,9 +299,6 @@
       <children xsi:type="menu:ToolBar" xmi:id="_VdC9518-EfG8KY2ojLIIpg" elementId="org.jkiss.dbeaver.ui.editors.entity.FolderEditor" visible="false">
         <tags>Draggable</tags>
       </children>
-      <children xsi:type="menu:ToolBar" xmi:id="_VdC96F8-EfG8KY2ojLIIpg" elementId="org.jkiss.dbeaver.ui.editors.sql.SQLEditor" visible="false">
-        <tags>Draggable</tags>
-      </children>
       <children xsi:type="menu:ToolBar" xmi:id="_VdC96V8-EfG8KY2ojLIIpg" elementId="group.editor" toBeRendered="false">
         <tags>toolbarSeparator</tags>
         <children xsi:type="menu:ToolBarSeparator" xmi:id="_VdC96l8-EfG8KY2ojLIIpg" elementId="group.editor" toBeRendered="false"/>
@@ -315,7 +314,7 @@
       </children>
     </trimBars>
     <trimBars xmi:id="_VdC98F8-EfG8KY2ojLIIpg" elementId="org.eclipse.ui.trim.status" side="Bottom">
-      <children xsi:type="menu:ToolControl" xmi:id="_VdC98V8-EfG8KY2ojLIIpg" elementId="org.jkiss.dbeaver.core.ui.Breadcrumb" contributorURI="platform:/plugin/org.jkiss.dbeaver.core" contributionURI="bundleclass://org.jkiss.dbeaver.core/org.jkiss.dbeaver.ui.controls.BreadcrumbTrim">
+      <children xsi:type="menu:ToolControl" xmi:id="_trXjgNNREe-gL-jF7DiACA" elementId="org.jkiss.dbeaver.core.ui.Breadcrumb" contributorURI="platform:/plugin/org.jkiss.dbeaver.core" contributionURI="bundleclass://org.jkiss.dbeaver.core/org.jkiss.dbeaver.ui.controls.BreadcrumbTrim">
         <tags>stretch</tags>
       </children>
       <children xsi:type="menu:ToolControl" xmi:id="_VdC98l8-EfG8KY2ojLIIpg" elementId="org.eclipse.ui.StatusLine" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.StandardTrim">
@@ -1251,18 +1250,18 @@
   <menuContributions xmi:id="_VdDjf18-EfG8KY2ojLIIpg" elementId="org.eclipse.ui.window.customizePerspective" contributorURI="platform:/plugin/org.jkiss.dbeaver.ui.app.standalone" positionInParent="popup:toolbar">
     <children xsi:type="menu:HandledMenuItem" xmi:id="_VdDjgF8-EfG8KY2ojLIIpg" elementId="org.eclipse.ui.window.customizePerspective" contributorURI="platform:/plugin/org.jkiss.dbeaver.ui.app.standalone" label="%command.name.customize" command="_VdELLV8-EfG8KY2ojLIIpg"/>
   </menuContributions>
-  <trimContributions xmi:id="_VdELIl8-EfG8KY2ojLIIpg" elementId="org.eclipse.ui.ide.application.trimcontribution.QuickAccess" contributorURI="platform:/plugin/org.eclipse.ui.ide.application" toBeRendered="false" parentId="org.eclipse.ui.main.toolbar" positionInParent="last">
-    <children xsi:type="menu:ToolControl" xmi:id="_VdELI18-EfG8KY2ojLIIpg" elementId="Spacer Glue" contributorURI="platform:/plugin/org.eclipse.ui.ide.application" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.renderers.swt/org.eclipse.e4.ui.workbench.renderers.swt.LayoutModifierToolControl">
+  <trimContributions xmi:id="_2r10UF9tEeO-yojH_y4TJA" elementId="org.eclipse.ui.ide.application.trimcontribution.QuickAccess" contributorURI="platform:/plugin/org.eclipse.ui.ide.application" toBeRendered="false" parentId="org.eclipse.ui.main.toolbar" positionInParent="last">
+    <children xsi:type="menu:ToolControl" xmi:id="_76uUAF9tEeO-yojH_y4TJA" elementId="Spacer Glue" contributorURI="platform:/plugin/org.eclipse.ui.ide.application" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.renderers.swt/org.eclipse.e4.ui.workbench.renderers.swt.LayoutModifierToolControl">
       <tags>glue</tags>
       <tags>move_after:PerspectiveSpacer</tags>
       <tags>SHOW_RESTORE_MENU</tags>
     </children>
-    <children xsi:type="menu:ToolControl" xmi:id="_VdELJF8-EfG8KY2ojLIIpg" elementId="SearchField" contributorURI="platform:/plugin/org.eclipse.ui.ide.application" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.quickaccess.SearchField">
+    <children xsi:type="menu:ToolControl" xmi:id="_8tJPcF9tEeO-yojH_y4TJA" elementId="SearchField" contributorURI="platform:/plugin/org.eclipse.ui.ide.application" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.quickaccess.SearchField">
       <tags>move_after:Spacer Glue</tags>
       <tags>HIDEABLE</tags>
       <tags>SHOW_RESTORE_MENU</tags>
     </children>
-    <children xsi:type="menu:ToolControl" xmi:id="_VdELJV8-EfG8KY2ojLIIpg" elementId="Search-PS Glue" contributorURI="platform:/plugin/org.eclipse.ui.ide.application" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.renderers.swt/org.eclipse.e4.ui.workbench.renderers.swt.LayoutModifierToolControl">
+    <children xsi:type="menu:ToolControl" xmi:id="_9LgmcF9tEeO-yojH_y4TJA" elementId="Search-PS Glue" contributorURI="platform:/plugin/org.eclipse.ui.ide.application" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.renderers.swt/org.eclipse.e4.ui.workbench.renderers.swt.LayoutModifierToolControl">
       <tags>glue</tags>
       <tags>move_after:SearchField</tags>
       <tags>SHOW_RESTORE_MENU</tags>

@@ -29,7 +29,7 @@ const tiposPergunta = [
   { value: 'select', label: 'Caixa de Seleção' },
   { value: 'radio', label: 'Múltipla Escolha (Opção Única)' },
   { value: 'checkbox', label: 'Múltipla Escolha (Múltiplas Opções)' },
-  { value: 'date', label: 'Data' },
+  { value: 'data', label: 'Data' },
   { value: 'file', label: 'Arquivo / Upload' },
 ]
 
@@ -41,7 +41,7 @@ watch(() => props.modelValue, (isOpen) => {
         nome_interno: props.initialData.nome_interno,
         label: props.initialData.label,
         placeholder: props.initialData.placeholder || '',
-        tipo_pergunta: props.initialData.tipo_pergunta || 'text',
+        tipo_pergunta: props.initialData.tipo_pergunta === 'date' ? 'data' : (props.initialData.tipo_pergunta || 'text'),
         opcoes: Array.isArray(props.initialData.opcoes) ? [...props.initialData.opcoes] : [],
       }
     } else {

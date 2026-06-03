@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { CEP_DEPENDENT_FIELDS, VIACEP_FIELD_MAP, buscarCEP, mascaraCEP } from '../../../../../utils/viacep'
 
 const route = useRoute()
 const { tipo_proc, tipo_cand, area_id, programa_id } = route.params as { tipo_proc: string, tipo_cand: string, area_id: string, programa_id: string }
@@ -16,9 +17,152 @@ const answers = ref<Record<string, any>>({})
 const saveStatus = ref<Record<string, string>>({})
 const fileNames = ref<Record<string, string>>({})
 const fileLinks = ref<Record<string, string>>({})
+const enderecoFieldsUnlocked = ref(false)
+const cepLookupLoading = ref(false)
+const BRAZIL_TIME_ZONE = 'America/Sao_Paulo'
+
+function isDateQuestion(tipo?: string) {
+  return tipo === 'data' || tipo === 'date'
+}
+
+function isCepQuestion(tipo?: string) {
+  return tipo === 'cep'
+}
+
+function isEnderecoQuestion(tipo?: string, nomeInterno?: string) {
+  return tipo === 'endereco' || CEP_DEPENDENT_FIELDS.includes(nomeInterno || '')
+}
+
+function normalizeDateAnswer(value: unknown) {
+  if (typeof value !== 'string') return value
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    return value.split('T')[0]
+  }
+
+  const brDateMatch = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (brDateMatch) {
+    const [, day, month, year] = brDateMatch
+    return `${year}-${month}-${day}`
+  }
+
+  return value
+}
 
 // Fallback de Entidade (para testes)
 const idEntidade = computed(() => (route.query.id_entidade as string) || '00ca60ea-6667-482d-8a96-09b877707b08')
+const perguntasMapByInternalName = computed(() => {
+  return new Map(
+    blocos.value.flatMap(b => b.perguntas.map((p: any) => [p.nome_interno, p]))
+  )
+})
+const hasCepQuestion = computed(() => perguntasMapByInternalName.value.has('cep'))
+
+function updateEnderecoFieldsUnlockedState() {
+  if (!hasCepQuestion.value) {
+    enderecoFieldsUnlocked.value = true
+    return
+  }
+
+  const cepQuestion = perguntasMapByInternalName.value.get('cep')
+  const cepValue = cepQuestion ? String(answers.value[cepQuestion.pergunta_id] || '') : ''
+  const hasValidCep = cepValue.replace(/\D/g, '').length === 8
+  const hasAnyDependentAnswer = CEP_DEPENDENT_FIELDS.some((field) => {
+    const question = perguntasMapByInternalName.value.get(field)
+    return question && answers.value[question.pergunta_id]
+  })
+
+  enderecoFieldsUnlocked.value = hasValidCep || hasAnyDependentAnswer
+}
+
+function isEnderecoFieldDisabled(pergunta: any) {
+  if (pergunta.disabled) return true
+  if (!isEnderecoQuestion(pergunta.tipo_pergunta, pergunta.nome_interno)) return false
+  if (!CEP_DEPENDENT_FIELDS.includes(pergunta.nome_interno)) return false
+  if (!hasCepQuestion.value) return false
+  return !enderecoFieldsUnlocked.value || cepLookupLoading.value
+}
+
+function formatCepInput(id: string) {
+  const currentValue = answers.value[id]
+  if (currentValue === undefined || currentValue === null) return
+
+  answers.value[id] = mascaraCEP(String(currentValue))
+
+  if (String(answers.value[id]).replace(/\D/g, '').length < 8) {
+    enderecoFieldsUnlocked.value = false
+  }
+}
+
+async function saveMultipleAnswers(perguntaIds: string[]) {
+  await Promise.all(
+    perguntaIds.map((perguntaId) => saveAnswer(perguntaId))
+  )
+}
+
+async function applyCepAddressData(data: Record<string, string>) {
+  const perguntaIdsToSave: string[] = []
+
+  for (const [viaCepField, nomeInterno] of Object.entries(VIACEP_FIELD_MAP)) {
+    const pergunta = perguntasMapByInternalName.value.get(nomeInterno)
+    if (!pergunta) continue
+
+    answers.value[pergunta.pergunta_id] = data[viaCepField] || ''
+    perguntaIdsToSave.push(pergunta.pergunta_id)
+  }
+
+  enderecoFieldsUnlocked.value = true
+
+  if (perguntaIdsToSave.length > 0) {
+    await saveMultipleAnswers(perguntaIdsToSave)
+  }
+}
+
+async function handleCepBlur(pergunta: any) {
+  formatCepInput(pergunta.pergunta_id)
+
+  const value = String(answers.value[pergunta.pergunta_id] || '')
+  const cepDigits = value.replace(/\D/g, '')
+
+  if (cepDigits.length === 0) {
+    saveStatus.value[pergunta.pergunta_id] = ''
+    enderecoFieldsUnlocked.value = false
+    return
+  }
+
+  if (cepDigits.length !== 8) {
+    saveStatus.value[pergunta.pergunta_id] = 'CEP inválido'
+    enderecoFieldsUnlocked.value = false
+    return
+  }
+
+  cepLookupLoading.value = true
+  saveStatus.value[pergunta.pergunta_id] = 'Buscando CEP...'
+
+  try {
+    const endereco = await buscarCEP(cepDigits)
+
+    if (!endereco) {
+      saveStatus.value[pergunta.pergunta_id] = 'CEP não encontrado'
+      enderecoFieldsUnlocked.value = false
+      return
+    }
+
+    answers.value[pergunta.pergunta_id] = mascaraCEP(endereco.cep || cepDigits)
+    await saveAnswer(pergunta.pergunta_id, 'cep')
+    await applyCepAddressData(endereco as unknown as Record<string, string>)
+  } catch (e) {
+    saveStatus.value[pergunta.pergunta_id] = 'Erro ao buscar CEP'
+    enderecoFieldsUnlocked.value = false
+    console.error('Erro ao consultar CEP:', e)
+  } finally {
+    cepLookupLoading.value = false
+  }
+}
 
 async function loadFormConfig() {
   loading.value = true
@@ -120,11 +264,25 @@ async function loadUserAnswers(perguntaIds: string[]) {
     }) as any
 
     if (respRes.success) {
+      const perguntaTipoMap = new Map(
+        blocos.value.flatMap(b => b.perguntas.map((p: any) => [p.pergunta_id, p.tipo_pergunta]))
+      )
+
       // Mapear respostas para o objeto reativo
       Object.keys(respRes.respostas).forEach(id => {
-        answers.value[id] = respRes.respostas[id].resposta
+        const tipoPergunta = perguntaTipoMap.get(id)
+        const resposta = respRes.respostas[id].resposta
+        if (isDateQuestion(tipoPergunta)) {
+          answers.value[id] = normalizeDateAnswer(resposta)
+        } else if (isCepQuestion(tipoPergunta) && typeof resposta === 'string') {
+          answers.value[id] = mascaraCEP(resposta)
+        } else {
+          answers.value[id] = resposta
+        }
         saveStatus.value[id] = `Carregado (${formatTime(respRes.respostas[id].modificado_em)})`
       })
+
+      updateEnderecoFieldsUnlockedState()
     }
   } catch (e) {
     console.error('Erro ao carregar respostas:', e)
@@ -137,6 +295,11 @@ async function saveAnswer(perguntaId: string, tipo_pergunta?: string) {
 
   if (tipo_pergunta === 'cpf' && !validarCPF(value)) {
     saveStatus.value[perguntaId] = 'CPF Inválido'
+    return
+  }
+
+  if (tipo_pergunta === 'cep' && String(value).replace(/\D/g, '').length !== 8) {
+    saveStatus.value[perguntaId] = 'CEP inválido'
     return
   }
 
@@ -154,7 +317,7 @@ async function saveAnswer(perguntaId: string, tipo_pergunta?: string) {
     }) as any
 
     if (res.success) {
-      saveStatus.value[perguntaId] = `Salvo às ${res.salvo_em}`
+      saveStatus.value[perguntaId] = `Salvo às ${formatTime(res.salvo_em)}`
     } else {
       saveStatus.value[perguntaId] = 'Erro ao salvar'
       console.error('Erro detalhado do backend:', res)
@@ -167,8 +330,22 @@ async function saveAnswer(perguntaId: string, tipo_pergunta?: string) {
 
 function formatTime(dateStr: string) {
   if (!dateStr) return ''
+
+  if (/^\d{2}:\d{2}$/.test(dateStr)) {
+    return dateStr
+  }
+
   const d = new Date(dateStr)
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  if (Number.isNaN(d.getTime())) {
+    return dateStr
+  }
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: BRAZIL_TIME_ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).format(d)
 }
 
 function formatCpfInput(id: string) {
@@ -336,6 +513,33 @@ onMounted(async () => {
                 :style="{ height: pergunta.altura ? pergunta.altura + 'px' : 'auto' }"
               />
 
+              <!-- CEP -->
+              <input 
+                v-else-if="pergunta.tipo_pergunta === 'cep'"
+                type="text"
+                v-model="answers[pergunta.pergunta_id]"
+                @input="formatCepInput(pergunta.pergunta_id)"
+                @blur="handleCepBlur(pergunta)"
+                :placeholder="pergunta.placeholder || '00000-000'"
+                :disabled="pergunta.disabled || cepLookupLoading"
+                maxlength="9"
+                class="bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                :class="answers[pergunta.pergunta_id] && String(answers[pergunta.pergunta_id]).replace(/\D/g, '').length > 0 && String(answers[pergunta.pergunta_id]).replace(/\D/g, '').length !== 8 ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/50 text-red-400' : ''"
+                :style="{ height: pergunta.altura ? pergunta.altura + 'px' : 'auto' }"
+              />
+
+              <!-- Endereço autopreenchido por CEP -->
+              <input 
+                v-else-if="pergunta.tipo_pergunta === 'endereco'"
+                type="text"
+                v-model="answers[pergunta.pergunta_id]"
+                @blur="saveAnswer(pergunta.pergunta_id)"
+                :placeholder="pergunta.placeholder"
+                :disabled="isEnderecoFieldDisabled(pergunta)"
+                class="bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                :style="{ height: pergunta.altura ? pergunta.altura + 'px' : 'auto' }"
+              />
+
               <!-- Select -->
               <select 
                 v-else-if="pergunta.tipo_pergunta === 'select'"
@@ -348,12 +552,14 @@ onMounted(async () => {
                 <option v-for="opt in pergunta.opcoes" :key="opt" :value="opt">{{ opt }}</option>
               </select>
 
-              <!-- Date -->
+              <!-- Data -->
               <input 
-                v-else-if="pergunta.tipo_pergunta === 'date'"
+                v-else-if="isDateQuestion(pergunta.tipo_pergunta)"
                 type="date"
                 v-model="answers[pergunta.pergunta_id]"
                 @blur="saveAnswer(pergunta.pergunta_id)"
+                :placeholder="pergunta.placeholder"
+                :disabled="pergunta.disabled"
                 class="bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none transition-all"
                 :style="{ height: pergunta.altura ? pergunta.altura + 'px' : 'auto' }"
               />

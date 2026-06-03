@@ -192,6 +192,7 @@ const mapTipoPergunta: Record<string, string> = {
   textarea: 'Texto Longo',
   number: 'Número',
   email: 'E-mail',
+  data: 'Data',
   date: 'Data',
   select: 'Seleção',
   file: 'Arquivo'
@@ -1101,7 +1102,7 @@ if (import.meta.client) {
                          </template>
                          <div v-else class="text-xs text-white/30 italic">Nenhuma opção configurada...</div>
                        </div>
-                       <div v-else-if="item.tipo_pergunta === 'date'" class="w-full relative pointer-events-none">
+                       <div v-else-if="['data', 'date'].includes(item.tipo_pergunta)" class="w-full relative pointer-events-none">
                          <div class="h-8 rounded bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] w-full flex items-center px-3 text-xs text-white/30 truncate">
                            {{ item.placeholder || 'DD/MM/AAAA' }}
                          </div>

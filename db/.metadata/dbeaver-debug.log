@@ -1,23 +1,22 @@
-2026-06-02 07:59:14.998 - DBeaver 26.0.5.202605171705 is starting
-2026-06-02 07:59:14.999 - OS: Linux 6.12.90+deb13.1-amd64 (amd64)
-2026-06-02 07:59:15.000 - Java version: 21.0.10 by Eclipse Adoptium (64bit)
-2026-06-02 07:59:15.000 - Install path: '/usr/share/dbeaver-ce'
-2026-06-02 07:59:15.000 - Instance path: 'file:/home/eikmeier/Documentos/dev/nuxt/educlickminimal/db/'
-2026-06-02 07:59:15.002 - Memory available 64Mb/1024Mb
-2026-06-02 07:59:15.008 - Initialize desktop platform...
-2026-06-02 07:59:15.423 - BounceCastle bundle found. Use JCE provider BC
+2026-06-03 11:32:10.442 - DBeaver 26.0.5.202605171705 is starting
+2026-06-03 11:32:10.443 - OS: Linux 6.12.90+deb13.1-amd64 (amd64)
+2026-06-03 11:32:10.443 - Java version: 21.0.10 by Eclipse Adoptium (64bit)
+2026-06-03 11:32:10.443 - Install path: '/usr/share/dbeaver-ce'
+2026-06-03 11:32:10.443 - Instance path: 'file:/home/eikmeier/Documentos/dev/nuxt/educlickminimal/db/'
+2026-06-03 11:32:10.444 - Memory available 64Mb/1024Mb
+2026-06-03 11:32:10.448 - Initialize desktop platform...
+2026-06-03 11:32:10.722 - BounceCastle bundle found. Use JCE provider BC
 > Start Core File Systems [org.eclipse.core.filesystem 1.11.400.v20251107-0507]
 > Start Core Resource Management [org.eclipse.core.resources 3.23.200.v20251217-0810]
-> Start DBeaver UI Navigator [org.jkiss.dbeaver.ui.navigator 1.0.179.202605171705]
 > Start Team Support Core [org.eclipse.team.core 3.10.1000.v20260112-1030]
-2026-06-02 07:59:15.641 - Initialize base platform...
-2026-06-02 07:59:15.667 - Schedule collected statistics send
-2026-06-02 07:59:15.668 - Platform initialized (660ms)
-2026-06-02 07:59:15.684 - 	Create display
-2026-06-02 07:59:16.047 - 	Patch workbench configuration
-2026-06-02 07:59:16.164 - 	Starting instance server at http://localhost:40595
-2026-06-02 07:59:16.175 - Run workbench
-> Start Eclipse IDE UI [org.eclipse.ui.ide 3.23.0.v20260103-1639]
+> Start DBeaver UI Navigator [org.jkiss.dbeaver.ui.navigator 1.0.179.202605171705]
+2026-06-03 11:32:10.880 - Initialize base platform...
+2026-06-03 11:32:10.915 - Schedule collected statistics send
+2026-06-03 11:32:10.916 - Platform initialized (467ms)
+2026-06-03 11:32:10.932 - 	Create display
+2026-06-03 11:32:11.052 - 	Patch workbench configuration
+2026-06-03 11:32:11.168 - 	Starting instance server at http://localhost:39063
+2026-06-03 11:32:11.175 - Run workbench
 > Start Eclipse e4 Workbench SWT [org.eclipse.e4.ui.workbench.swt 0.18.0.v20260119-0835]
 > Start Eclipse Application Services [org.eclipse.e4.core.services 2.5.300.v20251112-1253]
 > Start Eclipse UI Application Services [org.eclipse.e4.ui.services 1.6.600.v20251023-1358]
@@ -38,80 +37,36 @@
 > Start GEF Classic Draw2d [org.eclipse.draw2d 3.22.0.202602231721]
 > Start GEF Classic GEF (MVC) [org.eclipse.gef 3.25.0.202602162234]
 > Start JFace Text [org.eclipse.jface.text 3.30.0.v20260203-0841]
-2026-06-02 07:59:17.996 - Configure workbench window
+2026-06-03 11:32:12.508 - Configure workbench window
 > Start DBeaver SQL Model [org.jkiss.dbeaver.model.sql 1.0.169.202605171705]
-2026-06-02 07:59:18.174 - Total database drivers: 129 (129)
+2026-06-03 11:32:12.696 - Total database drivers: 129 (129)
 > Start Help System Core [org.eclipse.help 3.11.0.v20251227-1159]
-2026-06-02 07:59:18.302 - Create actions
-2026-06-02 07:59:18.972 - Initialize workbench window
-2026-06-02 07:59:19.029 - Finish initialization
+2026-06-03 11:32:12.797 - Create actions
+2026-06-03 11:32:13.131 - Initialize workbench window
+2026-06-03 11:32:13.161 - Finish initialization
 > Start Default Text Editor [org.eclipse.ui.editors 3.21.0.v20260218-1452]
 > Start Text Editor Framework [org.eclipse.ui.workbench.texteditor 3.20.0.v20260127-1637]
 > Start DBeaver UI Editors - Data [org.jkiss.dbeaver.ui.editors.data 1.0.179.202605171705]
 > Start DBeaver UI Editors - SQL [org.jkiss.dbeaver.ui.editors.sql 1.0.179.202605171705]
+> Start DBeaver SQL Terminal [org.jkiss.dbeaver.ui.editors.sql.terminal 1.0.155.202605171705]
+2026-06-03 11:32:13.925 - Open [https://stats.dbeaver.com/send-statistics?session=bd983f9b-58c3-4e0e-afc1-eea6aab42fb1&time=1780397960]
+> Start Core Compare Support [org.eclipse.compare.core 3.8.800.v20250718-1505]
 > Start DBeaver Sample Database [org.jkiss.dbeaver.ui.config.sample 1.0.216.202605171705]
-2026-06-02 07:59:21.380 - Open [https://dbeaver.io/product/version.xml]
+2026-06-03 11:32:14.797 - Statistics sent (OK)
+2026-06-03 11:32:14.876 - Open [https://dbeaver.io/product/version.xml]
 > Start DBeaver Dashboard UI [org.jkiss.dbeaver.ui.dashboard 1.0.176.202605171705]
 > Start DBeaver ERD UI [org.jkiss.dbeaver.ui.editors.erd 3.1.20.202605171705]
 > Start DBeaver ERD Model [org.jkiss.dbeaver.model.erd 1.1.20.202605171705]
-2026-06-02 08:02:31.215 - Open [https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.11/postgresql-42.7.11.pom]
-> Start DBeaver JDBC Model [org.jkiss.dbeaver.model.jdbc 1.0.72.202605171705]
-> Start DBeaver PostgreSQL Model [org.jkiss.dbeaver.ext.postgresql 2.1.252.202605171705]
-2026-06-02 08:02:38.630 - Connect with 'educlick_aca' (postgres-jdbc-19d3ecf601e-460ffb8683828b8d)
-> Start DBeaver GIS Support [org.jkiss.dbeaver.data.gis 1.0.203.202605171705]
-2026-06-02 08:02:38.765 - Execution context opened (educlick_aca; Main <postgres>; 0)
-2026-06-02 08:02:38.784 - Initiate connection to PostgreSQL database [postgres@aws-1-sa-east-1.pooler.supabase.com] for Main <postgres>
-2026-06-02 08:02:40.363 - Open [https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.11/postgresql-42.7.11.jar]
-2026-06-02 08:02:41.538 - Execution context opened (educlick_aca; Metadata <postgres>; 1)
-2026-06-02 08:02:41.540 - Initiate connection to PostgreSQL database [postgres@aws-1-sa-east-1.pooler.supabase.com] for Metadata <postgres>
-2026-06-02 08:02:42.153 - Connected (postgres-jdbc-19d3ecf601e-460ffb8683828b8d, PostgreSQL JDBC Driver [42.7.11])
-> Start DBeaver SQL Language Semantic Model [org.jkiss.dbeaver.model.lsm 1.0.74.202605171705]
-2026-06-02 08:03:19.508 - Role 'public' not found
-2026-06-02 08:03:19.696 - Role 'public' not found
-2026-06-02 08:03:19.696 - Role 'public' not found
-2026-06-02 08:03:19.696 - Role 'public' not found
-2026-06-02 08:03:19.697 - Role 'public' not found
-2026-06-02 08:03:20.002 - Role 'public' not found
-2026-06-02 08:03:20.002 - Role 'public' not found
-2026-06-02 08:03:20.003 - Role 'public' not found
-2026-06-02 08:03:20.003 - Role 'public' not found
-2026-06-02 08:03:20.135 - Role 'public' not found
-2026-06-02 08:03:20.136 - Role 'public' not found
-2026-06-02 08:03:20.136 - Role 'public' not found
-2026-06-02 08:03:20.136 - Role 'public' not found
-2026-06-02 08:03:20.273 - Role 'public' not found
-2026-06-02 08:03:20.274 - Role 'public' not found
-2026-06-02 08:03:20.274 - Role 'public' not found
-2026-06-02 08:03:20.274 - Role 'public' not found
-2026-06-02 08:03:20.460 - Role 'public' not found
-> Start DBeaver SQL Terminal [org.jkiss.dbeaver.ui.editors.sql.terminal 1.0.155.202605171705]
-> Start Core Compare Support [org.eclipse.compare.core 3.8.800.v20250718-1505]
 > Start Console [org.eclipse.ui.console 3.16.0.v20260123-1616]
 > Start Debug Core [org.eclipse.debug.core 3.23.200.v20251107-0507]
-2026-06-02 18:55:24.442 - Execution context closed (educlick_aca, 0)
-2026-06-02 18:55:24.457 - Execution context closed (educlick_aca, 1)
-2026-06-02 18:55:24.458 - Disconnected (postgres-jdbc-19d3ecf601e-460ffb8683828b8d)
-SWT SessionManagerDBus: Failed to UnregisterClient: GDBus.Error:org.freedesktop.DBus.Error.NoReply: Message recipient disconnected from message bus without replying
-2026-06-03 08:30:29.529 - org.eclipse.swt.SWTException: Device is disposed
-org.eclipse.swt.SWTException: Device is disposed
-	at org.eclipse.swt.SWT.error(SWT.java:4950)
-	at org.eclipse.swt.SWT.error(SWT.java:4865)
-	at org.eclipse.swt.SWT.error(SWT.java:4836)
-	at org.eclipse.swt.widgets.Display.error(Display.java:1577)
-	at org.eclipse.swt.widgets.Display.syncExec(Display.java:5938)
-	at org.jkiss.dbeaver.ui.UIUtils.syncExec(UIUtils.java:2112)
-	at org.jkiss.dbeaver.ui.editors.sql.terminal.SQLTerminalEditorAddIn.getServerOutputConsumer(SQLTerminalEditorAddIn.java:99)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(Unknown Source)
-	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(Unknown Source)
-	at java.base/java.util.stream.AbstractPipeline.copyInto(Unknown Source)
-	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(Unknown Source)
-	at java.base/java.util.stream.AbstractPipeline.evaluate(Unknown Source)
-	at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(Unknown Source)
-	at java.base/java.util.stream.ReferencePipeline.toArray(Unknown Source)
-	at java.base/java.util.stream.ReferencePipeline.toArray(Unknown Source)
-	at java.base/java.util.stream.ReferencePipeline.toList(Unknown Source)
-	at org.jkiss.dbeaver.ui.editors.sql.SQLEditor$ServerOutputReader.dumpOutput(SQLEditor.java:4649)
-	at org.jkiss.dbeaver.ui.editors.sql.SQLEditor$ServerOutputReader.run(SQLEditor.java:4624)
-	at org.jkiss.dbeaver.model.runtime.AbstractJob.run(AbstractJob.java:110)
-	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
-2026-06-03 08:30:29.540 - Error during shutdown: Cannot invoke "org.eclipse.swt.widgets.Display.removeListener(int, org.eclipse.swt.widgets.Listener)" because the return value of "org.eclipse.swt.widgets.Display.getCurrent()" is null
+> Start DBeaver SQL Language Semantic Model [org.jkiss.dbeaver.model.lsm 1.0.74.202605171705]
+2026-06-03 11:32:28.417 - Dispose navigator model
+2026-06-03 11:32:28.476 - DBeaver is stopping
+2026-06-03 11:32:28.478 - Stop instance server
+2026-06-03 11:32:28.479 - Instance server has been stopped
+2026-06-03 11:32:28.488 - DBeaver shutdown completed
+2026-06-03 11:32:28.510 - Shutdown desktop platform...
+2026-06-03 11:32:28.511 - Send collected statistics
+2026-06-03 11:32:28.512 - Open [https://stats.dbeaver.com/send-statistics?session=c555b182-3e87-4f2a-881e-236342cef59d&time=1780497135]
+2026-06-03 11:32:29.093 - Statistics sent (OK)
+2026-06-03 11:32:29.155 - Platform shutdown completed (644ms)
