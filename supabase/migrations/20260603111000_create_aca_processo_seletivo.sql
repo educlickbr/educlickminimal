@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS public.aca_processo_seletivo (
     modificado_por UUID NULL,
     modificado_em TIMESTAMPTZ DEFAULT NOW() NULL,
     id_entidade UUID NOT NULL,
+    CONSTRAINT aca_processo_seletivo_periodo_check CHECK (data_fim >= data_inicio),
     CONSTRAINT aca_processo_seletivo_pkey PRIMARY KEY (id)
 );
 

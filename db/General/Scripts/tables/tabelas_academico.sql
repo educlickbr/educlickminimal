@@ -249,6 +249,7 @@ CREATE TABLE public.aca_processo_seletivo (
 	modificado_por uuid NULL,
 	modificado_em timestamptz DEFAULT now() NULL,
 	id_entidade uuid NOT NULL,
+	CONSTRAINT aca_processo_seletivo_periodo_check CHECK ((data_fim >= data_inicio)),
 	CONSTRAINT aca_processo_seletivo_pkey PRIMARY KEY (id)
 );
 ALTER TABLE public.aca_processo_seletivo ENABLE ROW LEVEL SECURITY;

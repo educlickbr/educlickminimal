@@ -90,7 +90,7 @@ $$;
 
 -- Revogar acesso público direto e conceder apenas execução
 REVOKE ALL ON FUNCTION public.aca_get_programas_publicos(UUID) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.aca_get_programas_publicos(UUID) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.aca_get_programas_publicos(UUID) TO authenticated;
 
 REVOKE ALL ON FUNCTION public.aca_get_areas_publicas(UUID) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.aca_get_areas_publicas(UUID) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.aca_get_areas_publicas(UUID) TO authenticated;

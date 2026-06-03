@@ -77,4 +77,4 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION public.aca_get_form_config_completo(UUID, UUID, UUID, TEXT, TEXT) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.aca_get_form_config_completo(UUID, UUID, UUID, TEXT, TEXT) TO authenticated, anon;
+GRANT EXECUTE ON FUNCTION public.aca_get_form_config_completo(UUID, UUID, UUID, TEXT, TEXT) TO authenticated;

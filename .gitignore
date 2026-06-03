@@ -17,7 +17,8 @@ front_end/*.log
 .DS_Store
 .fleet
 .idea
-.vscode/
+.vscode
+.zed
 
 # Local env files
 front_end/.env

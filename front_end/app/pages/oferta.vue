@@ -10,6 +10,7 @@ const loading = ref(true)
 const programas = ref<any[]>([])
 const areas = ref<any[]>([])
 const activeArea = ref<string | null>(null)
+const BRAZIL_TIME_ZONE = 'America/Sao_Paulo'
 
 // Captura o ID da entidade via query param ou usa o fallback solicitado
 const fallbackId = '00ca60ea-6667-482d-8a96-09b877707b08'
@@ -46,10 +47,9 @@ function formatDate(dateStr: string) {
   try {
     const d = new Date(dateStr)
     if (isNaN(d.getTime())) return dateStr
-    const day = String(d.getDate()).padStart(2, '0')
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    const year = d.getFullYear()
-    return `${day}/${month}/${year}`
+    return new Intl.DateTimeFormat('pt-BR', {
+      timeZone: BRAZIL_TIME_ZONE
+    }).format(d)
   } catch {
     return dateStr
   }
@@ -60,12 +60,15 @@ function formatDateTime(dateStr: string) {
   try {
     const d = new Date(dateStr)
     if (isNaN(d.getTime())) return dateStr
-    const day = String(d.getDate()).padStart(2, '0')
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    const year = d.getFullYear()
-    const hours = String(d.getHours()).padStart(2, '0')
-    const minutes = String(d.getMinutes()).padStart(2, '0')
-    return `${day}/${month}/${year} ${hours}:${minutes}`
+    return new Intl.DateTimeFormat('pt-BR', {
+      timeZone: BRAZIL_TIME_ZONE,
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).format(d)
   } catch (e) {
     return dateStr
   }
@@ -160,7 +163,7 @@ function formatDateTime(dateStr: string) {
         
         <div 
           v-for="prog in filteredProgramas" 
-          :key="prog.id"
+          :key="prog.id_processo_seletivo || prog.id"
           class="group relative bg-[#0f0f17] border border-white/5 rounded-xl overflow-hidden hover:border-primary/30 transition-all hover:translate-y-[-4px] shadow-xl hover:shadow-primary/5 flex flex-col"
         >
           <!-- Accent Bar -->
@@ -182,6 +185,9 @@ function formatDateTime(dateStr: string) {
             <h3 class="text-xl font-black mb-3 leading-tight group-hover:text-primary transition-colors">
               {{ prog.nome_display }}
             </h3>
+            <p v-if="prog.nome_processo" class="text-[10px] font-black text-primary/80 uppercase tracking-widest mb-3">
+              {{ prog.nome_processo }}
+            </p>
             <p class="text-xs text-secondary leading-relaxed line-clamp-2 mb-6 opacity-70">
               {{ prog.descricao || 'Conheça os detalhes deste programa acadêmico e inscreva-se agora.' }}
             </p>
@@ -213,10 +219,13 @@ function formatDateTime(dateStr: string) {
           <!-- Footer Action -->
           <div class="p-6 bg-white/[0.02] border-t border-white/5">
             <NuxtLink 
-              :to="`/form/seletivo/estudante/${prog.id_area || '0'}/${prog.id}`"
-              class="w-full py-3 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 block text-center"
-            >
-              Acessar
+            :to="{
+              path: `/form/seletivo/estudante/${prog.id_area || '0'}/${prog.id}`,
+              query: prog.id_processo_seletivo ? { id_processo_seletivo: prog.id_processo_seletivo } : undefined
+            }"
+            class="w-full py-3 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 block text-center"
+          >
+            Acessar
             </NuxtLink>
           </div>
         </div>
@@ -237,5 +246,4 @@ function formatDateTime(dateStr: string) {
 
   </div>
 </template>
-
 
