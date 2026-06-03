@@ -91,3 +91,27 @@
 2026-06-02 18:55:24.442 - Execution context closed (educlick_aca, 0)
 2026-06-02 18:55:24.457 - Execution context closed (educlick_aca, 1)
 2026-06-02 18:55:24.458 - Disconnected (postgres-jdbc-19d3ecf601e-460ffb8683828b8d)
+SWT SessionManagerDBus: Failed to UnregisterClient: GDBus.Error:org.freedesktop.DBus.Error.NoReply: Message recipient disconnected from message bus without replying
+2026-06-03 08:30:29.529 - org.eclipse.swt.SWTException: Device is disposed
+org.eclipse.swt.SWTException: Device is disposed
+	at org.eclipse.swt.SWT.error(SWT.java:4950)
+	at org.eclipse.swt.SWT.error(SWT.java:4865)
+	at org.eclipse.swt.SWT.error(SWT.java:4836)
+	at org.eclipse.swt.widgets.Display.error(Display.java:1577)
+	at org.eclipse.swt.widgets.Display.syncExec(Display.java:5938)
+	at org.jkiss.dbeaver.ui.UIUtils.syncExec(UIUtils.java:2112)
+	at org.jkiss.dbeaver.ui.editors.sql.terminal.SQLTerminalEditorAddIn.getServerOutputConsumer(SQLTerminalEditorAddIn.java:99)
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(Unknown Source)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(Unknown Source)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(Unknown Source)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(Unknown Source)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(Unknown Source)
+	at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(Unknown Source)
+	at java.base/java.util.stream.ReferencePipeline.toArray(Unknown Source)
+	at java.base/java.util.stream.ReferencePipeline.toArray(Unknown Source)
+	at java.base/java.util.stream.ReferencePipeline.toList(Unknown Source)
+	at org.jkiss.dbeaver.ui.editors.sql.SQLEditor$ServerOutputReader.dumpOutput(SQLEditor.java:4649)
+	at org.jkiss.dbeaver.ui.editors.sql.SQLEditor$ServerOutputReader.run(SQLEditor.java:4624)
+	at org.jkiss.dbeaver.model.runtime.AbstractJob.run(AbstractJob.java:110)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+2026-06-03 08:30:29.540 - Error during shutdown: Cannot invoke "org.eclipse.swt.widgets.Display.removeListener(int, org.eclipse.swt.widgets.Listener)" because the return value of "org.eclipse.swt.widgets.Display.getCurrent()" is null
