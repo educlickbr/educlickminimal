@@ -110,6 +110,14 @@ const userInitial = computed(() => {
               </div>
               <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-violet-500 transition-colors">Formulários Programas</span></div>
             </button>
+            <button @click="handleNavigation('/processos')" class="menu-item group" :class="isActive('/processos') ? 'bg-violet-500/5' : ''">
+              <div class="menu-icon bg-violet-500/10 text-violet-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5c-1.1 0-2 .9-2 2v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              </div>
+              <div class="flex flex-col text-left">
+                <span class="text-sm font-bold transition-colors" :class="isActive('/processos') ? 'text-violet-500' : 'text-text group-hover:text-violet-500'">Processos</span>
+              </div>
+            </button>
             <button @click="handleNavigation('/matriculas')" class="menu-item group disabled:opacity-50">
               <div class="menu-icon bg-violet-500/5 text-violet-400">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5c-1.1 0-2 .9-2 2v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
@@ -167,12 +175,6 @@ const userInitial = computed(() => {
           </div>
           
           <div class="bg-div-15 border border-secondary/5 rounded-xl overflow-hidden shadow-sm flex flex-col">
-            <button @click="handleNavigation('/processos')" class="menu-item group">
-              <div class="menu-icon bg-emerald-500/10 text-emerald-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5c-1.1 0-2 .9-2 2v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-              </div>
-              <div class="flex flex-col text-left"><span class="text-sm font-bold text-text group-hover:text-emerald-500 transition-colors">Processos</span></div>
-            </button>
             <button @click="handleNavigation('/produtos')" class="menu-item group">
               <div class="menu-icon bg-emerald-500/5 text-emerald-400">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>

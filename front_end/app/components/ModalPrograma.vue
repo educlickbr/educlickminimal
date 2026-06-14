@@ -150,71 +150,125 @@
           </div>
         </div>
 
-        <!-- STEP 3: Prazos e Datas -->
+        <!-- STEP 3: Processos Seletivos -->
         <div v-if="activeStep === 2" class="flex flex-col gap-8 animate-in fade-in zoom-in-95 duration-300">
           <div class="flex flex-col gap-2">
-            <h4 class="text-sm font-black text-primary uppercase tracking-widest">Prazos e Datas</h4>
-            <p class="text-xs text-secondary/60">Defina o período de abertura para processo seletivo e matrículas.</p>
+            <h4 class="text-sm font-black text-primary uppercase tracking-widest">Processos Seletivos</h4>
+            <p class="text-xs text-secondary/60">Cadastre uma ou mais janelas de seleção. Os períodos não podem se sobrepor.</p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Processo Seletivo -->
-            <div class="flex flex-col gap-4 p-5 rounded-xl border border-secondary/10 bg-div-5">
-              <div class="flex items-center gap-3 mb-1">
-                <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                  <Icon name="ph:calendar-check-bold" class="w-5 h-5" />
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-black text-secondary/50 uppercase tracking-widest">
+              {{ form.processos.length }} processo(s) configurado(s)
+            </span>
+            <button
+              @click="addProcessoCard"
+              :disabled="!canAddProcesso"
+              class="px-3 py-2 rounded-lg border border-primary/20 bg-primary/10 text-[10px] font-black text-primary uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              + Novo Processo
+            </button>
+          </div>
+
+          <div class="flex flex-col gap-4">
+            <div
+              v-for="(processo, idx) in form.processos"
+              :key="processo.id || idx"
+              class="flex flex-col gap-4 p-5 rounded-xl border border-secondary/10 bg-div-5"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <Icon name="ph:files-bold" class="w-4 h-4" />
+                  </div>
+                  <h5 class="text-xs font-black text-primary uppercase tracking-widest">
+                    Processo {{ idx + 1 }}
+                  </h5>
                 </div>
-                <h5 class="text-xs font-black text-primary uppercase tracking-widest">Processo Seletivo</h5>
+                <button
+                  v-if="form.processos.length > 1"
+                  @click="removeProcessoCard(idx)"
+                  class="w-7 h-7 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500/20 transition-colors"
+                  title="Remover processo"
+                >
+                  <Icon name="ph:trash-bold" class="w-3.5 h-3.5" />
+                </button>
               </div>
-              
-              <div class="flex flex-col gap-4">
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] font-black text-secondary/50 uppercase tracking-widest px-1">Início</label>
-                  <input 
-                    type="datetime-local" 
-                    v-model="form.processo_seletivo_inicio"
-                    class="w-full px-4 py-2.5 rounded-lg border border-secondary/10 text-xs font-bold text-primary bg-background outline-none focus:border-primary/40 transition-colors"
-                  />
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] font-black text-secondary/50 uppercase tracking-widest px-1">Nome do Processo</label>
+                <input
+                  type="text"
+                  v-model="processo.nome_processo"
+                  placeholder="Ex: Vestibular 2026/1"
+                  class="w-full px-4 py-2.5 rounded-lg border border-secondary/10 text-xs font-bold text-primary bg-background outline-none focus:border-primary/40 transition-colors"
+                />
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="flex flex-col gap-4">
+                  <div class="flex items-center gap-3 mb-1">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <Icon name="ph:calendar-check-bold" class="w-5 h-5" />
+                    </div>
+                    <h6 class="text-[10px] font-black text-primary uppercase tracking-widest">Processo Seletivo</h6>
+                  </div>
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-black text-secondary/50 uppercase tracking-widest px-1">Início</label>
+                    <input
+                      type="datetime-local"
+                      v-model="processo.data_inicio"
+                      class="w-full px-4 py-2.5 rounded-lg border border-secondary/10 text-xs font-bold text-primary bg-background outline-none focus:border-primary/40 transition-colors"
+                    />
+                  </div>
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-black text-secondary/50 uppercase tracking-widest px-1">Fim</label>
+                    <input
+                      type="datetime-local"
+                      v-model="processo.data_fim"
+                      class="w-full px-4 py-2.5 rounded-lg border border-secondary/10 text-xs font-bold text-primary bg-background outline-none focus:border-primary/40 transition-colors"
+                    />
+                  </div>
                 </div>
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] font-black text-secondary/50 uppercase tracking-widest px-1">Fim</label>
-                  <input 
-                    type="datetime-local" 
-                    v-model="form.processo_seletivo_fim"
-                    class="w-full px-4 py-2.5 rounded-lg border border-secondary/10 text-xs font-bold text-primary bg-background outline-none focus:border-primary/40 transition-colors"
-                  />
+
+                <div class="flex flex-col gap-4">
+                  <div class="flex items-center gap-3 mb-1">
+                    <div class="w-8 h-8 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center">
+                      <Icon name="ph:user-plus-bold" class="w-5 h-5" />
+                    </div>
+                    <h6 class="text-[10px] font-black text-green-500 uppercase tracking-widest">Matrícula (Opcional)</h6>
+                  </div>
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-black text-secondary/50 uppercase tracking-widest px-1">Início</label>
+                    <input
+                      type="datetime-local"
+                      v-model="processo.matricula_inicio"
+                      class="w-full px-4 py-2.5 rounded-lg border border-secondary/10 text-xs font-bold text-green-500 bg-background outline-none focus:border-green-500/40 transition-colors"
+                    />
+                  </div>
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-black text-secondary/50 uppercase tracking-widest px-1">Fim</label>
+                    <input
+                      type="datetime-local"
+                      v-model="processo.matricula_fim"
+                      class="w-full px-4 py-2.5 rounded-lg border border-secondary/10 text-xs font-bold text-green-500 bg-background outline-none focus:border-green-500/40 transition-colors"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Matrícula -->
-            <div class="flex flex-col gap-4 p-5 rounded-xl border border-secondary/10 bg-div-5">
-              <div class="flex items-center gap-3 mb-1">
-                <div class="w-8 h-8 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center">
-                  <Icon name="ph:user-plus-bold" class="w-5 h-5" />
-                </div>
-                <h5 class="text-xs font-black text-green-500 uppercase tracking-widest">Período de Matrícula</h5>
-              </div>
+          <div v-if="processosValidationMessage" class="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex gap-3 items-start">
+            <Icon name="ph:warning-octagon-fill" class="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+            <p class="text-[10px] text-red-500/90 leading-relaxed">{{ processosValidationMessage }}</p>
+          </div>
 
-              <div class="flex flex-col gap-4">
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] font-black text-secondary/50 uppercase tracking-widest px-1">Início</label>
-                  <input 
-                    type="datetime-local" 
-                    v-model="form.matricula_inicio"
-                    class="w-full px-4 py-2.5 rounded-lg border border-secondary/10 text-xs font-bold text-green-500 bg-background outline-none focus:border-green-500/40 transition-colors"
-                  />
-                </div>
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] font-black text-secondary/50 uppercase tracking-widest px-1">Fim</label>
-                  <input 
-                    type="datetime-local" 
-                    v-model="form.matricula_fim"
-                    class="w-full px-4 py-2.5 rounded-lg border border-secondary/10 text-xs font-bold text-green-500 bg-background outline-none focus:border-green-500/40 transition-colors"
-                  />
-                </div>
-              </div>
-            </div>
+          <div v-else class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex gap-3 items-start">
+            <Icon name="ph:check-circle-fill" class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+            <p class="text-[10px] text-emerald-500/90 leading-relaxed">
+              Regra ativa: um novo processo só pode iniciar quando o anterior terminar (sem overlap).
+            </p>
           </div>
         </div>
 
@@ -373,6 +427,26 @@ import { ref, reactive, computed, watch } from 'vue'
 import { useAppStore } from '../../stores/app'
 import { useToast } from '../../composables/useToast'
 
+type ProcessoForm = {
+  id: string | null
+  nome_processo: string
+  data_inicio: string | null
+  data_fim: string | null
+  matricula_inicio: string | null
+  matricula_fim: string | null
+}
+
+function createEmptyProcesso(ordem: number): ProcessoForm {
+  return {
+    id: null,
+    nome_processo: `Processo ${ordem}`,
+    data_inicio: null,
+    data_fim: null,
+    matricula_inicio: null,
+    matricula_fim: null
+  }
+}
+
 const props = defineProps<{
   modelValue: boolean
   isEdit?: boolean
@@ -394,7 +468,7 @@ const loading = ref(false)
 const steps = [
   { key: 'origem', label: 'Origem' },
   { key: 'selecao', label: 'Ciclos' },
-  { key: 'prazos', label: 'Prazos' },
+  { key: 'processos', label: 'Processos' },
   { key: 'resumo', label: 'Conclusão' }
 ]
 const activeStep = ref(0)
@@ -408,10 +482,7 @@ const form = reactive({
   estrategia: 'unica' as 'unica' | 'separada',
   descricao: '',
   descricoes_multiplas: {} as Record<string, string>,
-  processo_seletivo_inicio: null as string | null,
-  processo_seletivo_fim: null as string | null,
-  matricula_inicio: null as string | null,
-  matricula_fim: null as string | null,
+  processos: [createEmptyProcesso(1)] as ProcessoForm[],
 })
 
 // Dados carregados da base
@@ -539,15 +610,81 @@ function formatToLocal(isoStr: string | null) {
   return `${year}-${month}-${day}T${hours}:${minutes}`
 }
 
+function toDateMs(dateStr: string | null): number | null {
+  if (!dateStr) return null
+  const ms = new Date(dateStr).getTime()
+  return Number.isNaN(ms) ? null : ms
+}
+
+function toIso(dateStr: string | null): string | null {
+  if (!dateStr) return null
+  const date = new Date(dateStr)
+  if (Number.isNaN(date.getTime())) return null
+  return date.toISOString()
+}
+
+const canAddProcesso = computed(() => {
+  return form.processos.every((p) => Boolean(p.data_inicio && p.data_fim))
+})
+
+function addProcessoCard() {
+  if (!canAddProcesso.value) return
+  form.processos.push(createEmptyProcesso(form.processos.length + 1))
+}
+
+function removeProcessoCard(index: number) {
+  if (form.processos.length <= 1) return
+  form.processos.splice(index, 1)
+}
+
+const processosValidationMessage = computed(() => {
+  if (!form.processos.length) return 'Adicione ao menos um processo seletivo.'
+
+  for (let i = 0; i < form.processos.length; i++) {
+    const processo = form.processos[i]
+    const nome = processo.nome_processo?.trim()
+    const inicioMs = toDateMs(processo.data_inicio)
+    const fimMs = toDateMs(processo.data_fim)
+    const matriculaInicioMs = toDateMs(processo.matricula_inicio)
+    const matriculaFimMs = toDateMs(processo.matricula_fim)
+
+    if (!nome) return `Informe o nome do processo ${i + 1}.`
+    if (inicioMs === null || fimMs === null) return `Informe início e fim do processo ${i + 1}.`
+    if (fimMs < inicioMs) return `No processo ${i + 1}, a data final deve ser maior ou igual à inicial.`
+    if (matriculaInicioMs !== null && matriculaFimMs !== null && matriculaFimMs < matriculaInicioMs) {
+      return `No processo ${i + 1}, o período de matrícula está inválido.`
+    }
+  }
+
+  const ordenados = [...form.processos]
+    .map((processo, idx) => ({
+      idx,
+      inicioMs: toDateMs(processo.data_inicio) as number,
+      fimMs: toDateMs(processo.data_fim) as number
+    }))
+    .sort((a, b) => a.inicioMs - b.inicioMs)
+
+  for (let i = 1; i < ordenados.length; i++) {
+    const anterior = ordenados[i - 1]
+    const atual = ordenados[i]
+    if (atual.inicioMs < anterior.fimMs) {
+      return 'Os processos não podem ter overlap. Um novo processo só pode iniciar quando o anterior terminar.'
+    }
+  }
+
+  return null
+})
+
 const canProceed = computed(() => {
   if (activeStep.value === 0) return form.origem !== null
   if (activeStep.value === 1) return form.ciclos_selecionados.length > 0
-  if (activeStep.value === 2) return true 
+  if (activeStep.value === 2) return processosValidationMessage.value === null
   return true
 })
 
 const canSave = computed(() => {
   if (form.origem === 'ciclo' && !form.id_area) return false
+  if (processosValidationMessage.value !== null) return false
   
   if (props.isEdit) return form.descricao.trim().length > 0
   if (form.estrategia === 'separada' && form.ciclos_selecionados.length > 1) {
@@ -608,6 +745,24 @@ async function handleSave() {
   try {
     const id_entidade = props.idEntidade || (store as any).entidades?.[0]?.id || (store as any).company?.id
     if (!id_entidade) throw new Error('Entidade ativa não encontrada')
+
+    const processosPayload = form.processos.map((processo, idx) => ({
+      id: processo.id || null,
+      nome_processo: processo.nome_processo?.trim() || `Processo ${idx + 1}`,
+      data_inicio: toIso(processo.data_inicio),
+      data_fim: toIso(processo.data_fim),
+      matricula_inicio: toIso(processo.matricula_inicio),
+      matricula_fim: toIso(processo.matricula_fim)
+    }))
+
+    const processosOrdenados = [...processosPayload].sort((a, b) => {
+      const aMs = a.data_inicio ? new Date(a.data_inicio).getTime() : 0
+      const bMs = b.data_inicio ? new Date(b.data_inicio).getTime() : 0
+      return aMs - bMs
+    })
+
+    const processoInicial = processosOrdenados[0] || null
+    const processoFinal = processosOrdenados[processosOrdenados.length - 1] || null
     
     // In edit mode we update the text and the ciclos relations
     if (props.isEdit) {
@@ -621,10 +776,11 @@ async function handleSave() {
           descricao: form.descricao,
           ciclos: form.ciclos_selecionados,
           usuario_id: store.user_expandido_id,
-          processo_seletivo_inicio: form.processo_seletivo_inicio ? new Date(form.processo_seletivo_inicio).toISOString() : null,
-          processo_seletivo_fim: form.processo_seletivo_fim ? new Date(form.processo_seletivo_fim).toISOString() : null,
-          matricula_inicio: form.matricula_inicio ? new Date(form.matricula_inicio).toISOString() : null,
-          matricula_fim: form.matricula_fim ? new Date(form.matricula_fim).toISOString() : null,
+          processo_seletivo_inicio: processoInicial?.data_inicio || null,
+          processo_seletivo_fim: processoFinal?.data_fim || null,
+          matricula_inicio: processoInicial?.matricula_inicio || null,
+          matricula_fim: processoFinal?.matricula_fim || null,
+          processos: processosPayload
         }
       }) as any
       if (res?.success) {
@@ -647,10 +803,11 @@ async function handleSave() {
       estrategia: form.estrategia, // 'unica' | 'separada'
       descricoes: form.estrategia === 'separada' ? form.descricoes_multiplas : undefined,
       usuario_id: store.user_expandido_id,
-      processo_seletivo_inicio: form.processo_seletivo_inicio ? new Date(form.processo_seletivo_inicio).toISOString() : null,
-      processo_seletivo_fim: form.processo_seletivo_fim ? new Date(form.processo_seletivo_fim).toISOString() : null,
-      matricula_inicio: form.matricula_inicio ? new Date(form.matricula_inicio).toISOString() : null,
-      matricula_fim: form.matricula_fim ? new Date(form.matricula_fim).toISOString() : null,
+      processo_seletivo_inicio: processoInicial?.data_inicio || null,
+      processo_seletivo_fim: processoFinal?.data_fim || null,
+      matricula_inicio: processoInicial?.matricula_inicio || null,
+      matricula_fim: processoFinal?.matricula_fim || null,
+      processos: processosPayload
     }
     
     const res = await $fetch('/api/programas/criar_com_ciclos', {
@@ -679,13 +836,14 @@ watch(() => props.modelValue, async (val) => {
       activeStep.value = 1 // Pula direto para a seleção de ciclos no modo de edição
       form.descricao = props.initialData.descricao || ''
       form.id_area = props.initialData.id_area || null
-      form.processo_seletivo_inicio = formatToLocal(props.initialData.processo_seletivo_inicio)
-      form.processo_seletivo_fim = formatToLocal(props.initialData.processo_seletivo_fim)
-      form.matricula_inicio = formatToLocal(props.initialData.matricula_inicio)
-      form.matricula_fim = formatToLocal(props.initialData.matricula_fim)
+      form.processos = [createEmptyProcesso(1)]
       
       try {
-        const resCiclos = await $fetch('/api/programas/ciclos', { params: { id_programa: props.programaId } }) as any
+        const [resCiclos, resProcessos] = await Promise.all([
+          $fetch('/api/programas/ciclos', { params: { id_programa: props.programaId } }) as any,
+          $fetch('/api/programas/processos', { params: { id_programa: props.programaId } }) as any
+        ])
+
         if (resCiclos?.success) {
           const loadedCiclos = resCiclos.ciclos || []
           
@@ -701,6 +859,25 @@ watch(() => props.modelValue, async (val) => {
             form.ciclos_selecionados = loadedCiclos
           }
         }
+
+        if (resProcessos?.success && Array.isArray(resProcessos.itens) && resProcessos.itens.length > 0) {
+          form.processos = resProcessos.itens.map((p: any, idx: number) => ({
+            id: p.id || null,
+            nome_processo: p.nome_processo || `Processo ${idx + 1}`,
+            data_inicio: formatToLocal(p.data_inicio),
+            data_fim: formatToLocal(p.data_fim),
+            matricula_inicio: formatToLocal(p.matricula_inicio),
+            matricula_fim: formatToLocal(p.matricula_fim)
+          }))
+        } else {
+          const fallback = createEmptyProcesso(1)
+          fallback.nome_processo = props.initialData.descricao ? `${props.initialData.descricao} - Processo` : 'Processo Seletivo'
+          fallback.data_inicio = formatToLocal(props.initialData.processo_seletivo_inicio)
+          fallback.data_fim = formatToLocal(props.initialData.processo_seletivo_fim)
+          fallback.matricula_inicio = formatToLocal(props.initialData.matricula_inicio)
+          fallback.matricula_fim = formatToLocal(props.initialData.matricula_fim)
+          form.processos = [fallback]
+        }
       } catch (e) {
         console.error('Erro ao buscar ciclos atrelados ao programa', e)
       }
@@ -714,10 +891,7 @@ watch(() => props.modelValue, async (val) => {
       form.estrategia = 'unica'
       form.descricao = ''
       form.descricoes_multiplas = {}
-      form.processo_seletivo_inicio = null
-      form.processo_seletivo_fim = null
-      form.matricula_inicio = null
-      form.matricula_fim = null
+      form.processos = [createEmptyProcesso(1)]
       ciclosEncontrados.value = []
     }
   }

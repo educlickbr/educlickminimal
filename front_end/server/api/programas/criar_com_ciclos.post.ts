@@ -7,7 +7,8 @@ export default defineEventHandler(async (event) => {
   
   const { 
     id_entidade, id_curso, id_area, descricao, ciclos, estrategia, usuario_id, descricoes,
-    processo_seletivo_inicio, processo_seletivo_fim, matricula_inicio, matricula_fim 
+    processo_seletivo_inicio, processo_seletivo_fim, matricula_inicio, matricula_fim,
+    processos
   } = body
 
   if (!id_entidade || !ciclos || ciclos.length === 0) {
@@ -26,7 +27,8 @@ export default defineEventHandler(async (event) => {
     p_processo_seletivo_inicio: processo_seletivo_inicio || null,
     p_processo_seletivo_fim:    processo_seletivo_fim || null,
     p_matricula_inicio:         matricula_inicio || null,
-    p_matricula_fim:            matricula_fim || null
+    p_matricula_fim:            matricula_fim || null,
+    p_processos:                Array.isArray(processos) ? processos : null
   } as any)
 
   if (error) return { success: false, message: error.message }

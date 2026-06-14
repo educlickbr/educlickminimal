@@ -21,6 +21,14 @@ const enderecoFieldsUnlocked = ref(false)
 const cepLookupLoading = ref(false)
 const BRAZIL_TIME_ZONE = 'America/Sao_Paulo'
 
+type FormPergunta = {
+  pergunta_id: string
+  tipo_pergunta?: string
+  opcoes?: unknown[]
+  nome_interno?: string
+  [key: string]: any
+}
+
 function isDateQuestion(tipo?: string) {
   return tipo === 'data' || tipo === 'date'
 }
@@ -32,6 +40,7 @@ function isCepQuestion(tipo?: string) {
 function isEnderecoQuestion(tipo?: string, nomeInterno?: string) {
   return tipo === 'endereco' || CEP_DEPENDENT_FIELDS.includes(nomeInterno || '')
 }
+
 
 function normalizeDateAnswer(value: unknown) {
   if (typeof value !== 'string') return value
@@ -55,9 +64,13 @@ function normalizeDateAnswer(value: unknown) {
 
 // Fallback de Entidade (para testes)
 const idEntidade = computed(() => (route.query.id_entidade as string) || '00ca60ea-6667-482d-8a96-09b877707b08')
-const perguntasMapByInternalName = computed(() => {
-  return new Map(
-    blocos.value.flatMap(b => b.perguntas.map((p: any) => [p.nome_interno, p]))
+const perguntasMapByInternalName = computed<Map<string, FormPergunta>>(() => {
+  return new Map<string, FormPergunta>(
+    blocos.value.flatMap((b: any) =>
+      (b.perguntas as FormPergunta[])
+        .filter((p) => typeof p.nome_interno === 'string' && p.nome_interno.length > 0)
+        .map((p) => [p.nome_interno as string, p] as [string, FormPergunta])
+    )
   )
 })
 const hasCepQuestion = computed(() => perguntasMapByInternalName.value.has('cep'))
@@ -264,23 +277,32 @@ async function loadUserAnswers(perguntaIds: string[]) {
     }) as any
 
     if (respRes.success) {
-      const perguntaTipoMap = new Map(
-        blocos.value.flatMap(b => b.perguntas.map((p: any) => [p.pergunta_id, p.tipo_pergunta]))
+      const perguntaMap = new Map<string, FormPergunta>(
+        blocos.value.flatMap((b) =>
+          b.perguntas.map((p: FormPergunta) => [p.pergunta_id, p] as [string, FormPergunta])
+        )
       )
+      const loadedAnswers: Record<string, any> = {}
 
       // Mapear respostas para o objeto reativo
       Object.keys(respRes.respostas).forEach(id => {
-        const tipoPergunta = perguntaTipoMap.get(id)
+        const pergunta = perguntaMap.get(id)
+        const tipoPergunta = pergunta?.tipo_pergunta ?? ''
         const resposta = respRes.respostas[id].resposta
         if (isDateQuestion(tipoPergunta)) {
-          answers.value[id] = normalizeDateAnswer(resposta)
+          loadedAnswers[id] = normalizeDateAnswer(resposta)
         } else if (isCepQuestion(tipoPergunta) && typeof resposta === 'string') {
-          answers.value[id] = mascaraCEP(resposta)
+          loadedAnswers[id] = mascaraCEP(resposta)
         } else {
-          answers.value[id] = resposta
+          loadedAnswers[id] = resposta
         }
         saveStatus.value[id] = `Carregado (${formatTime(respRes.respostas[id].modificado_em)})`
       })
+
+      answers.value = {
+        ...answers.value,
+        ...loadedAnswers
+      }
 
       updateEnderecoFieldsUnlockedState()
     }
@@ -543,26 +565,28 @@ onMounted(async () => {
               <!-- Select -->
               <select 
                 v-else-if="pergunta.tipo_pergunta === 'select'"
+                :key="`${pergunta.pergunta_id}:${answers[pergunta.pergunta_id] ?? ''}`"
                 v-model="answers[pergunta.pergunta_id]"
                 @change="saveAnswer(pergunta.pergunta_id)"
-                class="bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none transition-all appearance-none"
-                :style="{ height: pergunta.altura ? pergunta.altura + 'px' : 'auto' }"
+                class="w-full bg-white/[0.03] border border-white/10 rounded-xl px-5 py-2.5 text-sm text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none transition-all"
               >
-                <option value="" disabled selected>{{ pergunta.placeholder || 'Selecione uma opção' }}</option>
+                <option :value="null" disabled>{{ pergunta.placeholder || 'Selecione uma opção' }}</option>
                 <option v-for="opt in pergunta.opcoes" :key="opt" :value="opt">{{ opt }}</option>
               </select>
 
               <!-- Data -->
-              <input 
-                v-else-if="isDateQuestion(pergunta.tipo_pergunta)"
-                type="date"
-                v-model="answers[pergunta.pergunta_id]"
-                @blur="saveAnswer(pergunta.pergunta_id)"
-                :placeholder="pergunta.placeholder"
-                :disabled="pergunta.disabled"
-                class="bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-sm focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none transition-all"
-                :style="{ height: pergunta.altura ? pergunta.altura + 'px' : 'auto' }"
-              />
+              <template v-else-if="isDateQuestion(pergunta.tipo_pergunta)">
+                <input 
+                  :key="`${pergunta.pergunta_id}:${answers[pergunta.pergunta_id] ?? ''}`"
+                  type="date"
+                  v-model="answers[pergunta.pergunta_id]"
+                  @blur="saveAnswer(pergunta.pergunta_id)"
+                  :placeholder="pergunta.placeholder"
+                  :disabled="pergunta.disabled"
+                  class="bg-white/[0.03] border border-white/10 rounded-xl px-5 py-4 text-sm text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none transition-all"
+                  :style="{ height: pergunta.altura ? pergunta.altura + 'px' : 'auto' }"
+                />
+              </template>
 
               <!-- File / Upload -->
               <div v-else-if="pergunta.tipo_pergunta === 'file'" class="flex flex-col gap-2">
@@ -658,10 +682,24 @@ select {
   appearance: none !important;
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
+  color: #ffffff !important;
+  color-scheme: dark;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%238b5cf6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
   background-position: right 1.2rem center !important;
   background-repeat: no-repeat !important;
   background-size: 1.2em 1.2em !important;
   padding-right: 3rem !important;
+}
+select option {
+  color: #ffffff;
+  background: #0f0f17;
+}
+input[type="date"] {
+  color: #ffffff !important;
+  color-scheme: dark;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.85;
 }
 </style>

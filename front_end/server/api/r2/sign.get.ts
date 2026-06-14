@@ -2,6 +2,11 @@ import crypto from 'node:crypto';
 import { serverSupabaseClient } from '#supabase/server';
 
 export default defineEventHandler(async (event) => {
+  type GlobalArquivoSignData = {
+    path: string | null;
+    nome_original: string | null;
+  };
+
   const query = getQuery(event);
   let key = query.key as string;
   const id = query.id as string;
@@ -13,13 +18,15 @@ export default defineEventHandler(async (event) => {
 
   if (id) {
     const supabase = await serverSupabaseClient(event);
-    const { data } = await supabase.from('global_arquivos').select('path, nome_original').eq('id', id).single();
-    if (data) {
-      key = data.path;
-      nomeOriginal = data.nome_original || '';
-    } else {
+    const { data, error } = await supabase.from('global_arquivos').select('path, nome_original').eq('id', id).single();
+    const arquivo = data as GlobalArquivoSignData | null;
+
+    if (error || !arquivo?.path) {
       throw createError({ statusCode: 404, statusMessage: 'Arquivo não encontrado no banco de dados' });
     }
+
+    key = arquivo.path;
+    nomeOriginal = arquivo.nome_original ?? '';
   }
 
   const workerUrl = process.env.WORKER_URL;
