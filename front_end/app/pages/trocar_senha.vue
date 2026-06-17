@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useToast } from '../../composables/useToast'
+import { useToast } from '~/composables/useToast'
 const supabase = useSupabaseClient()
 const router = useRouter()
 import { useAppStore } from '../../stores/app'

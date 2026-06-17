@@ -425,7 +425,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
 import { useAppStore } from '../../stores/app'
-import { useToast } from '../../composables/useToast'
+import { useToast } from '~/composables/useToast'
 
 type ProcessoForm = {
   id: string | null

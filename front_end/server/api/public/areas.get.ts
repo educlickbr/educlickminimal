@@ -4,16 +4,17 @@ import { serverSupabaseClient } from '#supabase/server'
 export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)
   const query = getQuery(event)
-  const id_entidade = query.id_entidade
-
-  if (!id_entidade) {
-    return { success: false, message: 'ID da entidade não fornecido' }
-  }
+  
+  const id_entidade = query.id_entidade || '00ca60ea-6667-482d-8a96-09b877707b08'
 
   const { data, error } = await client.rpc('aca_get_areas_publicas', {
     p_id_entidade: id_entidade
-  }as any)
+  } as any)
 
-  if (error) return { success: false, message: error.message }
+  if (error) {
+    console.error('Erro ao buscar áreas públicas:', error)
+    return { success: false, message: error.message }
+  }
+  
   return { success: true, itens: data }
 })

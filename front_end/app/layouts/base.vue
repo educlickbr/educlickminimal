@@ -8,6 +8,11 @@ onMounted(() => {
    store.initSession() // Single BFF call for everything
 })
 
+async function handleLogout() {
+   await store.logout()
+   navigateTo('/login')
+}
+
 const route = useRoute()
 const pageTitle = computed(() => {
    if (route.path === '/') return 'Dashboard'
@@ -50,8 +55,17 @@ const pageTitle = computed(() => {
         <div class="flex items-center">
 
            <!-- Auth State Buttons -->
-           <div v-if="store.user" class="flex items-center gap-4">
+           <div v-if="store.user" class="flex items-center gap-2">
                
+               <!-- Logout Button -->
+               <button 
+                  @click="handleLogout"
+                  class="w-10 h-10 flex items-center justify-center rounded-lg text-secondary hover:text-red-400 hover:bg-red-400/10 transition-all"
+                  title="Sair"
+               >
+                  <Icon name="ph:sign-out-bold" class="w-5 h-5" />
+               </button>
+
                <!-- Menu Trigger (Far Right) -->
                <button 
                   @click="isMenuOpen = true"

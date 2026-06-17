@@ -95,7 +95,7 @@ definePageMeta({
 })
 
 import { useAppStore } from '../../stores/app'
-import { useToast } from '../../composables/useToast'
+import { useToast } from '~/composables/useToast'
 
 const store = useAppStore()
 const toast = useToast()

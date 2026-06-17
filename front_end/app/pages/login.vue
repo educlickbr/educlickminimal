@@ -3,6 +3,7 @@ const supabase = useSupabaseClient()
 import { useAppStore } from '../../stores/app'
 const store = useAppStore()
 const router = useRouter()
+const route = useRoute()
 
 const email = ref('')
 const password = ref('')
@@ -26,7 +27,9 @@ const handleLogin = async () => {
             // Initialize main session (All data now comes from BFF /api/me in one call)
             await store.initSession()
             
-            router.push('/')
+            // Redireciona para a URL de destino (se houver) ou para a home
+            const redirectTo = route.query.redirectTo as string
+            router.push(redirectTo || '/')
         }
     } catch (err: any) {
         errorMsg.value = err.message || 'Erro ao realizar login'
@@ -56,6 +59,9 @@ const handleLogin = async () => {
                 <h1 class="text-3xl font-black text-white uppercase tracking-[0.3em] text-center">
                     LOGIN
                 </h1>
+                <p v-if="route.query.redirectTo" class="text-[10px] font-bold text-primary uppercase tracking-widest mt-4">
+                    Faça login para continuar sua inscrição
+                </p>
             </div>
 
             <form @submit.prevent="handleLogin" class="space-y-6">

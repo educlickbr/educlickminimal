@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useToast } from '../../composables/useToast'
+import { useToast } from '~/composables/useToast'
 
 const props = defineProps<{
   modelValue: boolean

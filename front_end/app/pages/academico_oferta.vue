@@ -11,7 +11,7 @@ import ModalCiclo from '../components/ModalCiclo.vue'
 import ModalArea from '../components/ModalArea.vue'
 import ModalConfirmacao from '../components/ModalConfirmacao.vue'
 import { useAppStore } from '../../stores/app'
-import { useToast } from '../../composables/useToast'
+import { useToast } from '~/composables/useToast'
 
 const client = useSupabaseClient()
 

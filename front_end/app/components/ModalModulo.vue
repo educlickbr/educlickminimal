@@ -302,7 +302,7 @@
 
 <script setup lang="ts">
 import { useAppStore } from '../../stores/app'
-import { useToast } from '../../composables/useToast'
+import { useToast } from '~/composables/useToast'
 
 interface Componente {
   id: string

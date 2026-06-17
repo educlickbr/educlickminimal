@@ -5,7 +5,7 @@ definePageMeta({
 
 import ModalPergunta from '../components/ModalPergunta.vue'
 import { useAppStore } from '../../stores/app'
-import { useToast } from '../../composables/useToast'
+import { useToast } from '~/composables/useToast'
 import { CEP_DEPENDENT_FIELDS } from '../utils/viacep'
 
 interface Pergunta {
