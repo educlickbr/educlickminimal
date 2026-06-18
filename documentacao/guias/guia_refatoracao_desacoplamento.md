@@ -514,3 +514,126 @@ Mesmo com fallback `|| TABS[0]`, o TypeScript vê `Array.find()` como `T | undef
 <!-- ✅ -->
 {{ currentTab!.label }}
 ```
+
+---
+
+## 12) Lições Aprendidas (Acadêmico Oferta + Formulários)
+
+Pontos críticos descobertos durante o desacoplamento real de 2 páginas (12 abas no total).
+
+### 12.1 `$fetch` do `ofetch` QUEBRA no Nuxt
+
+**NUNCA** importe `$fetch` de `ofetch`. Use o `$fetch` global do Nuxt (auto-importado).
+
+```ts
+// ❌ QUEBRA — não tem headers de auth, base URL, etc.
+import { $fetch } from "ofetch"
+
+// ✅ Correto — usa o global do Nuxt
+// (não precisa importar, já é auto-importado)
+```
+
+**Sintoma:** página renderiza mas dados não carregam (sem erro visível).
+
+### 12.2 `initialTab` no SETUP, não no `onMounted`
+
+Se `activeTab` for definido como `ref("areas")` fixo e corrigido no `onMounted`, o SSR renderiza a aba errada → hydration mismatch → layout quebra (botão "Entrar" em vez do menu).
+
+```ts
+// ❌ hydration mismatch no F5
+const activeTab = ref("areas")
+onMounted(() => { activeTab.value = route.query.tab })
+
+// ✅ SSR-safe
+const initialTab = route.query.tab || "areas"
+const activeTab = ref(initialTab)
+```
+
+### 12.3 `v-if` individual, NÃO `v-else-if`
+
+Com `v-else-if`, Vue só monta 1 componente por vez. Com `v-if` separado, cada um tem ciclo de vida independente.
+
+```html
+<!-- ✅ -->
+<OfertaTabAreas v-if="activeTab === 'areas'" />
+<OfertaTabComponentes v-if="activeTab === 'componentes'" />
+
+<!-- ❌ pode causar problemas de montagem -->
+<OfertaTabAreas v-if="activeTab === 'areas'" />
+<OfertaTabComponentes v-else-if="activeTab === 'componentes'" />
+```
+
+### 12.4 APIs específicas → `server/api/<pagina>/`
+
+APIs consumidas só por uma página devem ficar em subpasta própria. APIs globais (compartilhadas) ficam na raiz.
+
+```
+server/api/
+├── academico_oferta/    ← 27 BFFs exclusivos
+├── formularios/         ← 6 BFFs exclusivos
+├── areas.*.ts           ← global (formularios também usa)
+└── programas/           ← global (calendario também usa)
+```
+
+**Como auditar:** `grep -rl "/api/xxx" front_end/app/` → se só aparece na página, move.
+
+### 12.5 Modal com `onSave` como prop
+
+Modais não devem chamar `$fetch` direto. Recebem a função de save como prop do composable.
+
+```html
+<!-- ModalPergunta.vue -->
+<script setup>
+defineProps<{ onSave: (data: any) => Promise<boolean> }>()
+// chama props.onSave(formData) em vez de $fetch inline
+</script>
+
+<!-- Tab component -->
+<ModalPergunta :onSave="perguntasCtx.handleSave" />
+```
+
+### 12.6 Dois padrões válidos de composable
+
+| Padrão | Quando usar | Exemplo |
+|---|---|---|
+| **Auto-contido** (cada tab cria seu composable) | Tabs independentes | `academico_oferta` |
+| **Compartilhado** (orquestrador cria, injeta via props) | Tabs que compartilham dados | `formularios` (perguntas) |
+
+### 12.7 Import explícito de componentes em subpasta
+
+Componentes em `components/<pagina>/` não são auto-importados com nome curto pelo Nuxt. Use import explícito:
+
+```ts
+// No orquestrador
+import OfertaTabAreas from "~/components/academico_oferta/OfertaTabAreas.vue"
+```
+
+---
+
+## 13) Diagnóstico Rápido de Página
+
+Checklist para auditar uma página existente:
+
+- [ ] `import { $fetch } from "ofetch"` → remover, usar global do Nuxt
+- [ ] `initialTab` no `setup()` (não no `onMounted`)
+- [ ] `v-if` individual por tab
+- [ ] APIs exclusivas em `server/api/<pagina>/`
+- [ ] APIs globais mantidas na raiz
+- [ ] Zero `$fetch` inline nos componentes
+
+### Exemplo: `academico_calendario` (diagnosticado 2026-06-18)
+
+| Check | Status |
+|---|---|
+| `ofetch` removido | ✅ Corrigido (3 composables) |
+| APIs movidas | ✅ `feriados`, `eventos` → `server/api/calendario/` |
+| `initialTab` SSR-safe | ✅ |
+| Layout em árvore (Feriados) | ⚠️ Perdido na componentização |
+
+**Resgate do layout em árvore:** Commit `6dcb77b`, arquivo `pages/academico_calendario.vue` (~L400-550).
+
+```bash
+git show 6dcb77b:front_end/app/pages/academico_calendario.vue | sed -n '400,550p'
+```
+
+Copiar `timelineMonths` + `toggleMonth`/`toggleAllMonths` para `useCalendarioFeriados.ts` e adaptar o template de `CalendarioTabFeriados.vue` seguindo o mesmo padrão de árvore do `CalendarioTabEventos.vue`.

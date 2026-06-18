@@ -6,7 +6,6 @@
  */
 
 import { ref } from "vue";
-import { $fetch } from "ofetch";
 
 export interface Area {
   id: string;
@@ -27,7 +26,7 @@ export function useOfertaAreas(deps: {
   };
 }) {
   const areas = ref<Area[]>([]);
-  const loading = ref(false);
+  const loading = ref(true);
 
   // Modal de criação/edição
   const showModal = ref(false);

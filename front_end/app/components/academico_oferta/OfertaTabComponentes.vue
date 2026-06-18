@@ -3,9 +3,11 @@
         <div class="flex items-center justify-between">
             <span
                 class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
-                >{{ loading ? "..." : areas.length + " área(s)" }}</span
+                >{{
+                    loading ? "..." : componentes.length + " componente(s)"
+                }}</span
             >
-            <button @click="openNova" class="add-btn">+ Nova Área</button>
+            <button @click="openNovo" class="add-btn">+ Novo Componente</button>
         </div>
         <div
             v-if="loading"
@@ -23,45 +25,54 @@
             v-else
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
-            <div v-if="areas.length === 0" class="col-span-full empty-state">
-                <p class="text-sm font-bold text-white/40">Nenhuma área</p>
+            <div
+                v-if="componentes.length === 0"
+                class="col-span-full empty-state"
+            >
+                <p class="text-sm font-bold text-white/40">Nenhum componente</p>
             </div>
-            <div v-for="a in areas" :key="a.id" class="comp-card">
+            <div v-for="c in componentes" :key="c.id" class="comp-card">
                 <div class="comp-avatar">
-                    {{ (a.nome_area || "?").charAt(0).toUpperCase() }}
+                    {{ (c.nome_componente || "?").charAt(0).toUpperCase() }}
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-black text-primary truncate">
-                        {{ a.nome_area }}
+                        {{ c.nome_componente || "-" }}
                     </p>
                     <p class="text-[9px] text-secondary/40 truncate">
-                        {{ a.descricao || "-" }}
+                        {{ c.descricao || "-" }}
                     </p>
                 </div>
                 <button
-                    @click="openEditar(a)"
+                    @click="openEditar(c)"
                     class="comp-action-btn comp-action-edit"
                 >
                     ✎
                 </button>
                 <button
-                    @click="confirmDelete(a.id)"
+                    @click="confirmDelete(c.id)"
                     class="comp-action-btn comp-action-delete"
                 >
                     ✕
                 </button>
             </div>
         </div>
-        <AcademicoOfertaModalArea
+        <AcademicoOfertaModalComponente
             v-model="showModal"
             :isEdit="isEdit"
-            :initialData="editData"
-            :idEntidade="idEntidade"
-            @saved="handleSaved"
+            :initialData="
+                editData
+                    ? {
+                          nome_componente: editData.nome_componente,
+                          descricao: editData.descricao ?? undefined,
+                      }
+                    : null
+            "
+            @save="handleSave"
         />
         <GlobalModalConfirmacao
             v-model="showConfirmDelete"
-            title="Excluir Área"
+            title="Excluir Componente"
             message="Confirmar?"
             type="danger"
             confirmText="Excluir"
@@ -74,12 +85,13 @@
 <script setup lang="ts">
 import { useOfertaCore } from "~/composables/academico_oferta/useOfertaCore";
 import { useToast } from "~/composables/useToast";
+import { useAppStore } from "~~/stores/app";
 
 const core = useOfertaCore();
+const store = useAppStore();
 const toast = useToast();
-const idEntidade = computed(() => core.getEntidadeAtivaId());
 
-const areas = ref<any[]>([]);
+const componentes = ref<any[]>([]);
 const loading = ref(false);
 const showModal = ref(false);
 const isEdit = ref(false);
@@ -88,14 +100,14 @@ const showConfirmDelete = ref(false);
 const deleteTarget = ref<string | null>(null);
 const isDeleting = ref(false);
 
-async function fetchAreas() {
+async function fetchComponentes() {
     loading.value = true;
     try {
         const id = await core.garantirEntidade();
-        const res = (await $fetch("/api/academico_oferta/areas", {
+        const res = (await $fetch("/api/academico_oferta/componentes", {
             params: { id_entidade: id, page: 1, limit: 20 },
         })) as any;
-        areas.value = Array.isArray(res?.itens) ? res.itens : [];
+        componentes.value = Array.isArray(res?.itens) ? res.itens : [];
     } catch (e: any) {
         toast.showToast(e?.message || "Erro", { type: "error" });
     } finally {
@@ -103,18 +115,15 @@ async function fetchAreas() {
     }
 }
 
-function openNova() {
+function openNovo() {
     isEdit.value = false;
     editData.value = null;
     showModal.value = true;
 }
-function openEditar(a: any) {
+function openEditar(c: any) {
     isEdit.value = true;
-    editData.value = a;
+    editData.value = c;
     showModal.value = true;
-}
-function handleSaved() {
-    fetchAreas();
 }
 function confirmDelete(id: string) {
     deleteTarget.value = id;
@@ -126,12 +135,12 @@ async function handleDelete() {
     isDeleting.value = true;
     try {
         const id = await core.garantirEntidade();
-        await $fetch("/api/academico_oferta/areas", {
+        await $fetch("/api/academico_oferta/componentes", {
             method: "DELETE",
             body: { id: deleteTarget.value, id_entidade: id },
         });
-        toast.showToast("Área removida", { type: "success" });
-        fetchAreas();
+        toast.showToast("Componente removido", { type: "success" });
+        fetchComponentes();
     } catch (e: any) {
         toast.showToast(e.message || "Erro", { type: "error" });
     } finally {
@@ -141,7 +150,28 @@ async function handleDelete() {
     }
 }
 
-onMounted(() => fetchAreas());
+async function handleSave(data: any) {
+    try {
+        const id = await core.garantirEntidade();
+        await $fetch("/api/academico_oferta/componentes", {
+            method: "POST",
+            body: {
+                id: isEdit.value ? editData.value?.id : undefined,
+                id_entidade: id,
+                nome_componente: data.nome_componente,
+                descricao: data.descricao ?? null,
+                usuario_id: store.user_expandido_id,
+            },
+        });
+        toast.showToast("Salvo", { type: "success" });
+        showModal.value = false;
+        fetchComponentes();
+    } catch (e: any) {
+        toast.showToast(e.message || "Erro", { type: "error" });
+    }
+}
+
+onMounted(() => fetchComponentes());
 </script>
 
 <style scoped>

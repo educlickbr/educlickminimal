@@ -146,7 +146,7 @@ function formatDateTime(dateStr: string) {
 
             <NuxtLink
                 v-if="!user"
-                to="/login"
+                to="/auth/login"
                 class="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
             >
                 Área do Aluno

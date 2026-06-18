@@ -3,9 +3,9 @@
         <div class="flex items-center justify-between">
             <span
                 class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
-                >{{ loading ? "..." : areas.length + " área(s)" }}</span
+                >{{ loading ? "..." : programas.length + " programa(s)" }}</span
             >
-            <button @click="openNova" class="add-btn">+ Nova Área</button>
+            <button @click="openNovo" class="add-btn">+ Novo Programa</button>
         </div>
         <div
             v-if="loading"
@@ -23,125 +23,69 @@
             v-else
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
-            <div v-if="areas.length === 0" class="col-span-full empty-state">
-                <p class="text-sm font-bold text-white/40">Nenhuma área</p>
+            <div
+                v-if="programas.length === 0"
+                class="col-span-full empty-state"
+            >
+                <p class="text-sm font-bold text-white/40">Nenhum programa</p>
             </div>
-            <div v-for="a in areas" :key="a.id" class="comp-card">
+            <div v-for="p in programas" :key="p.id" class="comp-card">
                 <div class="comp-avatar">
-                    {{ (a.nome_area || "?").charAt(0).toUpperCase() }}
+                    {{ (p.descricao || "?")[0].toUpperCase() }}
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-black text-primary truncate">
-                        {{ a.nome_area }}
+                        {{ p.descricao || "-" }}
                     </p>
-                    <p class="text-[9px] text-secondary/40 truncate">
-                        {{ a.descricao || "-" }}
-                    </p>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="badge badge-muted">{{ p.nome_curso }}</span
+                        ><span class="badge badge-primary"
+                            >{{ p.qtd_ciclos || 0 }} ciclos</span
+                        >
+                    </div>
                 </div>
                 <button
-                    @click="openEditar(a)"
+                    @click="openEditar(p)"
                     class="comp-action-btn comp-action-edit"
                 >
                     ✎
                 </button>
-                <button
-                    @click="confirmDelete(a.id)"
-                    class="comp-action-btn comp-action-delete"
-                >
-                    ✕
-                </button>
             </div>
         </div>
-        <AcademicoOfertaModalArea
+        <AcademicoOfertaModalPrograma
             v-model="showModal"
             :isEdit="isEdit"
+            :programaId="editData?.id"
             :initialData="editData"
-            :idEntidade="idEntidade"
+            :cursos="cursosDisponiveis"
+            :idEntidade="getEntidadeAtivaId()"
             @saved="handleSaved"
-        />
-        <GlobalModalConfirmacao
-            v-model="showConfirmDelete"
-            title="Excluir Área"
-            message="Confirmar?"
-            type="danger"
-            confirmText="Excluir"
-            :loading="isDeleting"
-            @confirm="handleDelete"
         />
     </div>
 </template>
 
 <script setup lang="ts">
 import { useOfertaCore } from "~/composables/academico_oferta/useOfertaCore";
+import { useOfertaProgramas } from "~/composables/academico_oferta/useOfertaProgramas";
 import { useToast } from "~/composables/useToast";
 
-const core = useOfertaCore();
+const { getEntidadeAtivaId, garantirEntidade } = useOfertaCore();
 const toast = useToast();
-const idEntidade = computed(() => core.getEntidadeAtivaId());
 
-const areas = ref<any[]>([]);
-const loading = ref(false);
-const showModal = ref(false);
-const isEdit = ref(false);
-const editData = ref<any>(null);
-const showConfirmDelete = ref(false);
-const deleteTarget = ref<string | null>(null);
-const isDeleting = ref(false);
+const {
+    programas,
+    cursosDisponiveis,
+    loading,
+    showModal,
+    isEdit,
+    editData,
+    fetchProgramas,
+    openNovo,
+    openEditar,
+    handleSaved,
+} = useOfertaProgramas({ getEntidadeAtivaId, garantirEntidade, toast });
 
-async function fetchAreas() {
-    loading.value = true;
-    try {
-        const id = await core.garantirEntidade();
-        const res = (await $fetch("/api/academico_oferta/areas", {
-            params: { id_entidade: id, page: 1, limit: 20 },
-        })) as any;
-        areas.value = Array.isArray(res?.itens) ? res.itens : [];
-    } catch (e: any) {
-        toast.showToast(e?.message || "Erro", { type: "error" });
-    } finally {
-        loading.value = false;
-    }
-}
-
-function openNova() {
-    isEdit.value = false;
-    editData.value = null;
-    showModal.value = true;
-}
-function openEditar(a: any) {
-    isEdit.value = true;
-    editData.value = a;
-    showModal.value = true;
-}
-function handleSaved() {
-    fetchAreas();
-}
-function confirmDelete(id: string) {
-    deleteTarget.value = id;
-    showConfirmDelete.value = true;
-}
-
-async function handleDelete() {
-    if (!deleteTarget.value) return;
-    isDeleting.value = true;
-    try {
-        const id = await core.garantirEntidade();
-        await $fetch("/api/academico_oferta/areas", {
-            method: "DELETE",
-            body: { id: deleteTarget.value, id_entidade: id },
-        });
-        toast.showToast("Área removida", { type: "success" });
-        fetchAreas();
-    } catch (e: any) {
-        toast.showToast(e.message || "Erro", { type: "error" });
-    } finally {
-        isDeleting.value = false;
-        showConfirmDelete.value = false;
-        deleteTarget.value = null;
-    }
-}
-
-onMounted(() => fetchAreas());
+onMounted(() => fetchProgramas());
 </script>
 
 <style scoped>
@@ -184,10 +128,6 @@ onMounted(() => fetchAreas());
     background: rgba(139, 92, 246, 0.15);
     color: #c4b5fd;
 }
-.comp-action-delete:hover {
-    background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-}
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -218,5 +158,23 @@ onMounted(() => fetchAreas());
     background: linear-gradient(135deg, #6d28d9, #7c3aed);
     box-shadow: 0 6px 20px rgba(139, 92, 246, 0.45);
     transform: translateY(-1px);
+}
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+.badge-primary {
+    background: rgba(139, 92, 246, 0.12);
+    color: #a78bfa;
+}
+.badge-muted {
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.35);
 }
 </style>

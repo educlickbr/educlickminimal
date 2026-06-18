@@ -1,9 +1,13 @@
 <script setup lang="ts">
 definePageMeta({ layout: "base" });
 
-import { useOfertaCore } from "~/composables/academico_oferta/useOfertaCore";
+import OfertaTabAreas from "~/components/academico_oferta/OfertaTabAreas.vue";
+import OfertaTabComponentes from "~/components/academico_oferta/OfertaTabComponentes.vue";
+import OfertaTabModulos from "~/components/academico_oferta/OfertaTabModulos.vue";
+import OfertaTabCursos from "~/components/academico_oferta/OfertaTabCursos.vue";
+import OfertaTabCiclos from "~/components/academico_oferta/OfertaTabCiclos.vue";
+import OfertaTabProgramas from "~/components/academico_oferta/OfertaTabProgramas.vue";
 
-// ── Navegação (fica na página) ──────────────────────────
 const tabs = [
     { key: "areas", label: "Áreas" },
     { key: "componentes", label: "Componentes" },
@@ -14,38 +18,16 @@ const tabs = [
 ];
 const route = useRoute();
 const router = useRouter();
-const activeTab = ref("areas");
-
-function setActiveTab(tabKey: string) {
-    activeTab.value = tabKey;
-    router.replace({ query: { ...route.query, tab: tabKey } });
+const initialTab =
+    typeof route.query.tab === "string" &&
+    tabs.some((t) => t.key === route.query.tab)
+        ? route.query.tab
+        : "areas";
+const activeTab = ref(initialTab);
+function setActiveTab(k: string) {
+    activeTab.value = k;
+    router.replace({ query: { ...route.query, tab: k } });
 }
-
-// ── Core ─────────────────────────────────────────────────
-const core = useOfertaCore();
-const idEntidade = computed(() => core.getEntidadeAtivaId());
-
-// ── Ref da tab de áreas ─────────────────────────────────
-const tabAreasRef = ref<any>(null);
-
-// ── Init / Watch ─────────────────────────────────────────
-onMounted(async () => {
-    const tabFromQuery =
-        typeof route.query.tab === "string" ? route.query.tab : null;
-    if (tabFromQuery && tabs.some((t) => t.key === tabFromQuery)) {
-        activeTab.value = tabFromQuery;
-    }
-    if (activeTab.value === "areas") {
-        await tabAreasRef.value?.fetchAreas();
-    }
-});
-
-watch(activeTab, async (val) => {
-    if (val === "areas") {
-        await tabAreasRef.value?.fetchAreas();
-    }
-    // outras tabs serão implementadas nos próximos passos
-});
 </script>
 
 <template>
@@ -56,81 +38,30 @@ watch(activeTab, async (val) => {
                     v-for="tab in tabs"
                     :key="tab.key"
                     @click="setActiveTab(tab.key)"
-                    class="tab-btn"
-                    :class="{ 'tab-btn--active': activeTab === tab.key }"
+                    :class="[
+                        'tab-btn',
+                        activeTab === tab.key ? 'tab-btn--active' : '',
+                    ]"
                 >
                     {{ tab.label }}
                 </button>
             </nav>
-
-            <button
-                v-if="activeTab === 'areas'"
-                @click="tabAreasRef?.openNova()"
-                class="add-btn"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="13"
-                    height="13"
-                    fill="currentColor"
-                    viewBox="0 0 256 256"
-                >
-                    <path
-                        d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"
-                    />
-                </svg>
-                Nova Área
-            </button>
         </div>
-
         <div>
-            <!-- ✅ Tab Áreas — migrada -->
-            <OfertaTabAreas
-                v-if="activeTab === 'areas'"
-                ref="tabAreasRef"
-                :idEntidade="idEntidade"
-            />
-
-            <!-- ⚠️ Placeholders para próximas migrações -->
-            <div
-                v-if="activeTab === 'componentes'"
-                class="py-16 text-center text-secondary/40 text-xs uppercase tracking-widest"
-            >
-                Componentes — em breve
-            </div>
-            <div
-                v-if="activeTab === 'modulos'"
-                class="py-16 text-center text-secondary/40 text-xs uppercase tracking-widest"
-            >
-                Módulos — em breve
-            </div>
-            <div
-                v-if="activeTab === 'cursos'"
-                class="py-16 text-center text-secondary/40 text-xs uppercase tracking-widest"
-            >
-                Cursos — em breve
-            </div>
-            <div
-                v-if="activeTab === 'ciclos'"
-                class="py-16 text-center text-secondary/40 text-xs uppercase tracking-widest"
-            >
-                Ciclos — em breve
-            </div>
-            <div
-                v-if="activeTab === 'programas'"
-                class="py-16 text-center text-secondary/40 text-xs uppercase tracking-widest"
-            >
-                Programas — em breve
-            </div>
+            <OfertaTabAreas v-if="activeTab === 'areas'" />
+            <OfertaTabComponentes v-if="activeTab === 'componentes'" />
+            <OfertaTabModulos v-if="activeTab === 'modulos'" />
+            <OfertaTabCursos v-if="activeTab === 'cursos'" />
+            <OfertaTabCiclos v-if="activeTab === 'ciclos'" />
+            <OfertaTabProgramas v-if="activeTab === 'programas'" />
         </div>
     </div>
 </template>
 
 <style scoped>
 .page-wrap {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem;
+    padding: 1rem 1.5rem;
+    min-height: 100vh;
 }
 .page-top-row {
     display: flex;
@@ -166,24 +97,5 @@ watch(activeTab, async (val) => {
 .tab-btn--active {
     background: rgba(139, 92, 246, 0.15);
     color: #a78bfa;
-}
-.add-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.625rem;
-    background: rgba(139, 92, 246, 0.1);
-    color: #a78bfa;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: all 0.15s;
-    border: none;
-    cursor: pointer;
-}
-.add-btn:hover {
-    background: rgba(139, 92, 246, 0.2);
 }
 </style>

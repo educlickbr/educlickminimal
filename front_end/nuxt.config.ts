@@ -23,9 +23,9 @@ export default defineNuxtConfig({
   // 2. Configuração do Supabase (Segurança JWT)
   supabase: {
     redirectOptions: {
-      login: "/login", // Onde mandar o usuário se não estiver logado
+      login: "/auth/login", // Onde mandar o usuário se não estiver logado
       callback: "/confirm", // Para onde o Supabase volta após login social
-      exclude: ["/", "/teste-layout", "/oferta", "/test", "/form/**"], // Páginas públicas (ex: Landing Page)
+      exclude: ["/", "/teste-layout", "/oferta", "/test", "/form/**", "/auth/**"], // Páginas públicas (ex: Landing Page)
     },
   },
 

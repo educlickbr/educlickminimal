@@ -10,7 +10,7 @@ onMounted(() => {
 
 async function handleLogout() {
    await store.logout()
-   navigateTo('/login')
+   navigateTo('/auth/login')
 }
 
 const route = useRoute()
@@ -78,7 +78,7 @@ const pageTitle = computed(() => {
                </button>
            </div>
 
-           <NuxtLink v-else to="/login" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-text hover:text-primary bg-div-30 px-3 py-1.5 rounded transition-all hover:bg-div-30/80 border border-transparent hover:border-secondary/5">
+           <NuxtLink v-else to="/auth/login" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-text hover:text-primary bg-div-30 px-3 py-1.5 rounded transition-all hover:bg-div-30/80 border border-transparent hover:border-secondary/5">
               <span>Entrar</span>
            </NuxtLink>
         </div>

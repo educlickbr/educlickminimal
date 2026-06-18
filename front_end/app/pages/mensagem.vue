@@ -13,7 +13,7 @@ const router = useRouter()
 
 // If no message, redirect to home/login
 if (!store.statusMessage.message) {
-    router.push('/login')
+    router.push('/auth/login')
 }
 
 // Icon based on type
