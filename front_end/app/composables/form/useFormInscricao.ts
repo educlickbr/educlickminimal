@@ -11,7 +11,6 @@
  */
 
 import { ref } from "vue";
-import { $fetch } from "ofetch";
 
 export interface InscricaoData {
   id: string;

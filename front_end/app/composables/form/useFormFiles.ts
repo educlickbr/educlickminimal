@@ -11,7 +11,6 @@
  */
 
 import { ref, type Ref } from "vue";
-import { $fetch } from "ofetch";
 
 export function useFormFiles(deps: {
   answers: Ref<Record<string, any>>;

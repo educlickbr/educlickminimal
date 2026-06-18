@@ -621,19 +621,73 @@ Checklist para auditar uma página existente:
 - [ ] APIs globais mantidas na raiz
 - [ ] Zero `$fetch` inline nos componentes
 
-### Exemplo: `academico_calendario` (diagnosticado 2026-06-18)
+### Exemplo: `academico_calendario` (diagnosticado e corrigido 2026-06-18)
 
 | Check | Status |
 |---|---|
 | `ofetch` removido | ✅ Corrigido (3 composables) |
 | APIs movidas | ✅ `feriados`, `eventos` → `server/api/calendario/` |
 | `initialTab` SSR-safe | ✅ |
-| Layout em árvore (Feriados) | ⚠️ Perdido na componentização |
+| Layout timeline (Feriados) | ✅ Restaurado do git (`43eabb3`) |
+| Layout timeline (Eventos) | ✅ Restaurado do git |
+| Layout calendário (grid rico) | ✅ Restaurado do git |
 
-**Resgate do layout em árvore:** Commit `6dcb77b`, arquivo `pages/academico_calendario.vue` (~L400-550).
+### 13.1 `timelineMonths` sempre gerar meses (mesmo sem dados)
 
-```bash
-git show 6dcb77b:front_end/app/pages/academico_calendario.vue | sed -n '400,550p'
+Se o `computed` de timeline retornar `[]` quando não há dados, o usuário perde a capacidade de adicionar itens inline em cada mês. O layout original permitia adicionar feriados/eventos diretamente no mês via botão `+`.
+
+```ts
+// ❌ usuário não vê os meses, não consegue adicionar
+const timelineMonths = computed(() => {
+  if (rawItems.length === 0) return []
+  // ...
+})
+
+// ✅ sempre gera os 12 meses do ano selecionado
+const timelineMonths = computed(() => {
+  // SEMPRE gera meses, mesmo sem eventos
+  for (let y = minYear; y <= maxYear; y++) {
+    for (let m = 0; m < 12; m++) { /* ... */ }
+  }
+})
 ```
 
-Copiar `timelineMonths` + `toggleMonth`/`toggleAllMonths` para `useCalendarioFeriados.ts` e adaptar o template de `CalendarioTabFeriados.vue` seguindo o mesmo padrão de árvore do `CalendarioTabEventos.vue`.
+### 13.2 Como resgatar layout do git
+
+Layouts visuais podem ser perdidos durante a componentização. O git preserva o original.
+
+```bash
+# 1. Encontrar o commit com o layout original
+git log --oneline -- "**/pagina.vue"
+
+# 2. Extrair a seção relevante
+git show <commit>:front_end/app/pages/pagina.vue | sed -n '<inicio>,<fim>p'
+
+# 3. Adaptar para o composable + componente
+# - Lógica de estado → composable (computed, refs)
+# - Template → componente .vue
+# - CSS scoped → <style scoped> do componente
+```
+
+### 13.3 Sintomas do `$fetch` do `ofetch`
+
+| Sintoma | Causa |
+|---|---|
+| Página renderiza mas dados não carregam | `$fetch` do `ofetch` não tem headers de auth do Nuxt |
+| Spinner some e mostra "Nenhum item" | API retorna erro silencioso |
+| Sem erro no console | `ofetch` não loga falhas de auth |
+| Funciona no clique mas não no F5 | Hydration mismatch (ver 12.2) |
+
+**Como encontrar:** `grep -rn 'from "ofetch"' front_end/app/`
+
+### 13.4 Modais e auto-import do Nuxt
+
+Componentes em subpasta têm nome composto pelo auto-import. O nome usado no template precisa bater.
+
+| Arquivo | Auto-import |
+|---|---|
+| `components/calendario/ModalFeriado.vue` | `<CalendarioModalFeriado>` |
+| `components/formularios/ModalPergunta.vue` | `<FormulariosModalPergunta>` |
+| `components/academico_oferta/ModalArea.vue` | `<AcademicoOfertaModalArea>` |
+
+**Regra:** `<Diretório><NomeArquivo>` em PascalCase. Se não funcionar, use import explícito (12.7).

@@ -6,8 +6,9 @@ import { useAppStore } from "~~/stores/app";
 import { useFormAnswers } from "~/composables/form/useFormAnswers";
 import { useFormFiles } from "~/composables/form/useFormFiles";
 import { useFormCep } from "~/composables/form/useFormCep";
+import { useFormConfig } from "~/composables/form/useFormConfig";
 import { useFormInscricao } from "~/composables/form/useFormInscricao";
-import { useToast } from '~/composables/useToast';
+import { useToast } from "~/composables/useToast";
 
 const route = useRoute();
 const { tipo_proc, tipo_cand, area_id, programa_id } = route.params as {
@@ -18,11 +19,7 @@ const { tipo_proc, tipo_cand, area_id, programa_id } = route.params as {
 };
 
 const store = useAppStore();
-
-// ── Estado local (UI + orquestração) ──────────────────────
-const loading = ref(true);
-const blocos = ref<any[]>([]);
-const activeTab = ref(0);
+const { showToast } = useToast();
 
 // ── Fallback de Entidade ──────────────────────────────────
 const idEntidade = computed(
@@ -32,6 +29,14 @@ const idEntidade = computed(
 );
 
 // ── Composables ───────────────────────────────────────────
+const configCtx = useFormConfig({
+    idEntidade: () => idEntidade.value,
+    programa_id,
+    area_id,
+    tipo_proc,
+    tipo_cand,
+});
+
 const answersCtx = useFormAnswers({
     idEntidade: () => idEntidade.value,
     userExpandidoId: () => store.user_expandido_id,
@@ -50,12 +55,21 @@ const cepCtx = useFormCep({
     saveStatus: answersCtx.saveStatus,
     saveAnswer: answersCtx.saveAnswer,
     saveMultipleAnswers: answersCtx.saveMultipleAnswers,
-    blocos: () => blocos.value,
+    blocos: () => configCtx.blocos.value,
 });
 
 const inscricaoCtx = useFormInscricao();
 
-// ── Funções de callback para eventos do FormPergunta ──────
+// ── Deep link: tab inicial via query param ─────────────────
+const initialTab = computed(() => {
+    const raw = route.query.tab;
+    if (raw === undefined || raw === null) return 0;
+    const parsed = Number(raw);
+    return Number.isNaN(parsed) || parsed < 0 ? 0 : parsed;
+});
+const activeTab = ref(initialTab.value);
+
+// ── Callbacks para eventos do FormPergunta ────────────────
 function onPerguntaBlur(perguntaId: string, tipo?: string) {
     answersCtx.saveAnswer(perguntaId, tipo);
 }
@@ -87,98 +101,7 @@ function onPerguntaViewFile(perguntaId: string) {
     filesCtx.viewFile(perguntaId);
 }
 
-// ── Carregar configuração do formulário ──────────────────
-async function loadFormConfig() {
-    loading.value = true;
-    try {
-        const configRes = (await $fetch("/api/form/config", {
-            params: {
-                id_entidade: idEntidade.value,
-                programa_id: programa_id !== "0" ? programa_id : null,
-                area_id: area_id !== "0" ? area_id : null,
-                tipo_proc,
-                tipo_cand,
-            },
-        })) as any;
-
-        if (configRes.success) {
-            let blocosData = configRes.blocos || [];
-
-            if (blocosData.length === 0) {
-                blocosData.push({
-                    bloco: "Dados Gerais",
-                    ordem: 0,
-                    perguntas: [],
-                });
-            }
-
-            const sysQuestions = [
-                {
-                    pergunta_id: "sys-nome",
-                    label: "Nome",
-                    tipo_pergunta: "text",
-                    largura: "1",
-                    obrigatorio: true,
-                },
-                {
-                    pergunta_id: "sys-sobrenome",
-                    label: "Sobrenome",
-                    tipo_pergunta: "text",
-                    largura: "1",
-                    obrigatorio: true,
-                },
-                {
-                    pergunta_id: "sys-email",
-                    label: "E-mail",
-                    tipo_pergunta: "email",
-                    largura: "2",
-                    obrigatorio: true,
-                    disabled: true,
-                },
-            ];
-
-            blocosData[0].perguntas = [
-                ...sysQuestions,
-                ...blocosData[0].perguntas,
-            ];
-            blocos.value = blocosData;
-
-            if (store.initialized) {
-                answersCtx.answers.value["sys-nome"] = store.nome || "";
-                answersCtx.answers.value["sys-sobrenome"] =
-                    store.sobrenome || "";
-                answersCtx.answers.value["sys-email"] = store.user?.email || "";
-            }
-
-            const allPerguntaIds = blocos.value
-                .flatMap((b) => b.perguntas.map((p: any) => p.pergunta_id))
-                .filter((id) => !id.startsWith("sys-"));
-
-            if (store.user_expandido_id && allPerguntaIds.length > 0) {
-                await answersCtx.loadUserAnswers(allPerguntaIds, blocos.value);
-
-                const fileQuestions = blocos.value
-                    .flatMap((b) => b.perguntas)
-                    .filter((p: any) => p.tipo_pergunta === "file");
-
-                for (const q of fileQuestions) {
-                    const fileId = answersCtx.answers.value[q.pergunta_id];
-                    if (fileId) {
-                        filesCtx.fetchFileInfo(q.pergunta_id, fileId);
-                    }
-                }
-            }
-        }
-    } catch (e) {
-        console.error("Erro ao carregar form:", e);
-    } finally {
-        loading.value = false;
-    }
-}
-
 // ── Finalizar Inscrição ──────────────────────────────────
-const { showToast } = useToast();
-
 async function handleFinalizarInscricao() {
     const idProcesso = (route.query.id_processo_seletivo as string) || "";
 
@@ -191,7 +114,6 @@ async function handleFinalizarInscricao() {
         id_processo: idProcesso,
         tipo_proc: tipo_proc as string,
         tipo_cand: tipo_cand as string,
-        // toast é tratado dentro do composable
     });
 
     if (sucesso && !jaExistia) {
@@ -202,7 +124,31 @@ async function handleFinalizarInscricao() {
 // ── Init ──────────────────────────────────────────────────
 onMounted(async () => {
     if (!store.initialized) await store.initSession();
-    await loadFormConfig();
+    await configCtx.loadFormConfig();
+
+    // Preencher respostas de sistema com dados do usuário logado
+    if (store.initialized) {
+        answersCtx.answers.value["sys-nome"] = store.nome || "";
+        answersCtx.answers.value["sys-sobrenome"] = store.sobrenome || "";
+        answersCtx.answers.value["sys-email"] = store.user?.email || "";
+    }
+
+    // Carregar respostas salvas e arquivos
+    const ids = configCtx.allPerguntaIds.value;
+    if (store.user_expandido_id && ids.length > 0) {
+        await answersCtx.loadUserAnswers(ids, configCtx.blocos.value);
+
+        const fileQuestions = configCtx.blocos.value
+            .flatMap((b) => b.perguntas)
+            .filter((p: any) => p.tipo_pergunta === "file");
+
+        for (const q of fileQuestions) {
+            const fileId = answersCtx.answers.value[q.pergunta_id];
+            if (fileId) {
+                filesCtx.fetchFileInfo(q.pergunta_id, fileId);
+            }
+        }
+    }
 });
 </script>
 
@@ -227,7 +173,7 @@ onMounted(async () => {
 
         <main class="max-w-5xl mx-auto px-6 py-12">
             <!-- Loading -->
-            <div v-if="loading" class="space-y-8">
+            <div v-if="configCtx.loading.value" class="space-y-8">
                 <div class="h-10 w-48 bg-white/5 animate-pulse rounded-lg" />
                 <div class="grid grid-cols-2 gap-6">
                     <div
@@ -240,7 +186,7 @@ onMounted(async () => {
 
             <!-- Vazio -->
             <div
-                v-else-if="blocos.length === 0"
+                v-else-if="configCtx.blocos.value.length === 0"
                 class="text-center py-20 bg-white/[0.02] border border-dashed border-white/10 rounded-2xl"
             >
                 <Icon
@@ -256,11 +202,11 @@ onMounted(async () => {
             <div v-else>
                 <!-- Tabs de blocos -->
                 <div
-                    v-if="blocos.length > 1"
+                    v-if="configCtx.blocos.value.length > 1"
                     class="flex gap-4 mb-10 overflow-x-auto pb-2 scrollbar-hide"
                 >
                     <button
-                        v-for="(bloco, i) in blocos"
+                        v-for="(bloco, i) in configCtx.blocos.value"
                         :key="i"
                         @click="activeTab = i"
                         class="px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex-shrink-0"
@@ -274,70 +220,76 @@ onMounted(async () => {
                     </button>
                 </div>
 
-                <!-- Bloco ativo -->
-                <div
-                    class="bg-[#0f0f17] border border-white/5 rounded-2xl p-8 md:p-12 shadow-2xl"
-                >
-                    <h2 class="text-2xl font-black mb-8 tracking-tight">
-                        {{ blocos[activeTab]?.bloco }}
-                    </h2>
-
-                    <div class="grid grid-cols-2 gap-x-8 gap-y-10">
-                        <FormPergunta
-                            v-for="pergunta in blocos[activeTab]?.perguntas"
-                            :key="pergunta.pergunta_id"
-                            :pergunta="pergunta"
-                            :answers="answersCtx.answers.value"
-                            :save-status="answersCtx.saveStatus.value"
-                            :file-names="filesCtx.fileNames.value"
-                            :file-links="filesCtx.fileLinks.value"
-                            :is-endereco-field-disabled="
-                                cepCtx.isEnderecoFieldDisabled
-                            "
-                            @blur="onPerguntaBlur"
-                            @cep-blur="onPerguntaCepBlur"
-                            @cep-input="onPerguntaCepInput"
-                            @cpf-input="onPerguntaCpfInput"
-                            @file-upload="onPerguntaFileUpload"
-                            @remove-file="onPerguntaRemoveFile"
-                            @view-file="onPerguntaViewFile"
-                        />
-                    </div>
-
-                    <!-- Navegação -->
+                <!-- Blocos: v-show preserva estado das FormPergunta entre tabs -->
+                <template v-for="(bloco, i) in configCtx.blocos.value" :key="i">
                     <div
-                        class="mt-16 pt-8 border-t border-white/5 flex items-center justify-between"
+                        v-show="activeTab === i"
+                        class="bg-[#0f0f17] border border-white/5 rounded-2xl p-8 md:p-12 shadow-2xl"
                     >
-                        <button
-                            v-if="activeTab > 0"
-                            @click="activeTab--"
-                            class="px-8 py-3 rounded-xl border border-white/10 text-xs font-black uppercase tracking-widest hover:bg-white/5 transition-all"
-                        >
-                            Anterior
-                        </button>
-                        <div v-else />
+                        <h2 class="text-2xl font-black mb-8 tracking-tight">
+                            {{ bloco.bloco }}
+                        </h2>
 
-                        <button
-                            v-if="activeTab < blocos.length - 1"
-                            @click="activeTab++"
-                            class="px-8 py-3 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
+                        <div class="grid grid-cols-2 gap-x-8 gap-y-10">
+                            <FormPergunta
+                                v-for="pergunta in bloco.perguntas"
+                                :key="pergunta.pergunta_id"
+                                :pergunta="pergunta"
+                                :answers="answersCtx.answers.value"
+                                :save-status="answersCtx.saveStatus.value"
+                                :file-names="filesCtx.fileNames.value"
+                                :file-links="filesCtx.fileLinks.value"
+                                :is-endereco-field-disabled="
+                                    cepCtx.isEnderecoFieldDisabled
+                                "
+                                @blur="onPerguntaBlur"
+                                @cep-blur="onPerguntaCepBlur"
+                                @cep-input="onPerguntaCepInput"
+                                @cpf-input="onPerguntaCpfInput"
+                                @file-upload="onPerguntaFileUpload"
+                                @remove-file="onPerguntaRemoveFile"
+                                @view-file="onPerguntaViewFile"
+                            />
+                        </div>
+
+                        <!-- Navegação -->
+                        <div
+                            class="mt-16 pt-8 border-t border-white/5 flex items-center justify-between"
                         >
-                            Próximo Passo
-                        </button>
-                        <button
-                            v-else
-                            @click="handleFinalizarInscricao"
-                            :disabled="inscricaoCtx.enviando.value"
-                            class="px-8 py-3 rounded-xl bg-green-500 text-white text-xs font-black uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg shadow-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {{
-                                inscricaoCtx.enviando.value
-                                    ? "Enviando..."
-                                    : "Finalizar Inscrição"
-                            }}
-                        </button>
+                            <button
+                                v-if="activeTab > 0"
+                                @click="activeTab--"
+                                class="px-8 py-3 rounded-xl border border-white/10 text-xs font-black uppercase tracking-widest hover:bg-white/5 transition-all"
+                            >
+                                Anterior
+                            </button>
+                            <div v-else />
+
+                            <button
+                                v-if="
+                                    activeTab <
+                                    configCtx.blocos.value.length - 1
+                                "
+                                @click="activeTab++"
+                                class="px-8 py-3 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
+                            >
+                                Próximo Passo
+                            </button>
+                            <button
+                                v-else
+                                @click="handleFinalizarInscricao"
+                                :disabled="inscricaoCtx.enviando.value"
+                                class="px-8 py-3 rounded-xl bg-green-500 text-white text-xs font-black uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg shadow-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {{
+                                    inscricaoCtx.enviando.value
+                                        ? "Enviando..."
+                                        : "Finalizar Inscrição"
+                                }}
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </template>
             </div>
         </main>
     </div>
