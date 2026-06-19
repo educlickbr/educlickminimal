@@ -64,7 +64,21 @@
             :cursoId="editData?.id"
             :initialData="editData"
             :modulos="modulosDisponiveis"
-            :idEntidade="getEntidadeAtivaId()"
+            :cursoCtx="{
+                areasDisponiveis,
+                loadingListAreas,
+                loadingArea,
+                fetchAreas,
+                saveArea: handleSaveArea,
+                deleteArea: handleDeleteArea,
+                saveCurso: handleSaveCurso,
+                modulosDoCurso,
+                loadingModulosCurso,
+                loadingCM,
+                fetchModulosDoCurso,
+                addModulo: handleAddModulo,
+                removeModulo: handleRemoveModulo,
+            }"
             @saved="handleSaved"
         />
         <GlobalModalConfirmacao
@@ -102,6 +116,19 @@ const {
     handleSaved,
     confirmDelete,
     handleDelete,
+    handleSaveCurso,
+    areasDisponiveis,
+    loadingListAreas,
+    loadingArea,
+    fetchAreas,
+    handleSaveArea,
+    handleDeleteArea,
+    modulosDoCurso,
+    loadingModulosCurso,
+    loadingCM,
+    fetchModulosDoCurso,
+    handleAddModulo,
+    handleRemoveModulo,
 } = useOfertaCursos({ getEntidadeAtivaId, garantirEntidade, toast });
 
 onMounted(() => fetchCursos());

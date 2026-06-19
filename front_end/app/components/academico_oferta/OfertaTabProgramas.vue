@@ -58,7 +58,23 @@
             :programaId="editData?.id"
             :initialData="editData"
             :cursos="cursosDisponiveis"
-            :idEntidade="getEntidadeAtivaId()"
+            :programaCtx="{
+                loading: programaFormCtx.loading,
+                listCursos: programaFormCtx.listCursos,
+                listModulos: programaFormCtx.listModulos,
+                listAreas: programaFormCtx.listAreas,
+                loadingCiclos: programaFormCtx.loadingCiclos,
+                ciclosEncontrados: programaFormCtx.ciclosEncontrados,
+                modulosPendentesCurso: programaFormCtx.modulosPendentesCurso,
+                temOverlapping: programaFormCtx.temOverlapping,
+                fetchBaseLists: programaFormCtx.fetchBaseLists,
+                fetchCursoCiclos: programaFormCtx.fetchCursoCiclos,
+                fetchAllCiclos: programaFormCtx.fetchAllCiclos,
+                checkOverlapping: programaFormCtx.checkOverlapping,
+                toDateMs: programaFormCtx.toDateMs,
+                handleSave: programaFormCtx.handleSave,
+                initEdit: programaFormCtx.initEdit,
+            }"
             @saved="handleSaved"
         />
     </div>
@@ -67,6 +83,7 @@
 <script setup lang="ts">
 import { useOfertaCore } from "~/composables/academico_oferta/useOfertaCore";
 import { useOfertaProgramas } from "~/composables/academico_oferta/useOfertaProgramas";
+import { useProgramaForm } from "~/composables/academico_oferta/useProgramaForm";
 import { useToast } from "~/composables/useToast";
 
 const { getEntidadeAtivaId, garantirEntidade } = useOfertaCore();
@@ -84,6 +101,12 @@ const {
     openEditar,
     handleSaved,
 } = useOfertaProgramas({ getEntidadeAtivaId, garantirEntidade, toast });
+
+const programaFormCtx = useProgramaForm({
+    getEntidadeAtivaId,
+    garantirEntidade,
+    toast,
+});
 
 onMounted(() => fetchProgramas());
 </script>

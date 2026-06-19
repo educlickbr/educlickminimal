@@ -62,7 +62,21 @@
             :moduloId="editData?.id"
             :initialData="editData"
             :componentes="componentesDisponiveis"
-            :idEntidade="getEntidadeAtivaId()"
+            :moduloCtx="{
+                saveModulo: handleSaveModulo,
+                componentesDoModulo,
+                loadingComponentesModulo,
+                loadingAddComponente,
+                fetchComponentesDoModulo,
+                addComponente: handleAddComponente,
+                removeComponente: handleRemoveComponente,
+                planos,
+                loadingPlanos,
+                loadingPlano,
+                fetchPlanos,
+                savePlano: handleSavePlano,
+                deletePlano: handleDeletePlano,
+            }"
             @saved="handleSaved"
         />
         <GlobalModalConfirmacao
@@ -100,6 +114,19 @@ const {
     handleSaved,
     confirmDelete,
     handleDelete,
+    handleSaveModulo,
+    componentesDoModulo,
+    loadingComponentesModulo,
+    loadingAddComponente,
+    fetchComponentesDoModulo,
+    handleAddComponente,
+    handleRemoveComponente,
+    planos,
+    loadingPlanos,
+    loadingPlano,
+    fetchPlanos,
+    handleSavePlano,
+    handleDeletePlano,
 } = useOfertaModulos({ getEntidadeAtivaId, garantirEntidade, toast });
 
 onMounted(() => fetchModulos());

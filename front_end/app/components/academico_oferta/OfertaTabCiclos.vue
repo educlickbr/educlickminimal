@@ -78,7 +78,11 @@
             :cicloId="editData?.id || editData?.id_ciclo"
             :initialData="editData"
             :modulos="modulosDisponiveis"
-            :idEntidade="getEntidadeAtivaId()"
+            :cicloCtx="{
+                simularCalendario,
+                handleSaveCiclo,
+                fetchDiasConfig,
+            }"
             @saved="handleSaved"
         />
         <GlobalModalConfirmacao
@@ -116,6 +120,9 @@ const {
     handleSaved,
     confirmDelete,
     handleDelete,
+    simularCalendario,
+    handleSaveCiclo,
+    fetchDiasConfig,
 } = useOfertaCiclos({ getEntidadeAtivaId, garantirEntidade, toast });
 
 onMounted(() => fetchCiclos());

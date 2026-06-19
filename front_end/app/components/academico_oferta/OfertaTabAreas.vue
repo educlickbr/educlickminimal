@@ -3,12 +3,18 @@
         <div class="flex items-center justify-between">
             <span
                 class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
-                >{{ loading ? "..." : areas.length + " área(s)" }}</span
+                >{{
+                    areasCtx.loading.value
+                        ? "..."
+                        : areasCtx.areas.value.length + " área(s)"
+                }}</span
             >
-            <button @click="openNova" class="add-btn">+ Nova Área</button>
+            <button @click="areasCtx.openNova()" class="add-btn">
+                + Nova Área
+            </button>
         </div>
         <div
-            v-if="loading"
+            v-if="areasCtx.loading.value"
             class="py-16 flex flex-col items-center justify-center gap-3"
         >
             <div
@@ -23,10 +29,17 @@
             v-else
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
-            <div v-if="areas.length === 0" class="col-span-full empty-state">
+            <div
+                v-if="areasCtx.areas.value.length === 0"
+                class="col-span-full empty-state"
+            >
                 <p class="text-sm font-bold text-white/40">Nenhuma área</p>
             </div>
-            <div v-for="a in areas" :key="a.id" class="comp-card">
+            <div
+                v-for="a in areasCtx.areas.value"
+                :key="a.id"
+                class="comp-card"
+            >
                 <div class="comp-avatar">
                     {{ (a.nome_area || "?").charAt(0).toUpperCase() }}
                 </div>
@@ -39,13 +52,13 @@
                     </p>
                 </div>
                 <button
-                    @click="openEditar(a)"
+                    @click="areasCtx.openEditar(a)"
                     class="comp-action-btn comp-action-edit"
                 >
                     ✎
                 </button>
                 <button
-                    @click="confirmDelete(a.id)"
+                    @click="areasCtx.confirmDelete(a.id)"
                     class="comp-action-btn comp-action-delete"
                 >
                     ✕
@@ -53,95 +66,39 @@
             </div>
         </div>
         <AcademicoOfertaModalArea
-            v-model="showModal"
-            :isEdit="isEdit"
-            :initialData="editData"
-            :idEntidade="idEntidade"
-            @saved="handleSaved"
+            v-model="areasCtx.showModal.value"
+            :isEdit="areasCtx.isEdit.value"
+            :initialData="areasCtx.editData.value"
+            :onSave="areasCtx.handleSave"
+            @saved="areasCtx.handleSaved()"
         />
         <GlobalModalConfirmacao
-            v-model="showConfirmDelete"
+            v-model="areasCtx.showConfirmDelete.value"
             title="Excluir Área"
             message="Confirmar?"
             type="danger"
             confirmText="Excluir"
-            :loading="isDeleting"
-            @confirm="handleDelete"
+            :loading="areasCtx.isDeleting.value"
+            @confirm="areasCtx.handleDelete()"
         />
     </div>
 </template>
 
 <script setup lang="ts">
 import { useOfertaCore } from "~/composables/academico_oferta/useOfertaCore";
+import { useOfertaAreas } from "~/composables/academico_oferta/useOfertaAreas";
 import { useToast } from "~/composables/useToast";
 
 const core = useOfertaCore();
 const toast = useToast();
-const idEntidade = computed(() => core.getEntidadeAtivaId());
 
-const areas = ref<any[]>([]);
-const loading = ref(false);
-const showModal = ref(false);
-const isEdit = ref(false);
-const editData = ref<any>(null);
-const showConfirmDelete = ref(false);
-const deleteTarget = ref<string | null>(null);
-const isDeleting = ref(false);
+const areasCtx = useOfertaAreas({
+    getEntidadeAtivaId: () => core.getEntidadeAtivaId(),
+    garantirEntidade: () => core.garantirEntidade(),
+    toast,
+});
 
-async function fetchAreas() {
-    loading.value = true;
-    try {
-        const id = await core.garantirEntidade();
-        const res = (await $fetch("/api/academico_oferta/areas", {
-            params: { id_entidade: id, page: 1, limit: 20 },
-        })) as any;
-        areas.value = Array.isArray(res?.itens) ? res.itens : [];
-    } catch (e: any) {
-        toast.showToast(e?.message || "Erro", { type: "error" });
-    } finally {
-        loading.value = false;
-    }
-}
-
-function openNova() {
-    isEdit.value = false;
-    editData.value = null;
-    showModal.value = true;
-}
-function openEditar(a: any) {
-    isEdit.value = true;
-    editData.value = a;
-    showModal.value = true;
-}
-function handleSaved() {
-    fetchAreas();
-}
-function confirmDelete(id: string) {
-    deleteTarget.value = id;
-    showConfirmDelete.value = true;
-}
-
-async function handleDelete() {
-    if (!deleteTarget.value) return;
-    isDeleting.value = true;
-    try {
-        const id = await core.garantirEntidade();
-        await $fetch("/api/academico_oferta/areas", {
-            method: "DELETE",
-            body: { id: deleteTarget.value, id_entidade: id },
-        });
-        toast.showToast("Área removida", { type: "success" });
-        fetchAreas();
-    } catch (e: any) {
-        toast.showToast(e.message || "Erro", { type: "error" });
-    } finally {
-        isDeleting.value = false;
-        showConfirmDelete.value = false;
-        deleteTarget.value = null;
-    }
-}
-
-onMounted(() => fetchAreas());
+onMounted(() => areasCtx.fetchAreas());
 </script>
 
 <style scoped>
