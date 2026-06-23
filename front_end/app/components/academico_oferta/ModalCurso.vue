@@ -119,7 +119,7 @@
                 <!-- TAB GRADE -->
                 <CursoTabGrade
                     v-if="activeTab === 'grade'"
-                    :saved-curso-id="savedCursoId"
+                    :saved-curso-id="currentCursoId"
                     :formCM="formCM"
                     :modulos-disponiveis="modulosDisponiveis"
                     :modulos-do-curso="modulosDoCurso"

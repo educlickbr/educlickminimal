@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { mascaraCEP } from "~/utils/viacep";
 import { useAppStore } from "~~/stores/app";
 import { useFormAnswers } from "~/composables/form/useFormAnswers";
@@ -11,6 +11,7 @@ import { useFormInscricao } from "~/composables/form/useFormInscricao";
 import { useToast } from "~/composables/useToast";
 
 const route = useRoute();
+const router = useRouter();
 const { tipo_proc, tipo_cand, area_id, programa_id } = route.params as {
     tipo_proc: string;
     tipo_cand: string;
@@ -48,6 +49,8 @@ const filesCtx = useFormFiles({
     saveStatus: answersCtx.saveStatus,
     saveAnswer: answersCtx.saveAnswer,
     userExpandidoId: () => store.user_expandido_id,
+    idEntidade: () =>
+        store.company?.id || (route.query.id_entidade as string) || null,
 });
 
 const cepCtx = useFormCep({
@@ -59,6 +62,10 @@ const cepCtx = useFormCep({
 });
 
 const inscricaoCtx = useFormInscricao();
+
+// ── Bloqueio: verifica se já está inscrito ─────────────────
+const jaInscrito = ref(false);
+const verificandoInscricao = ref(true);
 
 // ── Deep link: tab inicial via query param ─────────────────
 const initialTab = computed(() => {
@@ -110,20 +117,85 @@ async function handleFinalizarInscricao() {
         return;
     }
 
-    const { sucesso, jaExistia } = await inscricaoCtx.finalizarInscricao({
-        id_processo: idProcesso,
-        tipo_proc: tipo_proc as string,
-        tipo_cand: tipo_cand as string,
-    });
+    // Valida campos obrigatórios (frontend)
+    const pendentes: string[] = [];
+    for (const bloco of configCtx.blocos.value) {
+        for (const pergunta of bloco.perguntas) {
+            if (!pergunta.obrigatorio) continue;
+            const val = answersCtx.answers.value[pergunta.pergunta_id];
+            if (val === undefined || val === null || val === "") {
+                pendentes.push(pergunta.label);
+            }
+        }
+    }
+    if (pendentes.length > 0) {
+        showToast(`Preencha os campos obrigatórios: ${pendentes.join(", ")}`, {
+            type: "error",
+            duration: 5000,
+        });
+        return;
+    }
 
-    if (sucesso && !jaExistia) {
-        showToast("Inscrição finalizada com sucesso!", { type: "success" });
+    // Valida obrigatórios no servidor (RPC)
+    const valRes = (await $fetch("/api/form/validar", {
+        method: "POST",
+        body: {
+            id_entidade: idEntidade.value,
+            area_id: area_id !== "0" ? area_id : null,
+            programa_id: programa_id !== "0" ? programa_id : null,
+            tipo_proc: tipo_proc as string,
+            tipo_cand: tipo_cand as string,
+            user_expandido_id: store.user_expandido_id,
+        },
+    })) as any;
+
+    if (!valRes?.valid) {
+        const labels = (valRes.pendentes || [])
+            .map((p: any) => p.label)
+            .join(", ");
+        showToast(`Campos obrigatórios não preenchidos: ${labels}`, {
+            type: "error",
+            duration: 6000,
+        });
+        return;
+    }
+
+    const { sucesso, jaExistia, inscricao } =
+        await inscricaoCtx.finalizarInscricao({
+            id_processo: idProcesso,
+            tipo_proc: tipo_proc as string,
+            tipo_cand: tipo_cand as string,
+        });
+
+    if (sucesso && !jaExistia && inscricao?.id) {
+        router.push(`/form/sucesso?id_inscricao=${inscricao.id}`);
+    } else if (jaExistia) {
+        showToast("Você já está inscrito neste processo.", {
+            type: "info",
+        });
     }
 }
 
 // ── Init ──────────────────────────────────────────────────
 onMounted(async () => {
     if (!store.initialized) await store.initSession();
+
+    // Verifica se já está inscrito neste processo
+    const idProcesso = (route.query.id_processo_seletivo as string) || "";
+    if (idProcesso && store.user_expandido_id) {
+        const { existe } = await inscricaoCtx.verificarInscricao({
+            id_processo: idProcesso,
+            tipo_proc: tipo_proc as string,
+            tipo_cand: tipo_cand as string,
+        });
+        if (existe) {
+            jaInscrito.value = true;
+            verificandoInscricao.value = false;
+            return;
+        }
+    }
+    verificandoInscricao.value = false;
+
     await configCtx.loadFormConfig();
 
     // Preencher respostas de sistema com dados do usuário logado
@@ -140,7 +212,10 @@ onMounted(async () => {
 
         const fileQuestions = configCtx.blocos.value
             .flatMap((b) => b.perguntas)
-            .filter((p: any) => p.tipo_pergunta === "file");
+            .filter(
+                (p: any) =>
+                    p.tipo_pergunta === "file" || p.tipo_pergunta === "foto",
+            );
 
         for (const q of fileQuestions) {
             const fileId = answersCtx.answers.value[q.pergunta_id];
@@ -172,8 +247,52 @@ onMounted(async () => {
         </header>
 
         <main class="max-w-5xl mx-auto px-6 py-12">
+            <!-- Verificando inscrição -->
+            <div
+                v-if="verificandoInscricao"
+                class="py-20 flex flex-col items-center justify-center gap-4"
+            >
+                <div
+                    class="w-8 h-8 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"
+                />
+                <span
+                    class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
+                    >Verificando inscrição...</span
+                >
+            </div>
+
+            <!-- Já inscrito -->
+            <div
+                v-else-if="jaInscrito"
+                class="py-20 text-center max-w-md mx-auto"
+            >
+                <div
+                    class="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-6"
+                >
+                    <Icon
+                        name="ph:seal-check-bold"
+                        class="w-10 h-10 text-amber-400"
+                    />
+                </div>
+                <h2
+                    class="text-xl font-black uppercase tracking-widest mb-3 text-amber-400"
+                >
+                    Já Inscrito
+                </h2>
+                <p class="text-sm text-secondary/60 mb-8 leading-relaxed">
+                    Você já realizou sua inscrição neste processo seletivo.
+                    Acompanhe o status pelo painel do candidato.
+                </p>
+                <button
+                    @click="$router.back()"
+                    class="px-8 py-3 rounded-xl border border-white/10 text-xs font-black uppercase tracking-widest hover:bg-white/5 transition-all"
+                >
+                    Voltar
+                </button>
+            </div>
+
             <!-- Loading -->
-            <div v-if="configCtx.loading.value" class="space-y-8">
+            <div v-else-if="configCtx.loading.value" class="space-y-8">
                 <div class="h-10 w-48 bg-white/5 animate-pulse rounded-lg" />
                 <div class="grid grid-cols-2 gap-6">
                     <div

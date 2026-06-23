@@ -4,74 +4,92 @@
 
 Tela administrativa para gestão de formulários de inscrição:
 
-- **Banco de Perguntas** — CRUD de perguntas reutilizáveis
-- **Formulários** — configuração de formulários com drag-and-drop
+- **Banco de Perguntas** — CRUD de perguntas reutilizáveis (text, file, foto, etc.)
+- **Formulários** — configuração de formulários com drag-and-drop, blocos e campo obrigatório
 
-**Rota:** `/formularios` | **Layout:** `wide` | **Orquestrador:** `pages/formularios/index.vue` (~50 linhas)
+**Rota:** `/formularios?tab=perguntas|configuracoes` | **Layout:** `wide`
 
 ---
 
-## Arquitetura (padrão desacoplado)
+## Arquitetura
 
 Pipeline: **Orquestrador → Componente de tab → Composable → BFF → RPC → Banco**
 
 ```
-app/pages/formularios/index.vue                      ← orquestrador (~50 linhas)
-app/components/formularios/FormulariosTab*.vue        ← 2 componentes de tab (recebem ctx)
-app/components/formularios/ModalPergunta.vue          ← modal (recebe onSave como prop)
-app/composables/formularios/useFormularios*.ts        ← 4 composables
-server/api/formularios/*.ts                           ← 6 BFFs
-supabase/migrations/*.sql                             ← RPCs
-```
-
-> **Diferença do `academico_oferta`:** Aqui o composable de perguntas (`perguntasCtx`) é compartilhado entre as 2 abas via orquestrador, porque ambas precisam dos mesmos dados. No `academico_oferta` cada aba é independente e cria seu próprio composable.
-
-### Estrutura de diretórios
-
-```
-front_end/app/
-├── pages/formularios/index.vue
-├── components/formularios/
-│   ├── FormulariosTabPerguntas.vue
-│   ├── FormulariosTabConfiguracoes.vue
-│   └── ModalPergunta.vue
-├── composables/formularios/
-│   ├── useFormulariosCore.ts          ← getEntidadeAtivaId / garantirEntidade
-│   ├── useFormulariosPerguntas.ts     ← CRUD perguntas + handleSave
-│   ├── useFormulariosLista.ts         ← lista de formulários salvos
-│   └── useFormulariosBuilder.ts       ← form builder (drag-and-drop)
-│
+app/pages/formularios/index.vue                     ← orquestrador (~50 linhas)
+app/components/formularios/
+├── FormulariosTabPerguntas.vue                     ← CRUD de perguntas
+├── FormulariosTabConfiguracoes.vue                 ← lista + builder (drag-and-drop)
+└── ModalPergunta.vue                               ← modal de criação/edição
+app/composables/formularios/
+├── useFormulariosCore.ts                           ← getEntidadeAtivaId / garantirEntidade / mapTipoPergunta
+├── useFormulariosPerguntas.ts                      ← CRUD perguntas + handleSave
+├── useFormulariosLista.ts                          ← lista formulários salvos + fetchContexts
+└── useFormulariosBuilder.ts                        ← form builder (DnD, blocos, obrigatorio, save/load)
 server/api/formularios/
-├── index.get.ts                       ← GET  /api/formularios
-├── perguntas.get.ts                   ← GET  /api/formularios/perguntas → RPC frm_get_perguntas
-├── perguntas.post.ts                  ← POST /api/formularios/perguntas → RPC frm_upsert_pergunta
-├── perguntas.delete.ts                ← DEL  /api/formularios/perguntas → RPC frm_delete_pergunta
-├── form_config.get.ts                 ← GET  /api/formularios/form_config
-└── form_config.post.ts                ← POST /api/formularios/form_config
+├── index.get.ts                                    ← GET  /api/formularios
+├── perguntas.get.ts                                ← GET  /api/formularios/perguntas → frm_get_perguntas
+├── perguntas.post.ts                               ← POST /api/formularios/perguntas → frm_upsert_pergunta
+├── perguntas.delete.ts                             ← DEL  /api/formularios/perguntas → frm_delete_pergunta
+├── form_config.get.ts                              ← GET  /api/formularios/form_config → frm_get_form_config
+└── form_config.post.ts                             ← POST /api/formularios/form_config → frm_upsert_form_config
 ```
 
 ### Orquestrador (`index.vue`)
 
 ```ts
-// Composables instanciados UMA vez aqui
 const core = useFormulariosCore()
-const perguntasCtx = useFormulariosPerguntas({ garantirEntidade: core.garantirEntidade, toast })
+const perguntasCtx = useFormulariosPerguntas({ garantirEntidade, toast })
 
-// Lifecycle gerenciado pelo orquestrador
 onMounted → perguntasCtx.fetchPerguntas()
-watch(activeTab) → perguntasCtx.fetchPerguntas()
+watch(activeTab) → perguntasCtx.fetchPerguntas(); tabConfigRef?.init()
 ```
 
 ### Fluxo de dados
 
 ```
-FormulariosTabPerguntas  ← recebe perguntasCtx + idEntidade como props
-FormulariosTabConfiguracoes ← recebe perguntasCtx + idEntidade como props
-ModalPergunta            ← recebe onSave(perguntasCtx.handleSave) como prop
-                             (zero $fetch inline)
+perguntasCtx (compartilhado) → FormulariosTabPerguntas (props)
+                             → FormulariosTabConfiguracoes (props)
+ModalPergunta                ← onSave = perguntasCtx.handleSave (prop)
 ```
 
-### APIs
+---
+
+## Tab Configurações — Builder
+
+### Funcionalidades
+
+- **Lista** de formulários salvos (cards com escopo, tipo, candidato)
+- **Builder** com:
+  - Drag-and-drop do banco de perguntas para o canvas
+  - Blocos (tabs) gerenciáveis
+  - Toggle de largura (1 ou 2 colunas)
+  - **Toggle de obrigatório** (`*` âmbar — salvo no `aca_form_config.obrigatorio`)
+  - Seleção de área/programa, tipo de processo e tipo de candidato
+  - "Salvar Layout" persiste no banco via RPC
+
+### Campos salvos no `itemsToSave`
+
+| Campo | Origem |
+|---|---|
+| `pergunta_id` | builderItems |
+| `bloco_nome` | builderItems |
+| `bloco_ordem` | builderBlocos index |
+| `pergunta_ordem` | índice no array |
+| `largura` | builderItems (`"1"` ou `"2"`) |
+| `obrigatorio` | builderItems (toggle `*`) |
+
+### Inicialização da tab
+
+O `init` exposto chama:
+```ts
+listaCtx.fetchContexts()        // carrega áreas + programas
+listaCtx.fetchFormulariosSalvos() // carrega lista de forms salvos
+```
+
+---
+
+## APIs
 
 | Endpoint | Pipeline |
 |---|---|
@@ -79,35 +97,30 @@ ModalPergunta            ← recebe onSave(perguntasCtx.handleSave) como prop
 | `GET /api/formularios/perguntas` | → RPC `frm_get_perguntas` |
 | `POST /api/formularios/perguntas` | → RPC `frm_upsert_pergunta` |
 | `DELETE /api/formularios/perguntas` | → RPC `frm_delete_pergunta` |
+| `GET /api/formularios/form_config` | → RPC `frm_get_form_config` |
+| `POST /api/formularios/form_config` | → RPC `frm_upsert_form_config` |
 
 ### APIs globais usadas
 
 | Endpoint | Motivo |
 |---|---|
-| `/api/areas` | Contexto dos formulários (global) |
-| `/api/programas` | Contexto dos formulários (global) |
+| `/api/areas` | Contexto dos formulários |
+| `/api/programas` | Contexto dos formulários |
 
 ---
 
-## Checklist de desacoplamento
+## Histórico de mudanças
 
-Esta página foi auditada e corrigida em 2026-06-18. Itens verificados:
+### 2026-06-22 — Campo obrigatório
+- `BuilderItem` inclui `obrigatorio: boolean`
+- `saveFormConfig`: envia `obrigatorio` nos items
+- `fetchFormConfig`: restaura `obrigatorio` ao carregar
+- `toggleObrigatorio()`: nova função para alternar via botão `*` no canvas
+- Template: badge `*` âmbar no label + botão toggle nas ações
+- Correção: `listaCtx.fetchContexts()` adicionado ao `init` (estava faltando)
 
-- [x] APIs próprias movidas para `server/api/formularios/`
-- [x] APIs globais (`areas`, `programas`) mantidas na raiz
-- [x] `$fetch` do `ofetch` removido — usa global do Nuxt
-- [x] Zero `$fetch` inline nos componentes — tudo nos composables
-- [x] Modal recebe `onSave` como prop (sem chamada direta)
-- [x] Orquestrador gerencia lifecycle (`onMounted` + `watch`)
-- [x] `initialTab` no setup (SSR-safe)
-
----
-
-## Mudanças recentes
-
-### Auditoria e correções (2026-06-18)
-- APIs movidas: `perguntas`, `formularios`, `form_config` → `server/api/formularios/`
-- `$fetch` removido do `ofetch` em 3 composables
-- `handleSave` adicionado ao `useFormulariosPerguntas` (antes estava inline no ModalPergunta)
-- ModalPergunta atualizado para receber `onSave` como prop
-- `FormulariosTabPerguntas` atualizado para passar `:onSave="perguntasCtx.handleSave"`
+### 2026-06-18 — Auditoria e correções
+- APIs movidas para `server/api/formularios/`
+- `$fetch` do `ofetch` removido
+- `handleSave` extraído para `useFormulariosPerguntas`
+- ModalPergunta recebe `onSave` como prop

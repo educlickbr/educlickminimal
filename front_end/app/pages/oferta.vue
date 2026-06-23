@@ -11,6 +11,7 @@ const loading = ref(true);
 const programas = ref<any[]>([]);
 const areas = ref<any[]>([]);
 const activeArea = ref<string | null>(null);
+const inscritos = ref<Record<string, boolean>>({});
 const BRAZIL_TIME_ZONE = "America/Sao_Paulo";
 
 // Captura o ID da entidade via query param ou usa o fallback solicitado
@@ -33,6 +34,11 @@ async function fetchData() {
 
         if (progRes.success) programas.value = progRes.itens;
         if (areaRes.success) areas.value = areaRes.itens;
+
+        // Verifica inscrições do usuário logado
+        if (user.value && programas.value.length > 0) {
+            await verificarInscricoes();
+        }
     } catch (e) {
         console.error("Erro ao carregar dados públicos:", e);
     } finally {
@@ -43,6 +49,26 @@ async function fetchData() {
 onMounted(() => {
     fetchData();
 });
+
+async function verificarInscricoes() {
+    try {
+        const ids = programas.value
+            .map((p) => p.id_processo_seletivo)
+            .filter(Boolean);
+        if (ids.length === 0) return;
+
+        const res = (await $fetch("/api/form/inscricoes-lote", {
+            method: "POST",
+            body: { ids_processos: ids },
+        })) as any;
+
+        if (res?.success && res.inscritos) {
+            inscritos.value = res.inscritos;
+        }
+    } catch {
+        // silently fail - user might not be logged in
+    }
+}
 
 const filteredProgramas = computed(() => {
     if (!activeArea.value) return programas.value;
@@ -374,11 +400,19 @@ function formatDateTime(dateStr: string) {
                     <!-- Footer Action -->
                     <div class="p-6 bg-white/[0.02] border-t border-white/5">
                         <NuxtLink
+                            v-if="!inscritos[prog.id_processo_seletivo]"
                             :to="getFormUrl(prog)"
                             class="w-full py-3 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 block text-center"
                         >
                             Acessar
                         </NuxtLink>
+                        <div
+                            v-else
+                            class="w-full py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 cursor-default"
+                        >
+                            <Icon name="ph:seal-check-bold" class="w-4 h-4" />
+                            Já Inscrito
+                        </div>
                     </div>
                 </div>
             </div>

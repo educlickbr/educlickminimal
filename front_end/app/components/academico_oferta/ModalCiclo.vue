@@ -122,6 +122,23 @@
                     <div class="flex flex-col gap-2">
                         <label
                             class="text-[10px] font-black text-secondary/60 uppercase tracking-widest px-1"
+                            >Turno</label
+                        ><select
+                            v-model="formGeral.turno"
+                            class="w-full px-4 py-3 rounded-lg border border-secondary/10 text-sm font-bold text-primary outline-none"
+                        >
+                            <option
+                                v-for="t in TURNO_OPTIONS"
+                                :key="t.label"
+                                :value="t.val"
+                            >
+                                {{ t.label }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label
+                            class="text-[10px] font-black text-secondary/60 uppercase tracking-widest px-1"
                             >Título do Ciclo</label
                         ><input
                             v-model="formGeral.descricao"
@@ -259,11 +276,22 @@ function getAulaNumber(dia: any, index: number | string) {
     ).length;
 }
 
+const TURNO_OPTIONS = [
+    { val: null, label: "Não definido" },
+    { val: "Matutino", label: "Matutino" },
+    { val: "Vespertino", label: "Vespertino" },
+    { val: "Noturno", label: "Noturno" },
+    { val: "Matutino/Vespertino", label: "Matutino/Vespertino" },
+    { val: "Vespertino/Noturno", label: "Vespertino/Noturno" },
+    { val: "Integral", label: "Integral" },
+];
+
 const formGeral = reactive({
     id_modulo: null as string | null,
     data_ini: "",
     descricao: "",
     ano_semestre: null as string | null,
+    turno: null as string | null,
 });
 const semestreOptions = computed(() => getAnoSemestreList(10));
 watch(
@@ -396,6 +424,7 @@ async function handleSaveFinal() {
         id_modulo: fid,
         descricao: formGeral.descricao,
         ano_semestre: formGeral.ano_semestre,
+        turno: formGeral.turno,
         data_ini: formGeral.data_ini,
         data_fim: simulacaoData.value.data_fim,
         dias_semana: diasSemana.value,
@@ -420,6 +449,7 @@ watch(
                 formGeral.data_ini = props.initialData.data_ini || "";
                 formGeral.descricao = props.initialData.descricao || "";
                 formGeral.ano_semestre = props.initialData.ano_semestre || null;
+                formGeral.turno = props.initialData.turno || null;
                 const config = await props.cicloCtx.fetchDiasConfig(
                     props.cicloId,
                 );
@@ -431,6 +461,7 @@ watch(
                 formGeral.data_ini = "";
                 formGeral.descricao = "";
                 formGeral.ano_semestre = null;
+                formGeral.turno = null;
                 diasSemana.value = [];
                 diasExtras.value = [];
             }

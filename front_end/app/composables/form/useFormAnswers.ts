@@ -79,6 +79,8 @@ export function useFormAnswers(deps: {
 
     saveStatus.value[perguntaId] = "Salvando...";
 
+    const isFileType = tipo_pergunta === "file" || tipo_pergunta === "foto";
+
     try {
       const res = (await $fetch("/api/form/save", {
         method: "POST",
@@ -86,7 +88,8 @@ export function useFormAnswers(deps: {
           id_entidade: deps.idEntidade(),
           id_user_expandido: deps.userExpandidoId(),
           id_pergunta: perguntaId,
-          resposta: value,
+          resposta: isFileType ? (value ? "arquivo" : null) : value,
+          id_arquivo: isFileType ? value : null,
         },
       })) as any;
 
@@ -127,8 +130,17 @@ export function useFormAnswers(deps: {
         const pergunta = perguntaMap.get(id);
         const tipoPergunta = pergunta?.tipo_pergunta ?? "";
         const resposta = respRes.respostas[id].resposta;
+        const idArquivo = respRes.respostas[id].id_arquivo;
 
-        if (isDateQuestion(tipoPergunta)) {
+        // File/foto: prioriza id_arquivo, fallback resposta (compat antiga)
+        if (tipoPergunta === "file" || tipoPergunta === "foto") {
+          loadedAnswers[id] =
+            idArquivo ||
+            (resposta && String(resposta).match(/^[0-9a-f\-]{36}$/)
+              ? resposta
+              : null) ||
+            null;
+        } else if (isDateQuestion(tipoPergunta)) {
           loadedAnswers[id] = normalizeDateAnswer(resposta);
         } else {
           loadedAnswers[id] = resposta;

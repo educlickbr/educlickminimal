@@ -1,138 +1,165 @@
-# Página Form (`/form/[tipo_proc]/[tipo_cand]/[area_id]/[programa_id]`)
+# Páginas de Formulário
 
-## Visão Geral
+Rotas:
+- **Formulário público**: `/form/[tipo_proc]/[tipo_cand]/[area_id]/[programa_id]`
+- **Sucesso**: `/form/sucesso?id_inscricao=UUID`
+
+---
+
+## `/form/:tipo_proc/:tipo_cand/:area_id/:programa_id`
+
+### Visão Geral
 
 Tela pública de preenchimento de formulário de inscrição em processo seletivo:
 
 - **Blocos dinâmicos** — carregados via configuração com perguntas customizáveis
 - **Salvamento automático** — cada pergunta salva individualmente ao perder o foco
-- **Upload de arquivos** — via R2 Storage
+- **Upload de arquivos/fotos** — via R2 Storage, com placeholder estilizado
 - **Busca de CEP** — auto-preenchimento de endereço via ViaCEP
+- **Validação de obrigatórios** — frontend + RPC antes de finalizar
+- **Verificação de duplicidade** — bloqueia o form se já inscrito
 - **Finalização** — cria inscrição na tabela `aca_processo_seletivo_inscricoes`
+- **Redirecionamento** — após finalizar, vai para `/form/sucesso`
 
-**Rota:** `/form/:tipo_proc/:tipo_cand/:area_id/:programa_id` | **Layout:** nenhum (página standalone)
+Query params aceitos: `?id_processo_seletivo=UUID&id_entidade=UUID&tab=N`
 
----
-
-## Arquitetura (padrão desacoplado)
+### Arquitetura
 
 Pipeline: **Orquestrador → Composable → BFF → RPC → Banco**
 
 ```
-app/pages/form/[tipo_proc]/[tipo_cand]/[area_id]/[programa_id].vue  ← orquestrador (~230 linhas)
-app/components/form/FormPergunta.vue                                  ← componente de pergunta (reutilizado via v-for)
-app/composables/form/useFormConfig.ts                                 ← carrega configuração do formulário
-app/composables/form/useFormAnswers.ts                                ← CRUD de respostas
-app/composables/form/useFormFiles.ts                                  ← upload/download/remoção de arquivos
-app/composables/form/useFormCep.ts                                    ← busca de CEP + lock de campos
+app/pages/form/[tipo_proc]/[tipo_cand]/[area_id]/[programa_id].vue  ← orquestrador
+app/pages/form/sucesso.vue                                            ← página de confirmação
+app/components/form/FormPergunta.vue                                  ← componente de input por tipo
+app/composables/form/useFormConfig.ts                                 ← carrega config do formulário
+app/composables/form/useFormAnswers.ts                                ← CRUD de respostas (id_arquivo)
+app/composables/form/useFormFiles.ts                                  ← upload/download/remoção R2
+app/composables/form/useFormCep.ts                                    ← busca CEP + lock campos
 app/composables/form/useFormInscricao.ts                              ← verificar/criar inscrição
-server/api/form/config.get.ts                                         ← GET config → RPC aca_get_form_config_completo
-server/api/form/save.post.ts                                          ← POST save → RPC aca_upsert_resposta_form
-server/api/form/respostas.get.ts                                      ← GET respostas → RPC aca_get_respostas_usuario
-server/api/form/inscricao.get.ts                                      ← GET verificar → RPC aca_verificar_inscricao
-server/api/form/inscricao.post.ts                                     ← POST criar → RPC aca_criar_inscricao
+server/api/form/config.get.ts                                         ← GET config → aca_get_form_config_completo
+server/api/form/save.post.ts                                          ← POST save → aca_upsert_resposta_form
+server/api/form/respostas.get.ts                                      ← GET respostas → aca_get_respostas_usuario
+server/api/form/inscricao.get.ts                                      ← GET verificar (por id_processo ou id_inscricao)
+server/api/form/inscricao.post.ts                                     ← POST criar → aca_criar_inscricao
+server/api/form/validar.post.ts                                       ← POST validar obrigatórios → aca_validar_form_obrigatorio
 server/api/r2/sign.get.ts                                             ← GET signed URL (R2)
 server/api/r2/upload.post.ts                                          ← POST upload (R2)
-server/api/r2/delete.post.ts                                          ← POST delete (R2)
+server/api/r2/delete.post.ts                                          ← POST delete (R2 + banco)
 ```
 
-### Estrutura de diretórios
+### Composables
+
+| Composable | Responsabilidade |
+|---|---|
+| `useFormConfig` | Fetch `/api/form/config`, monta blocos + perguntas sys-* |
+| `useFormAnswers` | Estado `answers`/`saveStatus`, save/load respostas. File/foto usa `id_arquivo` |
+| `useFormFiles` | Upload/download/remoção via R2, injeta `answers` + `saveAnswer` + `idEntidade` |
+| `useFormCep` | Busca ViaCEP, lock/unlock campos dependentes |
+| `useFormInscricao` | `verificarInscricao` (bloqueio) + `finalizarInscricao` (POST) |
+
+### Fluxo de inicialização
 
 ```
-front_end/app/
-├── pages/form/[tipo_proc]/[tipo_cand]/[area_id]/[programa_id].vue   ← orquestrador
-├── components/form/
-│   └── FormPergunta.vue                                              ← componente de input por tipo
-├── composables/form/
-│   ├── useFormConfig.ts      ← loadFormConfig + allPerguntaIds
-│   ├── useFormAnswers.ts     ← answers, saveStatus, saveAnswer, loadUserAnswers
-│   ├── useFormFiles.ts       ← fileNames, fileLinks, upload/download/delete
-│   ├── useFormCep.ts         ← CEP lookup, enderecoFieldsUnlocked, mascara
-│   └── useFormInscricao.ts   ← verificarInscricao, finalizarInscricao
-│
-server/api/form/
-├── config.get.ts             ← RPC aca_get_form_config_completo
-├── save.post.ts              ← RPC aca_upsert_resposta_form
-├── respostas.get.ts          ← RPC aca_get_respostas_usuario
-├── inscricao.get.ts          ← RPC aca_verificar_inscricao
-└── inscricao.post.ts         ← RPC aca_criar_inscricao
-server/api/r2/
-├── sign.get.ts
-├── upload.post.ts
-└── delete.post.ts
+onMounted
+  ├── store.initSession()
+  ├── verificarInscricao(id_processo, tipo_proc, tipo_cand)
+  │     └── existe? → tela "Já Inscrito" (bloqueia form)
+  └── não existe → loadFormConfig → loadUserAnswers → fetchFileInfo
 ```
 
----
+### Tipos de pergunta suportados (`FormPergunta.vue`)
 
-## Orquestrador (`index.vue`)
+| Tipo | Renderização |
+|---|---|
+| `text`, `email` | input padrão |
+| `cpf` | input com formatação |
+| `cep` | input com busca ViaCEP |
+| `endereco` | input bloqueável via CEP |
+| `select` | dropdown |
+| `data`, `date` | date picker |
+| `textarea` | textarea |
+| `file` | placeholder c/ ícone 📄 + upload → nome + visualizar + remover |
+| `foto` | placeholder c/ ícone 📷 + upload → miniatura 64x64 + nome + remover |
 
-### Composables (5)
+### Validação de obrigatórios (dupla camada)
 
-| Composable | Instanciado por | Responsabilidade |
-|---|---|---|
-| `useFormConfig` | orquestrador | Fetch `/api/form/config`, monta blocos + perguntas sys-* |
-| `useFormAnswers` | orquestrador | Estado `answers`/`saveStatus`, `saveAnswer` (blur), `loadUserAnswers` |
-| `useFormFiles` | orquestrador | Upload/download/remoção via R2, injeta `answers` + `saveAnswer` |
-| `useFormCep` | orquestrador | Busca ViaCEP, lock/unlock campos dependentes |
-| `useFormInscricao` | orquestrador | Verificar/criar inscrição em processo seletivo |
+1. **Frontend**: varre `blocos`, checa `pergunta.obrigatorio` × `answers`
+2. **RPC** `aca_validar_form_obrigatorio`: consulta `aca_form_config` × `aca_resposta_form`
 
-### Fluxo de dados
+Se pendentes → toast com labels → bloqueia finalização.
+
+### Armazenamento de arquivos/fotos
+
+Respostas de tipo `file`/`foto` usam a coluna `id_arquivo` (FK → `global_arquivos`), não `resposta`:
 
 ```
-useFormConfig ──blocos──→ template (v-for blocos)
-useFormAnswers ──answers, saveStatus──→ FormPergunta (props)
-                              └──→ useFormFiles (deps)
-                              └──→ useFormCep (deps)
-useFormFiles ──fileNames, fileLinks──→ FormPergunta (props)
-useFormCep ──isEnderecoFieldDisabled──→ FormPergunta (props)
-useFormInscricao ──enviando──→ botão Finalizar (disabled)
+Upload:  answers[id] = fileUUID → saveAnswer → resposta="arquivo", id_arquivo=fileUUID
+Load:    answers[id] = id_arquivo (com fallback para resposta antiga)
+Delete:  answers[id] = null → saveAnswer → resposta=null, id_arquivo=null
 ```
 
-### Deep link
-
-`initialTab` lê `route.query.tab` no `setup()` para restaurar a tab ativa via URL (ex: `?tab=2` abre o terceiro bloco). Garantido no setup, não no `onMounted`, para SSR consistente.
-
-### Preservação de estado entre tabs
-
-Usa `v-show` (não `v-if`) nos blocos. Como os blocos são **dinâmicos** (quantidade desconhecida em tempo de compilação), o padrão `v-if` individual por componente de tab não se aplica. O `v-show` garante que as `FormPergunta` não sejam destruídas/recriadas ao trocar de aba.
-
----
-
-## APIs
+### APIs
 
 | Método | Endpoint | Pipeline |
 |---|---|---|
 | `GET` | `/api/form/config` | → RPC `aca_get_form_config_completo` |
 | `POST` | `/api/form/save` | → RPC `aca_upsert_resposta_form` |
 | `GET` | `/api/form/respostas` | → RPC `aca_get_respostas_usuario` |
-| `GET` | `/api/form/inscricao` | → RPC `aca_verificar_inscricao` |
+| `GET` | `/api/form/inscricao` | → `aca_verificar_inscricao` ou query direta por `id_inscricao` |
 | `POST` | `/api/form/inscricao` | → RPC `aca_criar_inscricao` |
+| `POST` | `/api/form/validar` | → RPC `aca_validar_form_obrigatorio` |
 | `GET` | `/api/r2/sign` | → R2 signed URL |
-| `POST` | `/api/r2/upload` | → R2 upload |
-| `POST` | `/api/r2/delete` | → R2 delete |
+| `POST` | `/api/r2/upload` | → R2 upload + insert global_arquivos (id_entidade, criado_por) |
+| `POST` | `/api/r2/delete` | → R2 delete + delete global_arquivos (count exact) |
 
 ---
 
-## Checklist de desacoplamento
+## `/form/sucesso`
 
-- [x] APIs próprias em `server/api/form/`
-- [x] APIs usam RPC (zero query direta)
-- [x] `$fetch` do `ofetch` removido dos composables — usa global do Nuxt
-- [x] `loadFormConfig` extraído para `useFormConfig` (zero `$fetch` inline no orquestrador)
-- [x] `useToast` instanciado na seção de composables
-- [x] `initialTab` via `route.query.tab` no setup (deep link)
-- [x] `v-show` preserva estado das FormPergunta entre tabs
-- [x] Orquestrador gerencia lifecycle (`onMounted`)
-- [ ] Componentes de tab extraídos (blocos são dinâmicos, `v-show` resolve)
-- [ ] APIs R2 em diretório dedicado (compartilhadas, não específicas do form)
+### Visão Geral
+
+Página exibida após finalização da inscrição. Só acessível com `?id_inscricao=UUID`.
+
+- Verifica se a inscrição existe no banco
+- Animação de check (bounce-in + draw-check)
+- Exibe ID da inscrição
+- Botão "Ir para o Início"
+
+### Estrutura
+
+```
+app/pages/form/sucesso.vue  ← standalone, sem layout
+server/api/form/inscricao.get.ts  ← busca por id_inscricao (query direta)
+```
 
 ---
 
 ## Histórico de mudanças
 
-### Refatoração de desacoplamento (2026-06-18)
-- `$fetch` do `ofetch` removido de `useFormAnswers`, `useFormFiles`, `useFormInscricao`
-- Criado `useFormConfig` — extrai `loadFormConfig` do orquestrador (zero `$fetch` inline)
+### 2026-06-22 — Foto, obrigatórios, validação, sucesso
+- Adicionado tipo `foto` no `FormPergunta.vue` (upload, miniatura, placeholder)
+- Refatorado `file` com placeholder estilizado (ícone 📄 + "Selecionar")
+- Refatorado armazenamento: `id_arquivo` (FK global_arquivos) em vez de `resposta`
+- `useFormAnswers.saveAnswer`: file/foto envia `id_arquivo` + dummy `resposta="arquivo"`
+- `useFormAnswers.loadUserAnswers`: file/foto lê `id_arquivo` com fallback compat
+- `useFormFiles`: adicionado `idEntidade` dep, envia `user_expandido_id`/`id_entidade` no upload/delete
+- Removido `confirm()` do browser — confirmação inline no `FormPergunta` (file + foto)
+- RPC `aca_upsert_resposta_form`: corrigido COALESCE → sobrescreve sempre
+- Migration: FK `global_arquivos.empresa_id` → `id_entidade` (user_entidades)
+- Migration: RLS delete policy corrigida via `user_expandido.id_user = auth.uid()`
+- RPC `aca_validar_form_obrigatorio` + BFF `/api/form/validar`
+- Validação dupla (front + RPC) antes de finalizar inscrição
+- Verificação de inscrição existente no `onMounted` — bloqueia form se já inscrito
+- Página `/form/sucesso` com animação após finalização
+- `inscricao.get.ts`: busca por `id_inscricao` como alternativa aos params de verificação
+
+### 2026-06-19 — Correção FK e migration
+- Migration: FK `aca_resposta_form.id_arquivo` corrigida de `glb_arquivo` → `global_arquivos`
+- Migration: RLS delete corrigida para `user_expandido`
+
+### 2026-06-18 — Refatoração de desacoplamento
+- `$fetch` do `ofetch` removido dos composables
+- Criado `useFormConfig`
 - `useToast` movido para seção de composables
-- `initialTab` via `route.query.tab` adicionado (deep link)
-- Template: `v-show` substitui `v-if` implícito via índice para preservar estado
+- `initialTab` via `route.query.tab`
+- Template: `v-show` para preservar estado entre tabs

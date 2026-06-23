@@ -110,6 +110,7 @@ export function useOfertaCiclos(deps: {
     id_modulo: string;
     descricao: string;
     ano_semestre: string | null;
+    turno: string | null;
     data_ini: string;
     data_fim: string;
     dias_semana: any[];
@@ -127,6 +128,7 @@ export function useOfertaCiclos(deps: {
           id_modulo: params.id_modulo,
           descricao: params.descricao,
           ano_semestre: params.ano_semestre,
+          turno: params.turno,
           data_ini: params.data_ini,
           data_fim: params.data_fim,
           usuario_id: store.user_expandido_id,

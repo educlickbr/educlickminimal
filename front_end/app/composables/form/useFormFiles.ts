@@ -17,6 +17,7 @@ export function useFormFiles(deps: {
   saveStatus: Ref<Record<string, string>>;
   saveAnswer: (perguntaId: string, tipo?: string) => Promise<void>;
   userExpandidoId: () => string | null;
+  idEntidade: () => string | null;
 }) {
   const fileNames = ref<Record<string, string>>({});
   const fileLinks = ref<Record<string, string>>({});
@@ -61,6 +62,8 @@ export function useFormFiles(deps: {
     formData.append("file", file as Blob);
     formData.append("saveToDb", "true");
     formData.append("escopo", "respostas_user");
+    formData.append("user_expandido_id", deps.userExpandidoId() || "");
+    formData.append("id_entidade", deps.idEntidade() || "");
 
     try {
       const response = (await $fetch("/api/r2/upload", {
@@ -86,15 +89,12 @@ export function useFormFiles(deps: {
     const fileId = deps.answers.value[perguntaId];
     if (!fileId) return;
 
-    if (!confirm("Tem certeza que deseja apagar e substituir este arquivo?"))
-      return;
-
     deps.saveStatus.value[perguntaId] = "Removendo...";
 
     try {
       const response = (await $fetch("/api/r2/delete", {
         method: "POST",
-        body: { fileId },
+        body: { fileId, user_expandido_id: deps.userExpandidoId() },
       })) as any;
 
       if (response.success) {

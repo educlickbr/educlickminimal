@@ -14,6 +14,7 @@ interface BuilderItem extends Pergunta {
   pergunta_id: string;
   largura: string;
   bloco_nome: string;
+  obrigatorio: boolean;
 }
 
 export function useFormulariosBuilder(deps: {
@@ -145,6 +146,7 @@ export function useFormulariosBuilder(deps: {
       pergunta_id: pergunta.id,
       largura: "2",
       bloco_nome: currentBloco.value,
+      obrigatorio: false,
     } as any);
     if ((pergunta as any).nome_interno === "cep") {
       let adicionados = 0;
@@ -161,6 +163,7 @@ export function useFormulariosBuilder(deps: {
                 ? "1"
                 : "2",
             bloco_nome: currentBloco.value,
+            obrigatorio: false,
           } as any);
           adicionados++;
         }
@@ -237,6 +240,7 @@ export function useFormulariosBuilder(deps: {
           pergunta_id: pergunta.id,
           largura: "2",
           bloco_nome: currentBloco.value,
+          obrigatorio: false,
         } as any);
         builderItems.value = items;
       } else if (src.type === "canvas") {
@@ -283,6 +287,7 @@ export function useFormulariosBuilder(deps: {
         pergunta_id: pergunta.id,
         largura: "1",
         bloco_nome: currentBloco.value,
+        obrigatorio: false,
       } as BuilderItem;
       const items = [...builderItems.value];
       if (isTargetFull) {
@@ -345,6 +350,7 @@ export function useFormulariosBuilder(deps: {
         pergunta_id: pergunta.id,
         largura: "1",
         bloco_nome: currentBloco.value,
+        obrigatorio: false,
       } as BuilderItem);
       builderItems.value = items;
     }
@@ -360,6 +366,18 @@ export function useFormulariosBuilder(deps: {
       builderItems.value[targetIndex] = {
         ...item,
         largura: String(item.largura) === "1" ? "2" : "1",
+      };
+  }
+
+  function toggleObrigatorio(indexInGrid: number) {
+    const realItem = currentBlocoItems.value[indexInGrid];
+    if (!realItem) return;
+    const targetIndex = builderItems.value.indexOf(realItem);
+    const item = builderItems.value[targetIndex];
+    if (item)
+      builderItems.value[targetIndex] = {
+        ...item,
+        obrigatorio: !item.obrigatorio,
       };
   }
 
@@ -458,6 +476,7 @@ export function useFormulariosBuilder(deps: {
           pergunta_id: r.pergunta_id,
           largura: r.largura,
           bloco_nome: r.bloco_nome || "Dados Gerais",
+          obrigatorio: !!r.obrigatorio,
         }));
       } else {
         builderItems.value = [];
@@ -492,8 +511,16 @@ export function useFormulariosBuilder(deps: {
           bloco_ordem: bOrdem,
           pergunta_ordem: index + 1,
           largura: b.largura,
+          obrigatorio: !!b.obrigatorio,
         };
       });
+      console.log(
+        "SAVE items com obrigatorio:",
+        itemsToSave.map((i: any) => ({
+          label: i.bloco_nome,
+          obrigatorio: i.obrigatorio,
+        })),
+      );
       const res = (await $fetch("/api/formularios/form_config", {
         method: "POST",
         body: {
@@ -575,6 +602,7 @@ export function useFormulariosBuilder(deps: {
     onSlotDragLeave,
     onSlotDrop,
     toggleLargura,
+    toggleObrigatorio,
     removeBuilderItem,
     mudarBlocoItem,
     abrirModalNovoBloco,

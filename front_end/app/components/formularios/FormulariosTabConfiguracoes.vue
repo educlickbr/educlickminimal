@@ -207,8 +207,8 @@
                             </h4>
                             <button
                                 @click="builderCtx.saveFormConfig"
-                                class="add-btn"
                                 :disabled="builderCtx.savingBuilder.value"
+                                class="px-5 py-2.5 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#8b5cf6] border border-[rgba(139,92,246,0.4)] text-white text-[11px] font-black uppercase tracking-widest hover:from-[#6d28d9] hover:to-[#7c3aed] hover:shadow-lg hover:shadow-[rgba(139,92,246,0.45)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                             >
                                 {{
                                     builderCtx.savingBuilder.value
@@ -496,6 +496,13 @@
                                                     )
                                                 }}</span
                                             >
+                                            <!-- Obrigatório badge -->
+                                            <span
+                                                v-if="item.obrigatorio"
+                                                class="text-amber-400 text-[8px] font-black"
+                                                title="Campo obrigatório"
+                                                >*</span
+                                            >
                                         </div>
                                         <div
                                             class="h-8 rounded bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] w-full flex items-center px-3 text-xs text-white/30 truncate"
@@ -510,6 +517,23 @@
                                         class="flex flex-col items-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
                                         <div class="canvas-actions">
+                                            <button
+                                                type="button"
+                                                @click.prevent.stop="
+                                                    builderCtx.toggleObrigatorio(
+                                                        idx,
+                                                    )
+                                                "
+                                                class="action-btn"
+                                                :class="
+                                                    item.obrigatorio
+                                                        ? 'text-amber-400'
+                                                        : ''
+                                                "
+                                                title="Obrigatório"
+                                            >
+                                                *
+                                            </button>
                                             <button
                                                 type="button"
                                                 @click.prevent.stop="
@@ -720,7 +744,12 @@ function voltarParaLista() {
     listaCtx.fetchFormulariosSalvos();
 }
 
-defineExpose({ init: listaCtx.fetchFormulariosSalvos });
+defineExpose({
+    init: async () => {
+        await listaCtx.fetchContexts();
+        await listaCtx.fetchFormulariosSalvos();
+    },
+});
 </script>
 
 <style scoped>

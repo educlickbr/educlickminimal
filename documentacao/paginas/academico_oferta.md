@@ -81,6 +81,83 @@ server/api/academico_oferta/
 
 ## Histórico de mudanças
 
+### Redesign Visual — Cursos (2026-06-23)
+
+**`OfertaTabCursos.vue`** — Cards de cursos reestruturados com o mesmo padrão dos demais:
+
+- Layout alterado de **horizontal flat** para **vertical em card** com hierarquia clara
+- **Grid de 2 colunas** máximo (`grid-cols-1` mobile / `grid-cols-2` desktop)
+- **Accent bar lateral violet** animada no hover
+- **Botões de ação ocultos** — editar e excluir aparecem apenas no hover
+- Hover com `translateY(-2px)` + glow violet sutil
+- **Dois badges distintos**: área acadêmica (violet mais intenso) e contagem de módulos (violet sutil) — hierarquia visual entre ambos
+- Empty state com ícone de camadas e mensagem de instrução
+
+---
+
+### Redesign Visual — Programas (2026-06-23)
+
+**`OfertaTabProgramas.vue`** — Cards de programas:
+
+- Mesmo padrão de card vertical com accent bar, hover-only actions e 2 colunas
+- Avatar com inicial do nome, badge de ciclos com ícone de relógio
+- Bloco de curso com label `CURSO` em pill violet sutil
+
+**`ModalPrograma.vue`** — Step indicator:
+
+- Substituído o row horizontal denso por **step indicator compacto**
+- Bubble circular com três estados: **active** (violet), **done** (green + ✓ SVG), **future** (muted)
+- Conectores como **linhas finas** entre steps — ficam verdes quando o step é concluído
+- Labels `10px` uppercase para não quebrar em telas menores
+
+**`programa/ProgramaStepCiclos.vue`**:
+
+- Select de curso com label padronizada
+- Ciclos exibidos como **cards clicáveis** com checkbox visual customizado (quadrado violet no selecionado)
+- Contador `X / Y selecionados` no header da lista
+- Loading e empty state com ícones SVG e mensagem descritiva
+- Aviso de matriz incompleta com card de alerta orange
+
+**`programa/ProgramaStepConclusao.vue`**:
+
+- Campos com `step-field` padronizado e labels de 9px uppercase
+- Opções de estratégia como **radio cards** com borda colorida e estado selecionado claro
+- Área automática exibida como campo readonly em itálico
+- Nomes múltiplos com tag orange identificando cada ciclo separadamente
+
+**`programa/ProgramaStepProcessos.vue`**:
+
+- Header com contador e botão "Novo Processo" alinhados
+- Processo identificado por **pill badge violet** com ícone de documento
+- Datas divididas em **dois grupos** lado a lado: Processo Seletivo (violet) / Matrícula (green + tag "Opcional")
+- Botão remover com ícone de lixeira, oculto quando há apenas um processo
+- Validação com ícones inline SVG (triângulo warn / círculo ok)
+
+---
+
+### Redesign Visual — Ciclos (2026-06-23)
+
+**`OfertaTabCiclos.vue`** — Cards de ciclos reestruturados:
+
+- Layout alterado de **horizontal flat** (tudo em uma linha) para **vertical em card** com hierarquia clara
+- Padding aumentado para `18–20px` com espaçamento interno generoso
+- **Botões de ação (editar/excluir) ocultos por padrão**, aparecem apenas no hover — alinhado ao padrão do design system
+- Bloco "Período" com label dedicada e seta SVG, substituindo o formato inline com `→`
+- **Accent bar lateral violet** animada no hover (padrão `.comp-card` do design system)
+- Hover com `translateY(-2px)` + glow violet sutil
+
+**`ciclo/CicloTabProgramacao.vue`** — Formulário de programação do cronograma:
+
+- Seções divididas com **header numerado** (ícone step circular + título + sublabel descritiva)
+- Formulários em `flex-wrap` com `gap: 12px` — elimina compressão dos campos
+- Campos de horário separados em **Início** e **Fim** individuais (antes agrupados com traço)
+- Chips de dias com padding confortável `6px 12px` e separação visual da lista de campos
+- Resultados de simulação exibidos em **grid de cards** individuais (Encontros, Início, Fim Previsto)
+- Card de status da carga em destaque com ícone SVG e texto hierarquizado
+- Cronograma detalhado com `border-left` colorido por tipo e `max-height` com scroll
+
+---
+
 ### Desacoplamento de modais + Composable do Programa (2026-06-19)
 
 **5 modais corrigidos**: `$fetch` inline removido de ModalArea, ModalCurso, ModalModulo, ModalCiclo, ModalPrograma. **25 `$fetch`** extraídos para composables.

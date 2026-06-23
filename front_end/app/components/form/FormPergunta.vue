@@ -106,15 +106,40 @@
             v-else-if="pergunta.tipo_pergunta === 'file'"
             class="flex flex-col gap-2"
         >
-            <input
+            <!-- Estado sem arquivo: placeholder com ícone de documento -->
+            <div
                 v-if="!answers[pergunta.pergunta_id]"
-                type="file"
-                @change="(e) => onFileUpload(e, pergunta.pergunta_id)"
-                class="w-full text-xs text-gray-400 file:mr-4 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-wider file:bg-primary/20 file:text-primary hover:file:bg-primary/30 file:cursor-pointer file:transition-all"
-                :style="{
-                    height: pergunta.altura ? pergunta.altura + 'px' : '36px',
-                }"
-            />
+                @click="triggerFileUpload"
+                class="flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-3 cursor-pointer hover:border-primary/30 hover:bg-white/[0.06] transition-all"
+            >
+                <div
+                    class="flex items-center justify-center w-16 h-16 rounded-lg border border-white/10 bg-white/[0.06] flex-shrink-0"
+                >
+                    <Icon
+                        name="ph:file-light"
+                        class="w-6 h-6 text-secondary/30"
+                    />
+                </div>
+                <div
+                    class="flex-1 min-w-0 flex items-center justify-between gap-2"
+                >
+                    <span class="text-[11px] text-secondary/40 font-medium">
+                        Nenhum arquivo
+                    </span>
+                    <span
+                        class="text-[9px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 transition-all"
+                    >
+                        Selecionar
+                    </span>
+                </div>
+                <input
+                    ref="fileInputRef"
+                    type="file"
+                    class="hidden"
+                    @change="(e) => onFileUpload(e, pergunta.pergunta_id)"
+                />
+            </div>
+            <!-- Arquivo carregado -->
             <div
                 v-else
                 class="flex items-center justify-between bg-white/[0.03] border border-white/10 rounded-xl px-4 py-2"
@@ -140,13 +165,135 @@
                         }}
                     </span>
                 </div>
+                <template v-if="pendingRemove === pergunta.pergunta_id">
+                    <div
+                        class="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider"
+                    >
+                        <span class="text-red-400/80">Tem certeza?</span>
+                        <button
+                            @click="confirmRemove(pergunta.pergunta_id)"
+                            class="px-2 py-1 rounded bg-red-500/80 hover:bg-red-500 text-white transition-colors"
+                        >
+                            Sim
+                        </button>
+                        <button
+                            @click="cancelRemove"
+                            class="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-gray-400 transition-colors"
+                        >
+                            Não
+                        </button>
+                    </div>
+                </template>
                 <button
-                    @click="onRemoveFile(pergunta.pergunta_id)"
+                    v-else
+                    @click="requestRemove(pergunta.pergunta_id)"
                     class="flex-shrink-0 text-red-400/60 hover:text-red-400 transition-colors ml-2"
                     title="Remover arquivo"
                 >
                     <Icon name="ph:trash-light" class="w-4 h-4" />
                 </button>
+            </div>
+        </div>
+
+        <!-- foto -->
+        <div
+            v-else-if="pergunta.tipo_pergunta === 'foto'"
+            class="flex flex-col gap-2"
+        >
+            <!-- Estado sem foto: placeholder com moldura e máquina -->
+            <div
+                v-if="!answers[pergunta.pergunta_id]"
+                @click="triggerFotoUpload"
+                class="flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-3 cursor-pointer hover:border-primary/30 hover:bg-white/[0.06] transition-all"
+            >
+                <div
+                    class="flex items-center justify-center w-16 h-16 rounded-lg border border-white/10 bg-white/[0.06] flex-shrink-0"
+                >
+                    <Icon
+                        name="ph:camera-light"
+                        class="w-6 h-6 text-secondary/30"
+                    />
+                </div>
+                <div
+                    class="flex-1 min-w-0 flex items-center justify-between gap-2"
+                >
+                    <span class="text-[11px] text-secondary/40 font-medium">
+                        Nenhuma foto
+                    </span>
+                    <span
+                        class="text-[9px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 transition-all"
+                    >
+                        Selecionar
+                    </span>
+                </div>
+                <input
+                    ref="fotoInputRef"
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    @change="(e) => onFileUpload(e, pergunta.pergunta_id)"
+                />
+            </div>
+            <!-- Estado com foto carregada -->
+            <div
+                v-else
+                class="flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-3"
+            >
+                <!-- Loading state enquanto a URL da imagem não carregou -->
+                <template v-if="!fileLinks?.[pergunta.pergunta_id]">
+                    <div
+                        class="flex items-center justify-center w-16 h-16 rounded-lg border border-white/10 bg-white/[0.06] text-[9px] text-secondary/40"
+                    >
+                        Carregando...
+                    </div>
+                </template>
+                <!-- Miniatura da foto à esquerda com moldura -->
+                <img
+                    v-else
+                    :src="fileLinks?.[pergunta.pergunta_id]"
+                    :alt="pergunta.label"
+                    class="w-16 h-16 rounded-lg border border-white/10 object-cover flex-shrink-0"
+                />
+                <!-- Informações do arquivo à direita -->
+                <div
+                    class="flex-1 min-w-0 flex items-center justify-between gap-2"
+                >
+                    <span
+                        class="text-[11px] text-gray-400 truncate font-medium"
+                        :title="fileNames?.[pergunta.pergunta_id]"
+                    >
+                        {{
+                            fileNames?.[pergunta.pergunta_id] || "Foto anexada"
+                        }}
+                    </span>
+                    <template v-if="pendingRemove === pergunta.pergunta_id">
+                        <div
+                            class="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider"
+                        >
+                            <span class="text-red-400/80">Tem certeza?</span>
+                            <button
+                                @click="confirmRemove(pergunta.pergunta_id)"
+                                class="px-2 py-1 rounded bg-red-500/80 hover:bg-red-500 text-white transition-colors"
+                            >
+                                Sim
+                            </button>
+                            <button
+                                @click="cancelRemove"
+                                class="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-gray-400 transition-colors"
+                            >
+                                Não
+                            </button>
+                        </div>
+                    </template>
+                    <button
+                        v-else
+                        @click="requestRemove(pergunta.pergunta_id)"
+                        class="flex-shrink-0 text-red-400/60 hover:text-red-400 transition-colors"
+                        title="Remover foto"
+                    >
+                        <Icon name="ph:trash-light" class="w-4 h-4" />
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -173,7 +320,33 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
 import { isDateQuestion } from "~/composables/form/useFormAnswers";
+
+const fotoInputRef = ref<HTMLInputElement | null>(null);
+const fileInputRef = ref<HTMLInputElement | null>(null);
+const pendingRemove = ref<string | null>(null);
+
+function triggerFotoUpload() {
+    fotoInputRef.value?.click();
+}
+
+function triggerFileUpload() {
+    fileInputRef.value?.click();
+}
+
+function requestRemove(perguntaId: string) {
+    pendingRemove.value = perguntaId;
+}
+
+function confirmRemove(perguntaId: string) {
+    pendingRemove.value = null;
+    emit("removeFile", perguntaId);
+}
+
+function cancelRemove() {
+    pendingRemove.value = null;
+}
 
 const props = defineProps<{
     pergunta: any;

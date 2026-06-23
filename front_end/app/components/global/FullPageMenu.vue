@@ -668,7 +668,7 @@ const userInitial = computed(() => {
                         class="bg-div-15 border border-secondary/5 rounded-xl overflow-hidden shadow-sm flex flex-col"
                     >
                         <button
-                            @click="handleNavigation('/meus_processos')"
+                            @click="handleNavigation('/meus-processos')"
                             class="menu-item group"
                         >
                             <div class="menu-icon bg-sky-500/10 text-sky-500">

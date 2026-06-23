@@ -27,45 +27,28 @@
                 </button>
             </div>
             <!-- Step indicator -->
-            <div
-                class="modal-tabs flex gap-8 items-center px-6 py-4 bg-background"
-            >
-                <div
-                    v-for="(step, idx) in steps"
-                    :key="step.key"
-                    class="flex items-center gap-3 transition-opacity duration-300"
-                    :class="activeStep >= idx ? 'opacity-100' : 'opacity-30'"
-                >
+            <div class="step-indicator">
+                <template v-for="(step, idx) in steps" :key="step.key">
                     <div
-                        class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border-2"
-                        :class="
-                            activeStep === idx
-                                ? 'border-primary text-primary bg-primary/10'
-                                : activeStep > idx
-                                  ? 'border-green-500 text-green-500 bg-green-500/10'
-                                  : 'border-secondary/40 text-secondary/40'
-                        "
+                        class="step-item"
+                        :class="{
+                            'step-item--active': activeStep === idx,
+                            'step-item--done':   activeStep > idx,
+                            'step-item--future': activeStep < idx,
+                        }"
                     >
-                        <Icon
-                            v-if="activeStep > idx"
-                            name="ph:check-bold"
-                        /><span v-else>{{ idx + 1 }}</span>
+                        <div class="step-bubble">
+                            <svg v-if="activeStep > idx" width="10" height="10" viewBox="0 0 10 10" fill="none">
+                                <path d="M2 5l2.5 2.5L8 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span v-else>{{ idx + 1 }}</span>
+                        </div>
+                        <span class="step-label">{{ step.label }}</span>
                     </div>
-                    <span
-                        class="text-xs font-bold uppercase tracking-widest"
-                        :class="
-                            activeStep >= idx
-                                ? 'text-primary'
-                                : 'text-secondary/40'
-                        "
-                        >{{ step.label }}</span
-                    >
-                    <Icon
-                        v-if="idx < steps.length - 1"
-                        name="ph:caret-right-bold"
-                        class="w-3 h-3 text-secondary/20 ml-4"
-                    />
-                </div>
+                    <div v-if="idx < steps.length - 1" class="step-connector">
+                        <div class="step-connector-line" :class="activeStep > idx ? 'step-connector-line--done' : ''"></div>
+                    </div>
+                </template>
             </div>
             <!-- Step content -->
             <div
@@ -473,10 +456,80 @@ watch(
 </script>
 
 <style scoped>
+/* ── Step Indicator ──────────────────────────────── */
+.step-indicator {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 0;
+    flex-shrink: 0;
+}
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.step-bubble {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 900;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+.step-item--active .step-bubble {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: #8b5cf6;
+    color: #c4b5fd;
+}
+.step-item--done .step-bubble {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #4ade80;
+}
+.step-item--future .step-bubble {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.25);
+}
+.step-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: color 0.2s ease;
+}
+.step-item--active .step-label { color: #c4b5fd; }
+.step-item--done   .step-label { color: rgba(74, 222, 128, 0.8); }
+.step-item--future .step-label { color: rgba(255, 255, 255, 0.2); }
+
+.step-connector {
+    flex: 1;
+    min-width: 16px;
+    max-width: 40px;
+    padding: 0 6px;
+}
+.step-connector-line {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 1px;
+    transition: background 0.3s ease;
+}
+.step-connector-line--done { background: rgba(34, 197, 94, 0.3); }
+
 .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
+
     background: rgba(139, 92, 246, 0.1);
     border-radius: 10px;
 }
