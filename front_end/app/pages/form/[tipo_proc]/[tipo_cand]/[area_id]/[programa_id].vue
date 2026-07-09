@@ -8,6 +8,7 @@ import { useFormFiles } from "~/composables/form/useFormFiles";
 import { useFormCep } from "~/composables/form/useFormCep";
 import { useFormConfig } from "~/composables/form/useFormConfig";
 import { useFormInscricao } from "~/composables/form/useFormInscricao";
+import { useFormMatricula } from "~/composables/form/useFormMatricula";
 import { useToast } from "~/composables/useToast";
 
 const route = useRoute();
@@ -62,6 +63,7 @@ const cepCtx = useFormCep({
 });
 
 const inscricaoCtx = useFormInscricao();
+const matriculaCtx = useFormMatricula();
 
 // ── Bloqueio: verifica se já está inscrito ─────────────────
 const jaInscrito = ref(false);
@@ -108,8 +110,64 @@ function onPerguntaViewFile(perguntaId: string) {
     filesCtx.viewFile(perguntaId);
 }
 
-// ── Finalizar Inscrição ──────────────────────────────────
+// ── Finalizar Inscrição / Matrícula ──────────────────────
 async function handleFinalizarInscricao() {
+    // ── FLUXO: MATRÍCULA ──────────────────────────────────
+    if (tipo_proc === 'matricula') {
+        if (!store.user_expandido_id) {
+            showToast("Usuário não identificado.", { type: "error" });
+            return;
+        }
+
+        // Valida campos obrigatórios (frontend)
+        const pendentes: string[] = [];
+        for (const bloco of configCtx.blocos.value) {
+            for (const pergunta of bloco.perguntas) {
+                if (!pergunta.obrigatorio) continue;
+                const val = answersCtx.answers.value[pergunta.pergunta_id];
+                if (val === undefined || val === null || val === "") {
+                    pendentes.push(pergunta.label);
+                }
+            }
+        }
+        if (pendentes.length > 0) {
+            showToast(`Preencha os campos obrigatórios: ${pendentes.join(", ")}`, {
+                type: "error",
+                duration: 5000,
+            });
+            return;
+        }
+
+        // Buscar oferta do programa pra saber se é pago
+        try {
+            const res = (await $fetch("/api/public/ofertas", {
+                params: { id_entidade: idEntidade.value },
+            })) as any;
+            const oferta = res?.itens?.find((o: any) => o.programa_id === programa_id);
+
+            if (oferta?.slug && oferta.valor_centavos > 0) {
+                // Programa pago → CHECKOUT PRIMEIRO (sem criar matrícula ainda)
+                // A matrícula será criada pelo webhook após confirmação do pagamento
+                router.push(`/checkout/${oferta.slug}?id_programa=${programa_id}`);
+            } else {
+                // Programa gratuito → cria matrícula direto
+                const { sucesso, matricula } = await matriculaCtx.finalizarMatricula({
+                    id_entidade: idEntidade.value,
+                    id_programa: programa_id,
+                    id_usuario: store.user_expandido_id,
+                    toast: { showToast },
+                });
+                if (sucesso) {
+                    router.push(`/form/sucesso?tipo=matricula&id_matricula=${matricula?.id}`);
+                }
+            }
+        } catch {
+            showToast("Erro ao processar matrícula.", { type: "error" });
+        }
+        return;
+    }
+
+    // ── FLUXO: PROCESSO SELETIVO (original) ───────────────
     const idProcesso = (route.query.id_processo_seletivo as string) || "";
 
     if (!idProcesso) {
@@ -168,7 +226,7 @@ async function handleFinalizarInscricao() {
         });
 
     if (sucesso && !jaExistia && inscricao?.id) {
-        router.push(`/form/sucesso?id_inscricao=${inscricao.id}`);
+        router.push(`/form/sucesso?tipo=seletivo&id_inscricao=${inscricao.id}`);
     } else if (jaExistia) {
         showToast("Você já está inscrito neste processo.", {
             type: "info",

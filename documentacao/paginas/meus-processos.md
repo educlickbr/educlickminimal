@@ -179,6 +179,19 @@ A RPC `aca_get_minhas_inscricoes` é `SECURITY INVOKER` — resolve o `user_expa
 
 ## Histórico de mudanças
 
+### 2026-06-28 — Redesign Visual e Grid de 2 Colunas
+
+**`pages/meus-processos/index.vue`** — Cards e estrutura visual:
+- Layout modificado de lista vertical flat de largura total para **grid de 2 colunas** máximo (`grid-cols-1` mobile / `grid-cols-2` desktop)
+- **Accent bar lateral violet** adicionada ao card, iluminando com gradiente animado no hover
+- Efeito de hover aprimorado com `translateY(-2px)` e sombra sutil
+- Badges reorganizados em linha contínua no topo (área, ano/semestre, turno)
+- Etapas de status (Dados, Docs, Candidatura) reestilizadas como **pílulas arredondadas com bullets de status coloridos** (âmbar para pendente, verde para aprovado, vermelho para reprovado)
+- Botões de ação alinhados na base do card, com botão "Detalhes" secundário estilizado em outline premium e botão "Matricular" primário com visual gradiente desabilitado
+- Empty state reestilizado com ícone SVG de pasta e botão de chamada para ação
+
+---
+
 ### 2026-06-23 — Página completa de Meus Processos
 
 **Pré-requisito: Turno no Ciclo:**

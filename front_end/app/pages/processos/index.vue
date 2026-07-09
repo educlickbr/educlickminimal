@@ -137,61 +137,6 @@ onMounted(async () => {
     gap: 1rem;
 }
 
-/* ── Tabs ── */
-.tabs-bar {
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
-}
-
-.tabs-nav {
-    display: flex;
-    gap: 0.25rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 0.75rem;
-    padding: 0.25rem;
-    width: fit-content;
-}
-
-.tab-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.625rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.3);
-    transition: all 0.15s;
-    border: none;
-    background: none;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.tab-btn:hover {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.tab-btn--active {
-    background: rgba(139, 92, 246, 0.15);
-    color: #a78bfa;
-}
-
-.tab-badge {
-    font-size: 0.6rem;
-    font-weight: 800;
-    padding: 0.1rem 0.4rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.35);
-}
-
-.tab-btn--active .tab-badge {
-    background: rgba(139, 92, 246, 0.2);
-    color: #c4b5fd;
-}
 
 .empty-state {
     display: flex;

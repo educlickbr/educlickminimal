@@ -34,6 +34,7 @@ watch(
         const areaId = props.activeTab === "todas" ? null : props.activeTab;
         props.ctx.fetchInscricoes(areaId);
     },
+    { immediate: true },
 );
 
 // Resetar página ao mudar aba ou filtro
@@ -86,38 +87,25 @@ function statusBadgeLabel(label: string, status: string | undefined) {
 
 <template>
     <!-- Tabs -->
-    <div class="tabs-bar mb-6 shrink-0">
+    <div class="page-top-row">
         <nav class="tabs-nav">
             <button
-                @click="setActiveTab('todas')"
+                v-for="tab in [{ key: 'todas', label: 'Todas' }, ...areas.map((a: any) => ({ key: a.id, label: a.nome_area }))]"
+                :key="tab.key"
+                @click="setActiveTab(tab.key)"
                 :class="[
                     'tab-btn',
-                    activeTab === 'todas' ? 'tab-btn--active' : '',
+                    activeTab === tab.key ? 'tab-btn--active' : '',
                 ]"
             >
-                Todas
-                <span class="tab-badge">{{ areas.length }}</span>
-            </button>
-            <button
-                v-for="area in areas"
-                :key="area.id"
-                @click="setActiveTab(area.id)"
-                :class="[
-                    'tab-btn',
-                    activeTab === area.id ? 'tab-btn--active' : '',
-                ]"
-            >
-                {{ area.nome_area }}
-                <span v-if="area.qtd_processos_ativos > 0" class="tab-badge">
-                    {{ area.qtd_processos_ativos }}
-                </span>
+                {{ tab.label }}
             </button>
         </nav>
     </div>
 
     <!-- Filtros -->
     <div
-        class="flex flex-wrap items-center gap-3 mb-8 bg-[#0f0f17] border border-white/5 rounded-xl p-3 shrink-0"
+        class="flex flex-wrap items-center gap-3 mb-4 bg-[#0f0f17] border border-white/5 rounded-xl p-3 shrink-0"
     >
         <select
             v-model="ctx.filtroAnoSemestre.value"
@@ -359,3 +347,41 @@ function statusBadgeLabel(label: string, status: string | undefined) {
         </div>
     </div>
 </template>
+
+<style scoped>
+.page-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.tabs-nav {
+    display: flex;
+    gap: 0.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 0.75rem;
+    padding: 0.25rem;
+}
+.tab-btn {
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.3);
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+.tab-btn:hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+.tab-btn--active {
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
+}
+</style>

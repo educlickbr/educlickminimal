@@ -204,7 +204,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from "vue";
 import { useToast } from "~/composables/useToast";
-import { getAnoSemestre, getAnoSemestreList } from "~~/utils/ano_semestre";
+import { getAnoSemestre, getAnoSemestreList } from "~/utils/anoSemestre";
 import CicloTabProgramacao from "./ciclo/CicloTabProgramacao.vue";
 
 interface CicloCtx {

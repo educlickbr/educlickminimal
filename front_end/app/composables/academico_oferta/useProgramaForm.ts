@@ -169,6 +169,8 @@ export function useProgramaForm(deps: {
       matricula_inicio: string | null;
       matricula_fim: string | null;
     }[];
+    gratuito: boolean;
+    exige_processo_seletivo: boolean;
   }): Promise<boolean> {
     loading.value = true;
     try {
@@ -208,6 +210,8 @@ export function useProgramaForm(deps: {
             matricula_inicio: processoInicial?.matricula_inicio || null,
             matricula_fim: processoFinal?.matricula_fim || null,
             processos: processosPayload,
+            gratuito: params.gratuito,
+            exige_processo_seletivo: params.exige_processo_seletivo,
           },
         })) as any;
         if (res?.success) {
@@ -237,6 +241,8 @@ export function useProgramaForm(deps: {
         matricula_inicio: processoInicial?.matricula_inicio || null,
         matricula_fim: processoFinal?.matricula_fim || null,
         processos: processosPayload,
+        gratuito: params.gratuito,
+        exige_processo_seletivo: params.exige_processo_seletivo,
       };
 
       const res = (await $fetch("/api/programas/criar_com_ciclos", {

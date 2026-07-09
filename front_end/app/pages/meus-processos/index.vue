@@ -4,6 +4,7 @@ definePageMeta({ layout: "base" });
 import { useMeusProcessos } from "~/composables/meus-processos/useMeusProcessos";
 
 const ctx = useMeusProcessos();
+const matriculaLoading = ref<string | null>(null);
 
 // Modal de Detalhes (reaproveitado de processos)
 const showDetalhes = ref(false);
@@ -12,6 +13,14 @@ const detalhesId = ref<string | null>(null);
 function verDetalhes(id: string) {
     detalhesId.value = id;
     showDetalhes.value = true;
+}
+
+async function irParaMatricula(insc: any) {
+    if (insc?.id_programa) {
+        // Vai pro formulário de matrícula (que decide se redireciona ao checkout)
+        // area_id = "0" significa sem filtro de área
+        navigateTo(`/form/matricula/estudante/0/${insc.id_programa}`);
+    }
 }
 
 onMounted(() => {
@@ -50,17 +59,16 @@ const paginasVisiveis = computed(() => {
         <!-- Cabeçalho -->
         <div class="flex items-center justify-between mb-6 shrink-0">
             <div>
-                <h2 class="text-xl font-black tracking-tight">
+                <h2 class="text-xl font-black tracking-tight text-white">
                     Minhas Inscrições
                 </h2>
-                <p class="text-[11px] text-secondary/60 font-bold mt-1">
-                    Acompanhe o status das suas inscrições em processos
-                    seletivos
+                <p class="text-[11px] text-secondary/60 font-bold mt-1 uppercase tracking-wider">
+                    Acompanhe o status das suas inscrições em processos seletivos
                 </p>
             </div>
             <NuxtLink
                 to="/oferta"
-                class="px-5 py-2.5 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
+                class="add-btn"
             >
                 Ver Cursos
             </NuxtLink>
@@ -69,11 +77,10 @@ const paginasVisiveis = computed(() => {
         <!-- Loading -->
         <div
             v-if="ctx.isLoading.value"
-            class="flex-1 flex items-center justify-center"
+            class="flex-1 flex flex-col items-center justify-center gap-3"
         >
-            <div
-                class="w-8 h-8 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"
-            />
+            <div class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin" />
+            <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">Carregando inscrições...</span>
         </div>
 
         <!-- Empty -->
@@ -81,154 +88,143 @@ const paginasVisiveis = computed(() => {
             v-else-if="ctx.inscricoes.value.length === 0"
             class="flex-1 flex items-center justify-center"
         >
-            <div
-                class="text-center py-20 bg-white/[0.02] border-2 border-dashed border-white/10 rounded-2xl max-w-md mx-auto w-full"
-            >
-                <Icon
-                    name="ph:folder-open-light"
-                    class="w-16 h-16 text-secondary/20 mx-auto mb-4"
-                />
-                <p class="text-sm font-bold text-secondary/60">
-                    Nenhuma inscrição encontrada
-                </p>
-                <p class="text-[11px] text-secondary/40 mt-2">
-                    Você ainda não se inscreveu em nenhum processo seletivo.
-                </p>
+            <div class="empty-state max-w-md mx-auto w-full">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" class="mb-3 text-white/25">
+                    <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m10 0V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2m10 0H7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <p class="text-sm font-bold text-white/30">Nenhuma inscrição encontrada</p>
+                <p class="text-[10px] font-bold text-white/15 mt-1 uppercase tracking-widest">Você ainda não se inscreveu em nenhum processo seletivo</p>
                 <NuxtLink
                     to="/oferta"
-                    class="inline-block mt-6 px-6 py-2.5 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest hover:bg-primary-dark transition-all"
+                    class="empty-cta mt-4"
                 >
                     Ver cursos disponíveis
                 </NuxtLink>
             </div>
         </div>
 
-        <!-- Cards -->
+        <!-- Grid de Cards (2 colunas) -->
         <template v-else>
-            <div class="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-1">
-                <div
-                    v-for="insc in ctx.inscricoes.value"
-                    :key="insc.id_inscricao"
-                    class="group bg-[#0f0f17] border border-white/5 rounded-xl p-5 hover:border-primary/30 transition-all flex flex-col md:flex-row gap-4 items-start md:items-center justify-between"
-                >
-                    <!-- Info Column -->
-                    <div class="flex-1 min-w-0">
-                        <!-- Badges de área + ano/semestre -->
-                        <div class="flex items-center gap-2 mb-2">
-                            <span
-                                v-if="insc.nome_area"
-                                class="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary text-[9px] font-black uppercase tracking-widest"
-                            >
-                                {{ insc.nome_area }}
-                            </span>
-                            <span
-                                v-if="insc.ano_semestre"
-                                class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-secondary text-[9px] font-bold uppercase tracking-wider"
-                            >
-                                {{ ctx.formatarAnoSemestre(insc.ano_semestre) }}
-                            </span>
-                            <span
-                                v-if="insc.turno"
-                                class="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-black uppercase tracking-widest"
-                            >
-                                {{ insc.turno }}
-                            </span>
+            <div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div
+                        v-for="insc in ctx.inscricoes.value"
+                        :key="insc.id_inscricao"
+                        class="insc-card"
+                        @click="verDetalhes(insc.id_inscricao)"
+                    >
+                        <div class="insc-accent-bar" />
+                        <div class="insc-card-inner">
+                            
+                            <!-- Top: Avatar + Badges de Categoria -->
+                            <div class="insc-card-header">
+                                <div class="insc-avatar">
+                                    {{ (insc.nome_curso || insc.nome_processo || "?")[0].toUpperCase() }}
+                                </div>
+                                <div class="insc-header-badges">
+                                    <span
+                                        v-if="insc.nome_area"
+                                        class="insc-badge-area"
+                                    >
+                                        {{ insc.nome_area }}
+                                    </span>
+                                    <span
+                                        v-if="insc.ano_semestre"
+                                        class="insc-badge-semestre"
+                                    >
+                                        {{ ctx.formatarAnoSemestre(insc.ano_semestre) }}
+                                    </span>
+                                    <span
+                                        v-if="insc.turno"
+                                        class="insc-badge-turno"
+                                    >
+                                        {{ insc.turno }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Nome do Curso / Processo -->
+                            <div class="mt-1">
+                                <h3 class="insc-name">
+                                    {{ insc.nome_curso || insc.nome_processo }}
+                                </h3>
+                                <p class="insc-date">
+                                    Inscrito em {{ ctx.formatarData(insc.data_inscricao) }}
+                                </p>
+                            </div>
+
+                            <!-- Etapas de Status -->
+                            <div class="insc-status-row">
+                                <!-- Dados -->
+                                <div 
+                                    class="insc-status-item"
+                                    :class="{
+                                        'insc-status-item--pending': insc.status_dados === 'pendente',
+                                        'insc-status-item--approved': insc.status_dados === 'aprovado',
+                                        'insc-status-item--rejected': insc.status_dados === 'reprovado',
+                                    }"
+                                >
+                                    <div class="status-dot"></div>
+                                    <span>Dados</span>
+                                </div>
+
+                                <!-- Docs -->
+                                <div 
+                                    class="insc-status-item"
+                                    :class="{
+                                        'insc-status-item--pending': insc.status_documentacao === 'pendente',
+                                        'insc-status-item--approved': insc.status_documentacao === 'aprovado',
+                                        'insc-status-item--rejected': insc.status_documentacao === 'reprovado',
+                                    }"
+                                >
+                                    <div class="status-dot"></div>
+                                    <span>Docs</span>
+                                </div>
+
+                                <!-- Candidatura -->
+                                <div 
+                                    class="insc-status-item"
+                                    :class="{
+                                        'insc-status-item--pending': insc.status_candidatura === 'pendente',
+                                        'insc-status-item--approved': insc.status_candidatura === 'aprovado',
+                                        'insc-status-item--rejected': insc.status_candidatura === 'reprovado',
+                                    }"
+                                >
+                                    <div class="status-dot"></div>
+                                    <span>Candidatura</span>
+                                </div>
+                            </div>
+
+                            <!-- Divider -->
+                            <div class="insc-divider" />
+
+                            <!-- Base: Ações -->
+                            <div class="insc-card-actions" @click.stop>
+                                <button
+                                    @click="verDetalhes(insc.id_inscricao)"
+                                    class="action-btn-secondary"
+                                >
+                                    Detalhes
+                                </button>
+                                <button
+                                    v-if="insc.status_candidatura === 'aprovado'"
+                                    @click="irParaMatricula(insc)"
+                                    :disabled="matriculaLoading === insc.id_inscricao"
+                                    class="action-btn-primary"
+                                >
+                                    {{ matriculaLoading === insc.id_inscricao ? 'Redirecionando...' : 'Matricular' }}
+                                </button>
+                                <button
+                                    v-else
+                                    class="action-btn-primary"
+                                    disabled
+                                    title="Aguardando aprovação"
+                                >
+                                    Matricular
+                                </button>
+                            </div>
+
                         </div>
-
-                        <!-- Nome do curso -->
-                        <h3
-                            class="text-sm font-bold text-white leading-tight group-hover:text-primary transition-colors"
-                        >
-                            {{ insc.nome_curso || insc.nome_processo }}
-                        </h3>
-                        <p class="text-[10px] text-secondary/50 mt-1">
-                            Inscrito em
-                            {{ ctx.formatarData(insc.data_inscricao) }}
-                        </p>
-
-                        <!-- Badges de status -->
-                        <div class="flex items-center gap-2 mt-3">
-                            <span
-                                class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border"
-                                :class="{
-                                    'bg-amber-500/10 border-amber-500/20 text-amber-400':
-                                        insc.status_dados === 'pendente',
-                                    'bg-green-500/10 border-green-500/20 text-green-400':
-                                        insc.status_dados === 'aprovado',
-                                    'bg-red-500/10 border-red-500/20 text-red-400':
-                                        insc.status_dados === 'reprovado',
-                                }"
-                            >
-                                {{
-                                    insc.status_dados === "aprovado"
-                                        ? "✓"
-                                        : insc.status_dados === "reprovado"
-                                          ? "✕"
-                                          : "○"
-                                }}
-                                Dados
-                            </span>
-                            <span
-                                class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border"
-                                :class="{
-                                    'bg-amber-500/10 border-amber-500/20 text-amber-400':
-                                        insc.status_documentacao === 'pendente',
-                                    'bg-green-500/10 border-green-500/20 text-green-400':
-                                        insc.status_documentacao === 'aprovado',
-                                    'bg-red-500/10 border-red-500/20 text-red-400':
-                                        insc.status_documentacao ===
-                                        'reprovado',
-                                }"
-                            >
-                                {{
-                                    insc.status_documentacao === "aprovado"
-                                        ? "✓"
-                                        : insc.status_documentacao ===
-                                            "reprovado"
-                                          ? "✕"
-                                          : "○"
-                                }}
-                                Docs
-                            </span>
-                            <span
-                                class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border"
-                                :class="{
-                                    'bg-amber-500/10 border-amber-500/20 text-amber-400':
-                                        insc.status_candidatura === 'pendente',
-                                    'bg-green-500/10 border-green-500/20 text-green-400':
-                                        insc.status_candidatura === 'aprovado',
-                                    'bg-red-500/10 border-red-500/20 text-red-400':
-                                        insc.status_candidatura === 'reprovado',
-                                }"
-                            >
-                                {{
-                                    insc.status_candidatura === "aprovado"
-                                        ? "✓"
-                                        : insc.status_candidatura ===
-                                            "reprovado"
-                                          ? "✕"
-                                          : "○"
-                                }}
-                                Candidatura
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Action Column -->
-                    <div class="flex items-center gap-2 shrink-0">
-                        <button
-                            @click="verDetalhes(insc.id_inscricao)"
-                            class="px-5 py-2 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-secondary hover:text-white hover:bg-white/5 transition-all"
-                        >
-                            Detalhes
-                        </button>
-                        <button
-                            class="px-5 py-2 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 opacity-40 cursor-not-allowed"
-                            disabled
-                            title="Em breve"
-                        >
-                            Matricular
-                        </button>
                     </div>
                 </div>
             </div>
@@ -283,14 +279,278 @@ const paginasVisiveis = computed(() => {
 </template>
 
 <style scoped>
+/* Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(139, 92, 246, 0.1);
     border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
+}
+
+/* ── Card ──────────────────────────────────────── */
+.insc-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.insc-card:hover {
+    border-color: rgba(139, 92, 246, 0.28);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(139,92,246,0.12);
+}
+
+.insc-accent-bar {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(180deg, #7c3aed, #a78bfa);
+    opacity: 0; transition: opacity 0.2s ease;
+}
+.insc-card:hover .insc-accent-bar { opacity: 1; }
+
+.insc-card-inner {
+    padding: 18px 18px 16px 20px;
+    display: flex; flex-direction: column; gap: 10px;
+}
+
+/* ── Header ─────────────────────────────────────── */
+.insc-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.insc-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    color: #a78bfa;
+    font-size: 14px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.insc-header-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.insc-badge-area {
+    font-size: 8px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    color: #c4b5fd;
+}
+
+.insc-badge-semestre {
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.insc-badge-turno {
+    font-size: 8px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+/* ── Content ─────────────────────────────────────── */
+.insc-name {
+    font-size: 13px;
+    font-weight: 900;
+    color: rgba(232,230,240,0.95);
+    line-height: 1.3;
+}
+.insc-date {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.35);
+    margin-top: 2px;
+}
+
+/* ── Status Row ────────────────────────────────── */
+.insc-status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+
+.insc-status-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 8px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 16px;
+    border: 1px solid transparent;
+}
+
+.status-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.insc-status-item--pending {
+    background: rgba(245, 158, 11, 0.08);
+    border-color: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
+.insc-status-item--approved {
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
+.insc-status-item--rejected {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+/* ── Actions / Divider ───────────────────────────── */
+.insc-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.05);
+    margin: 4px 0;
+}
+
+.insc-card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.action-btn-secondary {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.action-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.action-btn-primary {
+    padding: 7px 16px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+}
+.action-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #6d28d9, #7c3aed);
+}
+.action-btn-primary:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* ── Empty state / Add button ────────────────────── */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 52px 24px;
+    background: rgba(255,255,255,0.015);
+    border-radius: 14px;
+    border: 1px dashed rgba(255,255,255,0.07);
+    text-align: center;
+}
+.empty-cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 18px;
+    border-radius: 10px;
+    background: rgba(139,92,246,0.12);
+    border: 1px solid rgba(139,92,246,0.25);
+    color: #c4b5fd;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.empty-cta:hover {
+    background: rgba(139,92,246,0.2);
+}
+
+.add-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    border: 1px solid rgba(139,92,246,0.4);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 14px rgba(139,92,246,0.3);
+}
+.add-btn:hover {
+    background: linear-gradient(135deg,#6d28d9,#7c3aed);
+    box-shadow: 0 6px 20px rgba(139,92,246,0.45);
+    transform: translateY(-1px);
 }
 </style>

@@ -23,16 +23,30 @@ export default defineNuxtConfig({
   // 2. Configuração do Supabase (Segurança JWT)
   supabase: {
     redirectOptions: {
-      login: "/auth/login", // Onde mandar o usuário se não estiver logado
-      callback: "/confirm", // Para onde o Supabase volta após login social
-      exclude: ["/", "/teste-layout", "/oferta", "/test", "/form/**", "/auth/**"], // Páginas públicas (ex: Landing Page)
+      login: "/auth/login",
+      callback: "/confirm",
+      exclude: [
+        "/",
+        "/teste-layout",
+        "/oferta",
+        "/test",
+        "/form/**",
+        "/auth/**",
+      ],
     },
   },
 
-  // 3. Pinia Auto-imports (Para você não precisar importar 'defineStore' toda vez)
+  // 3. Pinia Auto-imports
   pinia: {
     storesDirs: ["./stores/**"],
   },
 
   devtools: { enabled: true },
+
+  // 4. Vite - permitir hosts externos (ngrok)
+  vite: {
+    server: {
+      allowedHosts: true,
+    },
+  },
 });

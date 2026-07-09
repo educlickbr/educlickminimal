@@ -582,6 +582,20 @@ const userInitial = computed(() => {
                             </div>
                         </button>
                         <button
+                            @click="handleNavigation('/configuracoes/pagamento')"
+                            class="menu-item group"
+                        >
+                            <div class="menu-icon bg-emerald-500/5 text-emerald-400">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div class="flex flex-col text-left">
+                                <span class="text-sm font-bold text-text group-hover:text-emerald-500 transition-colors">Gateway</span>
+                            </div>
+                        </button>
+                        <button
                             @click="handleNavigation('/vendas')"
                             class="menu-item group"
                         >
@@ -705,6 +719,33 @@ const userInitial = computed(() => {
                                 <span
                                     class="text-sm font-bold text-text group-hover:text-sky-500 transition-colors"
                                     >Meus Processos</span
+                                >
+                            </div>
+                        </button>
+                        <button
+                            @click="handleNavigation('/meus-cursos')"
+                            class="menu-item group"
+                        >
+                            <div class="menu-icon bg-sky-500/10 text-sky-500">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                                    <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                                </svg>
+                            </div>
+                            <div class="flex flex-col text-left">
+                                <span
+                                    class="text-sm font-bold text-text group-hover:text-sky-500 transition-colors"
+                                    >Meus Cursos</span
                                 >
                             </div>
                         </button>

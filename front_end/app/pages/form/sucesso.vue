@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useAppStore } from "~~/stores/app";
 
@@ -7,12 +7,39 @@ const route = useRoute();
 const store = useAppStore();
 
 const idInscricao = (route.query.id_inscricao as string) || "";
+const tipo = (route.query.tipo as string) || "seletivo";
 const loading = ref(true);
 const inscricao = ref<any>(null);
 const erro = ref("");
 
+const isMatricula = computed(() => tipo === "matricula");
+
+const titulo = computed(() =>
+    isMatricula.value ? "Matrícula Realizada!" : "Inscrição Finalizada!"
+);
+
+const descricao = computed(() =>
+    isMatricula.value
+        ? "Sua matrícula foi registrada com sucesso. Acesse Meus Cursos para acompanhar."
+        : "Sua inscrição foi registrada com sucesso. Acompanhe o status pelo painel do candidato."
+);
+
+const destino = computed(() =>
+    isMatricula.value ? "/meus-cursos" : "/meus-processos"
+);
+
+const label = computed(() =>
+    isMatricula.value ? "Ver Meus Cursos" : "Ver Meus Processos"
+);
+
 onMounted(async () => {
     await store.initSession();
+
+    if (isMatricula.value) {
+        // Matrícula não precisa buscar inscrição
+        loading.value = false;
+        return;
+    }
 
     if (!idInscricao || !store.user_expandido_id) {
         erro.value = "Acesso inválido.";
@@ -87,15 +114,15 @@ onMounted(async () => {
             <h1
                 class="text-2xl font-black uppercase tracking-widest mb-3 bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent"
             >
-                Inscrição Finalizada!
+                {{ titulo }}
             </h1>
 
             <p class="text-sm text-secondary/60 mb-8 leading-relaxed">
-                Sua inscrição foi registrada com sucesso. Acompanhe o status
-                pelo painel do candidato.
+                {{ descricao }}
             </p>
 
             <div
+                v-if="!isMatricula"
                 class="bg-white/[0.03] border border-white/10 rounded-xl p-4 mb-8 inline-block"
             >
                 <p
@@ -108,10 +135,10 @@ onMounted(async () => {
 
             <div class="flex flex-col gap-3">
                 <NuxtLink
-                    to="/"
+                    :to="destino"
                     class="px-8 py-3 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#8b5cf6] text-white text-xs font-black uppercase tracking-widest hover:from-[#6d28d9] hover:to-[#7c3aed] transition-all shadow-lg shadow-purple-500/20"
                 >
-                    Ir para o Início
+                    {{ label }}
                 </NuxtLink>
             </div>
         </div>

@@ -33,20 +33,39 @@
                         class="step-item"
                         :class="{
                             'step-item--active': activeStep === idx,
-                            'step-item--done':   activeStep > idx,
+                            'step-item--done': activeStep > idx,
                             'step-item--future': activeStep < idx,
                         }"
                     >
                         <div class="step-bubble">
-                            <svg v-if="activeStep > idx" width="10" height="10" viewBox="0 0 10 10" fill="none">
-                                <path d="M2 5l2.5 2.5L8 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <svg
+                                v-if="activeStep > idx"
+                                width="10"
+                                height="10"
+                                viewBox="0 0 10 10"
+                                fill="none"
+                            >
+                                <path
+                                    d="M2 5l2.5 2.5L8 3"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
                             </svg>
                             <span v-else>{{ idx + 1 }}</span>
                         </div>
                         <span class="step-label">{{ step.label }}</span>
                     </div>
                     <div v-if="idx < steps.length - 1" class="step-connector">
-                        <div class="step-connector-line" :class="activeStep > idx ? 'step-connector-line--done' : ''"></div>
+                        <div
+                            class="step-connector-line"
+                            :class="
+                                activeStep > idx
+                                    ? 'step-connector-line--done'
+                                    : ''
+                            "
+                        ></div>
                     </div>
                 </template>
             </div>
@@ -97,6 +116,8 @@
                     :list-cursos="listCursos"
                     :list-areas="listAreas"
                     :tem-overlapping="temOverlapping"
+                    :gratuito="form.gratuito"
+                    :exige-processo-seletivo="form.exige_processo_seletivo"
                     @update:estrategia="
                         form.estrategia = $event as 'unica' | 'separada'
                     "
@@ -104,6 +125,10 @@
                     @update:descricao="form.descricao = $event"
                     @update:descricao-multipla="
                         (cId, v) => (form.descricoes_multiplas[cId] = v)
+                    "
+                    @update:gratuito="form.gratuito = $event"
+                    @update:exige-processo-seletivo="
+                        form.exige_processo_seletivo = $event
                     "
                 />
             </div>
@@ -239,6 +264,8 @@ const form = reactive({
     descricao: "",
     descricoes_multiplas: {} as Record<string, string>,
     processos: [createEmptyProcesso(1)] as ProcessoForm[],
+    gratuito: true,
+    exige_processo_seletivo: false,
 });
 
 function setOrigem(val: "curso" | "ciclo") {
@@ -352,6 +379,8 @@ async function handleSave() {
         estrategia: form.estrategia,
         descricoes_multiplas: form.descricoes_multiplas,
         processos: form.processos,
+        gratuito: form.gratuito,
+        exige_processo_seletivo: form.exige_processo_seletivo,
     });
     if (ok) {
         emit("saved");
@@ -384,6 +413,9 @@ watch(
                 activeStep.value = 1;
                 form.descricao = props.initialData.descricao || "";
                 form.id_area = props.initialData.id_area || null;
+                form.gratuito = props.initialData.gratuito !== false;
+                form.exige_processo_seletivo =
+                    props.initialData.exige_processo_seletivo === true;
                 form.processos = [createEmptyProcesso(1)];
                 const { resCiclos, resProcessos } =
                     await props.programaCtx.initEdit(props.programaId!);
@@ -449,6 +481,8 @@ watch(
                 form.descricao = "";
                 form.descricoes_multiplas = {};
                 form.processos = [createEmptyProcesso(1)];
+                form.gratuito = true;
+                form.exige_processo_seletivo = false;
             }
         }
     },
@@ -507,9 +541,15 @@ watch(
     letter-spacing: 0.1em;
     transition: color 0.2s ease;
 }
-.step-item--active .step-label { color: #c4b5fd; }
-.step-item--done   .step-label { color: rgba(74, 222, 128, 0.8); }
-.step-item--future .step-label { color: rgba(255, 255, 255, 0.2); }
+.step-item--active .step-label {
+    color: #c4b5fd;
+}
+.step-item--done .step-label {
+    color: rgba(74, 222, 128, 0.8);
+}
+.step-item--future .step-label {
+    color: rgba(255, 255, 255, 0.2);
+}
 
 .step-connector {
     flex: 1;
@@ -523,13 +563,14 @@ watch(
     border-radius: 1px;
     transition: background 0.3s ease;
 }
-.step-connector-line--done { background: rgba(34, 197, 94, 0.3); }
+.step-connector-line--done {
+    background: rgba(34, 197, 94, 0.3);
+}
 
 .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-
     background: rgba(139, 92, 246, 0.1);
     border-radius: 10px;
 }

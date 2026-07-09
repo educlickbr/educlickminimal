@@ -110,7 +110,7 @@
                 <!-- TAB COMPONENTES -->
                 <ModuloTabComponentes
                     v-if="activeTab === 'componentes'"
-                    :saved-modulo-id="savedModuloId"
+                    :saved-modulo-id="currentModuloId"
                     :formMC="formMC"
                     :componentes-disponiveis="componentesDisponiveis"
                     :componentes-do-modulo="componentesDoModulo"
@@ -122,7 +122,7 @@
                 <!-- TAB PLANOS -->
                 <ModuloTabPlanos
                     v-if="activeTab === 'planos'"
-                    :saved-modulo-id="savedModuloId"
+                    :saved-modulo-id="currentModuloId"
                     :editing-plano-id="editingPlanoId"
                     :form-plano="formPlano"
                     :componentes-para-plano="componentesParaPlano"

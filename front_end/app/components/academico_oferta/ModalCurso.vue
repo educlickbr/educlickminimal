@@ -36,28 +36,28 @@
                 </button>
             </div>
             <div class="modal-tabs">
-                <button
-                    v-for="tab in tabs"
-                    :key="tab.key"
-                    @click="activeTab = tab.key"
-                    :class="[
-                        'modal-tab-btn',
-                        activeTab === tab.key ? 'modal-tab-btn--active' : '',
-                    ]"
-                >
-                    {{ tab.label
-                    }}<span
-                        v-if="tab.key === 'grade' && modulosDoCurso.length > 0"
-                        class="modal-tab-badge"
-                        >{{ modulosDoCurso.length }}</span
-                    ><span
-                        v-if="
-                            tab.key === 'areas' && areasDisponiveis.length > 0
-                        "
-                        class="modal-tab-badge"
-                        >{{ areasDisponiveis.length }}</span
+                <div class="modal-tabs-inner">
+                    <button
+                        v-for="tab in tabs"
+                        :key="tab.key"
+                        @click="activeTab = tab.key"
+                        :class="[
+                            'modal-tab-btn',
+                            activeTab === tab.key ? 'modal-tab-btn--active' : '',
+                        ]"
                     >
-                </button>
+                        {{ tab.label
+                        }}<span
+                            v-if="tab.key === 'grade' && modulosDoCurso.length > 0"
+                            class="modal-tab-badge"
+                            >{{ modulosDoCurso.length }}</span
+                        ><span
+                            v-if="tab.key === 'areas' && areasDisponiveis.length > 0"
+                            class="modal-tab-badge"
+                            >{{ areasDisponiveis.length }}</span
+                        >
+                    </button>
+                </div>
             </div>
             <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
                 <!-- TAB GERAL -->
@@ -451,42 +451,55 @@ select option {
 }
 .modal-tabs {
     display: flex;
-    gap: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(0, 0, 0, 0.2);
-    padding: 0 20px;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.18);
+    padding: 10px 20px;
     flex-shrink: 0;
 }
+.modal-tabs-inner {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 4px;
+}
 .modal-tab-btn {
-    padding: 12px 16px;
+    padding: 7px 14px;
     font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.28);
     background: transparent;
     border: none;
-    border-bottom: 2px solid transparent;
+    border-radius: 7px;
     cursor: pointer;
     transition: all 0.15s ease;
     display: flex;
     align-items: center;
     gap: 6px;
+    white-space: nowrap;
 }
 .modal-tab-btn:hover {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.04);
 }
 .modal-tab-btn--active {
-    color: #a78bfa;
-    border-bottom-color: #8b5cf6;
+    color: #c4b5fd;
+    background: rgba(139, 92, 246, 0.14);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 }
 .modal-tab-badge {
     font-size: 9px;
     font-weight: 900;
-    background: rgba(139, 92, 246, 0.18);
+    background: rgba(139, 92, 246, 0.2);
     color: #a78bfa;
     padding: 1px 6px;
     border-radius: 999px;
+    line-height: 1.6;
 }
 .modal-footer {
     display: flex;

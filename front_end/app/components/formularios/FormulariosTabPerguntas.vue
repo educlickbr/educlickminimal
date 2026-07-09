@@ -1,103 +1,81 @@
 <template>
     <div class="flex flex-col gap-6">
-        <div
-            v-if="perguntasCtx.loading.value"
-            class="py-16 flex flex-col items-center justify-center gap-3"
-        >
-            <div
-                class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"
-            />
-            <span
-                class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
-                >Carregando perguntas...</span
-            >
+
+        <!-- Loading -->
+        <div v-if="perguntasCtx.loading.value" class="py-16 flex flex-col items-center justify-center gap-3">
+            <div class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin" />
+            <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">Carregando perguntas...</span>
         </div>
-        <div
-            v-else
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-        >
-            <div
-                v-if="perguntasCtx.perguntas.value.length === 0"
-                class="col-span-full empty-state"
-            >
-                <div class="empty-icon">
-                    <Icon name="ph:question-bold" class="w-8 h-8" />
-                </div>
-                <p class="empty-title">Nenhuma pergunta cadastrada</p>
-                <p class="empty-subtitle">
-                    Crie perguntas para serem usadas na configuração dos seus
-                    formulários.
-                </p>
-                <button @click="perguntasCtx.openNova" class="empty-cta mt-4">
+
+        <!-- Grid -->
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div v-if="perguntasCtx.perguntas.value.length === 0" class="col-span-full empty-state">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="mb-2 text-white/20">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <p class="text-sm font-bold text-white/30">Nenhuma pergunta cadastrada</p>
+                <p class="text-[10px] font-bold text-white/15 mt-1 uppercase tracking-widest">Crie perguntas para usar nos seus formulários</p>
+                <button @click="perguntasCtx.openNova" class="empty-cta">
                     Cadastrar Primeira Pergunta
                 </button>
             </div>
+
             <div
                 v-for="p in perguntasCtx.perguntas.value"
                 :key="p.id"
-                class="comp-card group"
+                class="perg-card"
+                @click="!p.global && perguntasCtx.openEditar(p)"
+                :class="{ 'perg-card--global': p.global }"
             >
-                <div class="comp-card-accent" />
-                <div class="comp-avatar">
-                    {{ (p.label || "?").charAt(0).toUpperCase() }}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-0.5">
-                        <p class="text-xs font-black text-primary truncate">
-                            {{ p.label }}
-                        </p>
-                        <span
-                            v-if="p.global"
-                            class="flex-shrink-0 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/20"
-                            >Global</span
-                        >
+                <div class="perg-accent-bar" />
+                <div class="perg-card-inner">
+
+                    <!-- Header: avatar + badges + ações -->
+                    <div class="perg-card-header">
+                        <div class="perg-avatar">
+                            {{ (p.label || "?").charAt(0).toUpperCase() }}
+                        </div>
+
+                        <div class="perg-header-badges">
+                            <span v-if="p.global" class="perg-badge-global">
+                                <svg width="8" height="8" viewBox="0 0 12 12" fill="none">
+                                    <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M6 1C4.5 3 4 4.5 4 6s.5 3 2 5M6 1c1.5 2 2 3.5 2 5s-.5 3-2 5M1 6h10" stroke="currentColor" stroke-width="1.2"/>
+                                </svg>
+                                Global
+                            </span>
+                            <span class="perg-badge-tipo">{{ p.tipo_pergunta }}</span>
+                        </div>
+
+                        <div v-if="!p.global" class="perg-card-actions" @click.stop>
+                            <button @click="perguntasCtx.openEditar(p)" class="action-btn action-edit" title="Editar">
+                                <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                                    <path d="M8.5 1.5L10.5 3.5L4 10H2V8L8.5 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <button @click="perguntasCtx.handleDelete(p.id)" class="action-btn action-delete" title="Excluir">
+                                <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                                    <path d="M2 3h8M5 3V2h2v1M4 3l.5 7h3L8 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <p
-                        class="text-[9px] text-secondary/40 font-medium truncate"
-                    >
-                        {{ p.nome_interno }} - {{ p.tipo_pergunta }}
+
+                    <!-- Label -->
+                    <p class="perg-label">{{ p.label }}</p>
+
+                    <!-- Nome interno -->
+                    <p class="perg-interno">
+                        <svg width="9" height="9" viewBox="0 0 12 12" fill="none">
+                            <path d="M1 6h10M7 2l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {{ p.nome_interno }}
                     </p>
-                </div>
-                <div class="comp-actions group-hover:opacity-100">
-                    <button
-                        v-if="!p.global"
-                        @click="perguntasCtx.openEditar(p)"
-                        class="comp-action-btn comp-action-edit"
-                        title="Editar"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="14"
-                            height="14"
-                            fill="currentColor"
-                            viewBox="0 0 256 256"
-                        >
-                            <path
-                                d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63Z"
-                            />
-                        </svg>
-                    </button>
-                    <button
-                        v-if="!p.global"
-                        @click="perguntasCtx.handleDelete(p.id)"
-                        class="comp-action-btn comp-action-delete"
-                        title="Excluir"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="14"
-                            height="14"
-                            fill="currentColor"
-                            viewBox="0 0 256 256"
-                        >
-                            <path
-                                d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"
-                            />
-                        </svg>
-                    </button>
                 </div>
             </div>
         </div>
+
         <FormulariosModalPergunta
             v-if="perguntasCtx.showModal.value"
             v-model="perguntasCtx.showModal.value"
@@ -120,110 +98,112 @@ defineProps<{
 </script>
 
 <style scoped>
+/* ── Card ──────────────────────────────────────── */
+.perg-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.perg-card:hover {
+    border-color: rgba(139, 92, 246, 0.28);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(139,92,246,0.12);
+}
+/* Cards globais: sem cursor de edição, hover mais sutil */
+.perg-card--global { cursor: default; }
+.perg-card--global:hover {
+    border-color: rgba(245, 158, 11, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.perg-accent-bar {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(180deg, #7c3aed, #a78bfa);
+    opacity: 0; transition: opacity 0.2s ease;
+}
+.perg-card:not(.perg-card--global):hover .perg-accent-bar { opacity: 1; }
+.perg-card--global .perg-accent-bar {
+    background: linear-gradient(180deg, #d97706, #fbbf24);
+}
+.perg-card--global:hover .perg-accent-bar { opacity: 0.6; }
+
+.perg-card-inner {
+    padding: 18px 18px 16px 20px;
+    display: flex; flex-direction: column; gap: 8px;
+}
+
+/* ── Header ─────────────────────────────────────── */
+.perg-card-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.perg-avatar {
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);
+    color: #a78bfa; font-size: 13px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+}
+.perg-card--global .perg-avatar {
+    background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); color: #fbbf24;
+}
+
+.perg-header-badges { display: flex; align-items: center; gap: 5px; }
+
+.perg-badge-global {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 3px 7px; border-radius: 10px;
+    background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.25); color: #fbbf24;
+}
+.perg-badge-tipo {
+    font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 3px 7px; border-radius: 10px;
+    background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.15); color: rgba(167,139,250,0.7);
+}
+
+.perg-card-actions {
+    margin-left: auto; display: flex; gap: 5px;
+    opacity: 0; transition: opacity 0.15s ease;
+}
+.perg-card:hover .perg-card-actions { opacity: 1; }
+
+.action-btn {
+    width: 26px; height: 26px; border-radius: 7px; border: none;
+    background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.35);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s ease;
+}
+.action-edit:hover   { background: rgba(139,92,246,0.18); color: #c4b5fd; }
+.action-delete:hover { background: rgba(239,68,68,0.15);  color: #fca5a5; }
+
+/* ── Content ─────────────────────────────────────── */
+.perg-label {
+    font-size: 13px; font-weight: 900; color: rgba(232,230,240,0.92);
+    line-height: 1.3; margin-top: 2px;
+}
+.perg-interno {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 700;
+    color: rgba(255,255,255,0.22); font-style: italic;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Empty state ─────────────────────────────────── */
 .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    border: 1px dashed rgba(255, 255, 255, 0.1);
-}
-.empty-icon {
-    color: rgba(139, 92, 246, 0.5);
-    margin-bottom: 16px;
-}
-.empty-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 4px;
-}
-.empty-subtitle {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
-    text-align: center;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 52px 24px;
+    background: rgba(255,255,255,0.015); border-radius: 14px;
+    border: 1px dashed rgba(255,255,255,0.07);
 }
 .empty-cta {
-    margin-top: 16px;
-    padding: 8px 16px;
-    background: rgba(139, 92, 246, 0.15);
-    color: #c4b5fd;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 12px;
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    cursor: pointer;
+    margin-top: 16px; padding: 9px 20px; border-radius: 10px;
+    background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25);
+    color: #c4b5fd; font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer;
+    transition: all 0.15s ease;
 }
-.comp-card {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 12px;
-    border-radius: 12px;
-    transition: all 0.2s;
-}
-.comp-card:hover {
-    border-color: rgba(139, 92, 246, 0.3);
-    transform: translateX(2px);
-}
-.comp-card-accent {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: #8b5cf6;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-.comp-card:hover .comp-card-accent {
-    opacity: 1;
-}
-.comp-avatar {
-    background: rgba(139, 92, 246, 0.1);
-    color: #a78bfa;
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 16px;
-    flex-shrink: 0;
-}
-.comp-actions {
-    display: flex;
-    gap: 6px;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-.group:hover .comp-actions {
-    opacity: 1;
-}
-.comp-action-btn {
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.5);
-    width: 28px;
-    height: 28px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    cursor: pointer;
-}
-.comp-action-edit:hover {
-    background: rgba(139, 92, 246, 0.15);
-    color: #c4b5fd;
-}
-.comp-action-delete:hover {
-    background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-}
+.empty-cta:hover { background: rgba(139,92,246,0.2); }
 </style>
