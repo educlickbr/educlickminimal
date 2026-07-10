@@ -2,6 +2,9 @@ export default defineNuxtConfig({
   // 1. Registro de Módulos (A tríade sagrada)
   app: {
     head: {
+      link: [
+        { rel: "icon", type: "image/png", href: "/favicon_educlick.png" },
+      ],
       style: [
         {
           innerHTML:
