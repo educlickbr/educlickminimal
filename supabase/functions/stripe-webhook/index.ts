@@ -13,10 +13,17 @@ Deno.serve(async (req) => {
             return new Response(JSON.stringify({ error: "stripe-signature ausente" }), { status: 400 });
         }
 
+        const rawBody = await req.text();
+        const secret = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
+
+        // Debug: log para entender o que está chegando
+        console.log("Secret prefix:", secret.substring(0, 12) + "...");
+        console.log("Signature prefix:", signature.substring(0, 50) + "...");
+        console.log("Body length:", rawBody.length);
+
         const stripe = Stripe(Deno.env.get("STRIPE_SECRET_KEY")!);
-        const event = stripe.webhooks.constructEvent(
-            await req.text(), signature,
-            Deno.env.get("STRIPE_WEBHOOK_SECRET")!
+        const event = await stripe.webhooks.constructEventAsync(
+            rawBody, signature, secret
         );
 
         if (event.type === "checkout.session.completed") {
@@ -26,7 +33,6 @@ Deno.serve(async (req) => {
                 return new Response(JSON.stringify({ received: true }), { status: 200 });
             }
 
-            // Usa SUPABASE_SECRET_KEYS (auto-injetado) no lugar do deprecated service_role_key
             const SECRET_KEYS = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS")!);
             const supabase = createClient(Deno.env.get("SUPABASE_URL")!, SECRET_KEYS.default);
 

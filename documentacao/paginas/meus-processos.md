@@ -7,7 +7,8 @@ Tela do **aluno** para acompanhar suas inscrições em processos seletivos:
 - **Cards de inscrição** — nome do curso, área, ano/semestre, turno, data de inscrição
 - **Badges de status** — Dados, Documentação, Candidatura (pendente/aprovado/reprovado)
 - **Modal de Detalhes** — reaproveitado do módulo `processos`, exibe o formulário preenchido
-- **Botão Matricular** — placeholder (desabilitado, implementação futura)
+- **Botão Matricular** — habilitado quando `status_candidatura === 'aprovado'` → redireciona ao form de matrícula
+- **Badge "✅ Matriculado"** — quando `ja_matriculado === true`, substitui o botão
 - **Paginação** — 20 itens por página, scroll interno, paginação fixa no rodapé
 - **Sem abas/filtros** — visão pessoal, apenas as inscrições do próprio aluno
 
@@ -28,7 +29,11 @@ app/composables/meus-processos/
 server/api/meus-processos/
 └── index.get.ts                                            ← GET → RPC aca_get_minhas_inscricoes
 supabase/migrations/
-└── 20260623010000_rpc_aca_get_minhas_inscricoes.sql        ← RPC SECURITY INVOKER
+├── 20260623010000_rpc_aca_get_minhas_inscricoes.sql        ← RPC original
+├── 20260623013000_fix_rpc_aca_get_minhas_inscricoes.sql    ← fix ORDER BY
+├── 20260708220000_aca_get_minhas_inscricoes_add_oferta_slug.sql ← + oferta_slug
+├── 20260708230000_aca_get_minhas_inscricoes_add_id_oferta.sql   ← + id_oferta
+└── 20260710180000_add_ja_matriculado_to_minhas_inscricoes.sql   ← + ja_matriculado
 
 (REAPROVEITADO)
 app/components/processos/ProcessosModalDetalhes.vue         ← modal de detalhes
@@ -127,8 +132,10 @@ A RPC `aca_get_minhas_inscricoes` é `SECURITY INVOKER` — resolve o `user_expa
 - Range de páginas: primeiras 3 + "..." + entorno + últimas 2
 
 ### Botão Matricular
-- Placeholder desabilitado (`opacity-40 cursor-not-allowed`)
-- Implementação futura
+- Habilitado somente quando `status_candidatura === 'aprovado'`
+- Redireciona para `/form/matricula/estudante/0/{id_programa}`
+- Se o aluno já possui matrícula (`ja_matriculado`), exibe badge `✅ Matriculado` no lugar do botão
+- O form de matrícula, por sua vez, detecta se o programa é pago e exibe aba checkout inline
 
 ---
 

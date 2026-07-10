@@ -10,6 +10,7 @@ import { useFormConfig } from "~/composables/form/useFormConfig";
 import { useFormInscricao } from "~/composables/form/useFormInscricao";
 import { useFormMatricula } from "~/composables/form/useFormMatricula";
 import { useToast } from "~/composables/useToast";
+import CheckoutResumo from "~/components/checkout/CheckoutResumo.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -65,6 +66,50 @@ const cepCtx = useFormCep({
 const inscricaoCtx = useFormInscricao();
 const matriculaCtx = useFormMatricula();
 
+// ── Checkout inline ──────────────────────────────────────
+const ofertaCheckout = ref<any>(null);
+const processandoPagamento = ref(false);
+const erroPagamento = ref<string | null>(null);
+const { showToast: toastCheckout } = useToast();
+
+const isPago = computed(() => {
+    const o = ofertaCheckout.value;
+    return o && o.valor_centavos > 0;
+});
+
+const qtdBlocos = computed(() => configCtx.blocos.value.length);
+const totalTabs = computed(() =>
+    isPago.value ? qtdBlocos.value + 1 : qtdBlocos.value
+);
+const checkoutTabIndex = computed(() => qtdBlocos.value);
+
+const valorFormatado = computed(() => {
+    const v = ofertaCheckout.value?.valor_centavos;
+    if (!v) return "Grátis";
+    return `R$ ${(v / 100).toFixed(2).replace(".", ",")}`;
+});
+
+async function handleIrParaPagamento() {
+    if (!ofertaCheckout.value?.id || !store.user_expandido_id) return;
+    processandoPagamento.value = true;
+    erroPagamento.value = null;
+    try {
+        const res = (await $fetch("/api/comercial/checkout/criar", {
+            method: "POST",
+            body: { id_oferta: ofertaCheckout.value.id },
+        })) as any;
+        if (res?.redirect) {
+            window.location.href = res.redirect;
+        } else if (res?.error) {
+            erroPagamento.value = res.error;
+        }
+    } catch (e: any) {
+        erroPagamento.value = e?.message || "Erro ao processar pagamento";
+    } finally {
+        processandoPagamento.value = false;
+    }
+}
+
 // ── Bloqueio: verifica se já está inscrito ─────────────────
 const jaInscrito = ref(false);
 const verificandoInscricao = ref(true);
@@ -111,6 +156,33 @@ function onPerguntaViewFile(perguntaId: string) {
 }
 
 // ── Finalizar Inscrição / Matrícula ──────────────────────
+async function fetchOfertaDoPrograma() {
+    try {
+        const res = (await $fetch("/api/public/ofertas", {
+            params: { id_entidade: idEntidade.value },
+        })) as any;
+        const oferta = res?.itens?.find((o: any) => o.programa_id === programa_id);
+        if (oferta) {
+            ofertaCheckout.value = oferta;
+        }
+    } catch {
+        // Silencioso — se não achar oferta, não mostra aba pagamento
+    }
+}
+
+async function criarMatriculaGrafica() {
+    if (!store.user_expandido_id) return;
+    const { sucesso, matricula } = await matriculaCtx.finalizarMatricula({
+        id_entidade: idEntidade.value,
+        id_programa: programa_id as string,
+        id_usuario: store.user_expandido_id as string,
+        toast: { showToast },
+    });
+    if (sucesso) {
+        router.push(`/form/sucesso?tipo=matricula&id_matricula=${matricula?.id}`);
+    }
+}
+
 async function handleFinalizarInscricao() {
     // ── FLUXO: MATRÍCULA ──────────────────────────────────
     if (tipo_proc === 'matricula') {
@@ -138,31 +210,15 @@ async function handleFinalizarInscricao() {
             return;
         }
 
-        // Buscar oferta do programa pra saber se é pago
-        try {
-            const res = (await $fetch("/api/public/ofertas", {
-                params: { id_entidade: idEntidade.value },
-            })) as any;
-            const oferta = res?.itens?.find((o: any) => o.programa_id === programa_id);
+        // Usa oferta já carregada no onMounted
+        const oferta = ofertaCheckout.value;
 
-            if (oferta?.slug && oferta.valor_centavos > 0) {
-                // Programa pago → CHECKOUT PRIMEIRO (sem criar matrícula ainda)
-                // A matrícula será criada pelo webhook após confirmação do pagamento
-                router.push(`/checkout/${oferta.slug}?id_programa=${programa_id}`);
-            } else {
-                // Programa gratuito → cria matrícula direto
-                const { sucesso, matricula } = await matriculaCtx.finalizarMatricula({
-                    id_entidade: idEntidade.value,
-                    id_programa: programa_id,
-                    id_usuario: store.user_expandido_id,
-                    toast: { showToast },
-                });
-                if (sucesso) {
-                    router.push(`/form/sucesso?tipo=matricula&id_matricula=${matricula?.id}`);
-                }
-            }
-        } catch {
-            showToast("Erro ao processar matrícula.", { type: "error" });
+        if (oferta?.slug && oferta.valor_centavos > 0) {
+            // Programa pago → vai pra aba checkout
+            activeTab.value = checkoutTabIndex.value;
+        } else {
+            // Programa gratuito → cria matrícula direto
+            await criarMatriculaGrafica();
         }
         return;
     }
@@ -282,6 +338,11 @@ onMounted(async () => {
             }
         }
     }
+
+    // Carregar oferta do programa (pra saber se é pago e mostrar aba checkout)
+    if (tipo_proc === 'matricula') {
+        await fetchOfertaDoPrograma();
+    }
 });
 </script>
 
@@ -377,9 +438,9 @@ onMounted(async () => {
 
             <!-- Formulário -->
             <div v-else>
-                <!-- Tabs de blocos -->
+                <!-- Tabs de blocos + checkout -->
                 <div
-                    v-if="configCtx.blocos.value.length > 1"
+                    v-if="totalTabs > 1"
                     class="flex gap-4 mb-10 overflow-x-auto pb-2 scrollbar-hide"
                 >
                     <button
@@ -394,6 +455,18 @@ onMounted(async () => {
                         "
                     >
                         {{ bloco.bloco }}
+                    </button>
+                    <button
+                        v-if="isPago"
+                        @click="activeTab = checkoutTabIndex"
+                        class="px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex-shrink-0"
+                        :class="
+                            activeTab === checkoutTabIndex
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                : 'bg-white/[0.02] text-secondary/40 border border-white/5 hover:text-white hover:border-white/10'
+                        "
+                    >
+                        Pagamento
                     </button>
                 </div>
 
@@ -445,12 +518,19 @@ onMounted(async () => {
                             <button
                                 v-if="
                                     activeTab <
-                                    configCtx.blocos.value.length - 1
+                                    qtdBlocos - 1
                                 "
                                 @click="activeTab++"
                                 class="px-8 py-3 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
                             >
                                 Próximo Passo
+                            </button>
+                            <button
+                                v-else-if="activeTab < totalTabs - 1"
+                                @click="handleFinalizarInscricao"
+                                class="px-8 py-3 rounded-xl bg-emerald-500 text-white text-xs font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20"
+                            >
+                                Ir para Pagamento
                             </button>
                             <button
                                 v-else
@@ -467,6 +547,55 @@ onMounted(async () => {
                         </div>
                     </div>
                 </template>
+
+                <!-- Aba: Pagamento (checkout inline) -->
+                <div
+                    v-if="isPago"
+                    v-show="activeTab === checkoutTabIndex"
+                    class="bg-[#0f0f17] border border-white/5 rounded-2xl p-8 md:p-12 shadow-2xl"
+                >
+                    <h2 class="text-2xl font-black mb-8 tracking-tight">
+                        Revisão e Pagamento
+                    </h2>
+
+                    <CheckoutResumo
+                        :oferta="ofertaCheckout"
+                        :valor-formatado="valorFormatado"
+                        :is-gratuito="false"
+                    >
+                        <template #actions>
+                            <div class="mt-8 pt-8 border-t border-white/5">
+                                <p
+                                    v-if="erroPagamento"
+                                    class="text-red-400 text-xs font-bold mb-4"
+                                >
+                                    {{ erroPagamento }}
+                                </p>
+                                <button
+                                    :disabled="processandoPagamento"
+                                    @click="handleIrParaPagamento"
+                                    class="w-full py-4 rounded-xl bg-primary text-white text-sm font-black uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                    {{ processandoPagamento
+                                        ? "Redirecionando..."
+                                        : `Ir para Pagamento - ${valorFormatado}`
+                                    }}
+                                </button>
+                            </div>
+                        </template>
+                    </CheckoutResumo>
+
+                    <!-- Navegação -->
+                    <div class="mt-8 flex items-center justify-between">
+                        <button
+                            @click="activeTab = qtdBlocos - 1"
+                            class="px-8 py-3 rounded-xl border border-white/10 text-xs font-black uppercase tracking-widest hover:bg-white/5 transition-all"
+                        >
+                            Anterior
+                        </button>
+                        <div />
+                    </div>
+                </div>
             </div>
         </main>
     </div>

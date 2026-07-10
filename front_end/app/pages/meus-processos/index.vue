@@ -4,7 +4,6 @@ definePageMeta({ layout: "base" });
 import { useMeusProcessos } from "~/composables/meus-processos/useMeusProcessos";
 
 const ctx = useMeusProcessos();
-const matriculaLoading = ref<string | null>(null);
 
 // Modal de Detalhes (reaproveitado de processos)
 const showDetalhes = ref(false);
@@ -206,13 +205,18 @@ const paginasVisiveis = computed(() => {
                                 >
                                     Detalhes
                                 </button>
+                                <span
+                                    v-if="insc.ja_matriculado"
+                                    class="action-btn-primary !bg-green-500/10 !border-green-500/20 !text-green-400 cursor-default"
+                                >
+                                    ✅ Matriculado
+                                </span>
                                 <button
-                                    v-if="insc.status_candidatura === 'aprovado'"
+                                    v-else-if="insc.status_candidatura === 'aprovado'"
                                     @click="irParaMatricula(insc)"
-                                    :disabled="matriculaLoading === insc.id_inscricao"
                                     class="action-btn-primary"
                                 >
-                                    {{ matriculaLoading === insc.id_inscricao ? 'Redirecionando...' : 'Matricular' }}
+                                    Matricular
                                 </button>
                                 <button
                                     v-else

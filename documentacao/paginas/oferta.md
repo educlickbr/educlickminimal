@@ -2,40 +2,36 @@
 
 ## Visão Geral
 
-Página **pública** (sem login obrigatório) que exite os programas acadêmicos com inscrições abertas. Se o usuário estiver logado, verifica em lote quais processos ele já está inscrito e exibe "Já Inscrito" em vez de "Acessar".
+Página **pública** (sem login obrigatório) que exibe programas acadêmicos disponíveis. Se o usuário estiver logado, verifica em lote quais processos ele já está inscrito e exibe "Já Inscrito" em vez de "Acessar"/"Comprar"/"Matricular".
 
 **Rota:** `/oferta`  
 **Layout:** `false` (layout customizado inline)  
-**Arquivo:** `pages/oferta.vue` (~440 linhas — **não refatorado**)
+**Arquivo:** `pages/oferta.vue`
 
 ---
 
-## Estado Atual (06/2026)
-
-> ⚠️ **Página ainda não refatorada** para o padrão de desacoplamento. Todo o script, template e CSS estão no mesmo arquivo.
->
-> Consome dados via **RPCs legadas** do módulo acadêmico (`aca_get_programas_publicos`), não do módulo comercial (`com_*`).
-
-### Funcionalidades
+## Funcionalidades
 
 - **Lista de programas** com processo seletivo ativo (data_fim >= now())
+- **Ofertas comerciais** integradas — mostra preço como badge nos cards
 - **Filtro por área** — botões dinâmicos com "Todos" + áreas
-- **Cards de programa** — área, nome do processo, carga horária, datas
-- **Verificação de inscrição** (se logado) — badge "Já Inscrito" substitui botão "Acessar"
-- **Link para formulário** → `/form/seletivo/estudante/{area_id}/{programa_id}?id_processo_seletivo={uuid}`
-- **Header customizado** — logo + navegação + login/cadastro
-- **Footer** — rodapé simples com marca
-- **Responsivo** — grid 1 col (mobile) / 2 col (desktop) / 3 col (wide)
+- **Cards de programa** — área, nome, carga horária, datas, badge de preço (Grátis / R$ XX)
+- **Verificação de inscrição** (se logado) — badge "Já Inscrito" substitui botão
+- **Roteamento inteligente** conforme tipo do programa:
+  - `exige_processo_seletivo = true` → botão "**Acessar**" → formulário de processo seletivo
+  - `exige_processo_seletivo = false` + `gratuito = false` → botão "**Comprar**" → form de matrícula + checkout
+  - `exige_processo_seletivo = false` + `gratuito = true` → botão "**Matricular**" → form de matrícula direta
 
 ---
 
-## Arquitetura (atual, pré-refatoração)
+## Arquitetura (não refatorada)
 
 ```
-app/pages/oferta.vue                      ← única página (~440 linhas, tudo inline)
+app/pages/oferta.vue                      ← única página (tudo inline)
 server/api/public/
 ├── programas.get.ts                       ← GET → RPC aca_get_programas_publicos
-└── areas.get.ts                           ← GET → RPC aca_get_areas_publicas
+├── areas.get.ts                           ← GET → RPC aca_get_areas_publicas
+└── ofertas.get.ts                         ← GET → RPC com_get_ofertas_publicas
 server/api/form/
 └── inscricoes-lote.post.ts               ← POST → RPC aca_verificar_inscricoes_lote
 ```
@@ -46,31 +42,29 @@ server/api/form/
 |---|---|---|---|
 | `GET` | `/api/public/programas` | `aca_get_programas_publicos` | Programas com processo seletivo ativo |
 | `GET` | `/api/public/areas` | `aca_get_areas_publicas` | Áreas para filtro |
-| `POST` | `/api/form/inscricoes-lote` | `aca_verificar_inscricoes_lote` | Verifica se usuário já está inscrito |
+| `GET` | `/api/public/ofertas` | `com_get_ofertas_publicas` | Ofertas ativas com preço |
+| `POST` | `/api/form/inscricoes-lote` | `aca_verificar_inscricoes_lote` | Verifica inscrições do usuário |
 
 ---
 
 ## Fluxo de Dados
 
 ```
-1. fetchData()
+1. fetchData() via Promise.allSettled
    ├── GET /api/public/programas?id_entidade=X
-   │     → aca_get_programas_publicos → programas com processo ativo
-   └── GET /api/public/areas?id_entidade=X
-         → aca_get_areas_publicas → áreas para filtro
+   ├── GET /api/public/areas?id_entidade=X
+   └── GET /api/public/ofertas?id_entidade=X
+         → com_get_ofertas_publicas → ofertas com slug, valor_centavos, programa_id
 
-2. Se usuário logado:
-   POST /api/form/inscricoes-lote
-     body: { ids_processos: [...] }
-     → retorna mapa { id_processo: true, ... }
+2. ofertasPorPrograma (computed)
+   → mapa { programa_id: oferta }
+   → usado para badge de preço e roteamento
 
-3. filteredProgramas (computed)
-   → filtra por activeArea (ou "Todas")
-   → cada card exibe área, nome, carga, datas
-
-4. Botão condicional:
-   - inscritos[id_processo] → badge "Já Inscrito" (desabilitado)
-   - senão → link para formulário de inscrição
+3. Roteamento (getFormUrl)
+   prog.exige_processo_seletivo
+     ├── true  → /form/seletivo/estudante/{area}/{prog}
+     ├── false + pago → /checkout/{slug}
+     └── false + grátis → /checkout/{slug} (fluxo grátis)
 ```
 
 ---
@@ -85,18 +79,13 @@ server/api/form/
 ├─────────────────────────────────────────────────────┤
 │ Filtro: [Todas] [Área 1] [Área 2] ...             │
 ├─────────────────────────────────────────────────────┤
-│ Loading: skeleton grid                              │
-│ Vazio: mensagem "Nenhum programa disponível"        │
-├─────────────────────────────────────────────────────┤
 │ Grid de Cards:                                      │
 │ ┌────────────────────┐  ┌────────────────────┐     │
-│ │ Área               │  │ Área               │     │
-│ │ Nome do Processo   │  │ Nome do Processo   │     │
-│ │ Carga Horária      │  │ Carga Horária      │     │
-│ │ Início das aulas   │  │ Início das aulas   │     │
-│ │ Inscrições até     │  │ Inscrições até     │     │
-│ │ Matrículas a partir│  │ Matrículas a partir│     │
-│ │ [Acessar]          │  │ [Acessar]          │     │
+│ │ Área  | Preço/R$   │  │ Área  | Grátis     │     │
+│ │ Nome do Programa   │  │ Nome do Programa   │     │
+│ │ Nome do Processo   │  │ Carga Horária      │     │
+│ │ Carga | Datas      │  │ ...                │     │
+│ │ [Acessar]          │  │ [Comprar]          │     │
 │ └────────────────────┘  └────────────────────┘     │
 ├─────────────────────────────────────────────────────┤
 │ Footer                                              │
@@ -105,41 +94,34 @@ server/api/form/
 
 ---
 
+## Funcionalidades Recentes (Julho/2026)
+
+### Badge de preço
+Ofertas pagas exibem badge verde com valor formatado (`R$ 12,00`). Ofertas gratuitas exibem badge "Grátis".
+
+### Roteamento inteligente
+- **Com processo seletivo**: botão "Acessar" → formulário de processo (`/form/seletivo/...`)
+- **Sem processo seletivo**: botão "Comprar" ou "Matricular" → form de matrícula (`/form/matricula/...`)
+
+### Campos retornados pela RPC pública
+A RPC `aca_get_programas_publicos` agora retorna `exige_processo_seletivo` e `gratuito` — essenciais para o roteamento correto.
+
+---
+
 ## Limitações Atuais
 
 | Limitação | Impacto |
 |---|---|
-| **Usa RPCs legadas** (`aca_*`) | Ignora ofertas do módulo comercial (`com_oferta`), não exibe preços |
-| **Só programas com processo seletivo** | Não mostra programas com matrícula direta (gratuitos sem seleção) |
-| **Não consuma ofertas pagas** | Programas pagos (`gratuito = false`) não aparecem com preço |
-| **Código não desacoplado** | 440 linhas inline — difícil manutenção |
-| **Layout customizado** | Ignora `layouts/base.vue`, tem header/footer próprios |
-
----
-
-## Próximos Passos (Refatoração Futura)
-
-> Plano para migrar a vitrine pública para o novo módulo comercial.
-
-1. **Criar RPC** `com_get_ofertas_publicas` — retorna ofertas públicas + ativas + vigentes com dados do produto/programa
-2. **Criar BFF** `server/api/public/ofertas.get.ts` — substitui `programas.get.ts`
-3. **Refatorar página** para padrão desacoplado:
-   - `pages/oferta/index.vue` (orquestrador)
-   - `components/oferta-publica/OfertaCard.vue`
-   - `composables/oferta-publica/useOfertaPublica.ts`
-4. **Adicionar suporte a ofertas pagas** — botão "Comprar R$ XX" → `/checkout/[slug]`
-5. **Adicionar suporte a matrícula direta** — botão "Matricular-se" → checkout gratuito
-6. **Layout** — usar `layouts/base.vue` ou manter customizado com header/footer
+| **Só programas com processo seletivo ativo** | Não mostra programas de matrícula direta |
+| **Código não desacoplado** | ~440 linhas inline |
+| **Layout customizado** | Ignora `layouts/base.vue` |
 
 ---
 
 ## Histórico de Mudanças
 
-### 2026-06-03 — Refatoração para `aca_processo_seletivo`
-- Tabela `aca_processo_seletivo` separada do programa
-- RPC `aca_get_programas_publicos` com JOIN em processos
-- Card por processo (não por programa)
-
-### 2026-06-22 — Bloqueio de re-inscrição
-- Verificação em lote de inscrições
-- Badge "Já Inscrito" no lugar do botão "Acessar"
+### 2026-07-09 — Roteamento inteligente + badge de preço
+- `getFormUrl` agora verifica `exige_processo_seletivo`: se false, redireciona ao checkout
+- Botão mostra "Comprar" (pago) ou "Matricular" (grátis) quando sem processo
+- RPC `aca_get_programas_publicos` atualizada para retornar `exige_processo_seletivo` e `gratuito`
+- `ofertasPorPrograma` map liga ofertas aos programas para exibir preço
