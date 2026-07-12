@@ -10,81 +10,131 @@
  *   ODOO_EMAIL       — Email do usuário da API
  *   ODOO_API_KEY     — API key do Odoo
  */
-export default defineEventHandler(async (event) => {
-    const { personName, companyName, email, message } = await readBody(event);
 
-    // Validação básica
+type JsonRpcResult<T> = {
+    result?: T;
+    error?: {
+        message?: string;
+        data?: { message?: string };
+    };
+};
+
+const callOdoo = async <T>(odooUrl: string, payload: Record<string, unknown>) => {
+    const baseUrl = odooUrl.replace(/\/+$/, "");
+    const url = `${baseUrl}/jsonrpc`;
+
+    const response = await $fetch<JsonRpcResult<T>>(url, {
+        method: "POST",
+        body: {
+            jsonrpc: "2.0",
+            method: "call",
+            id: Date.now(),
+            params: payload,
+        },
+    });
+
+    if (response.error) {
+        throw new Error(
+            response.error.data?.message ??
+                response.error.message ??
+                "Erro de integração com o Odoo.",
+        );
+    }
+
+    if (typeof response.result === "undefined") {
+        throw new Error("Resposta inválida do Odoo.");
+    }
+
+    return response.result;
+};
+
+export default defineEventHandler(async (event) => {
+    const body = await readBody<{
+        personName?: string;
+        companyName?: string;
+        email?: string;
+        message?: string;
+    }>(event);
+
+    const personName = body.personName?.trim();
+    const companyName = body.companyName?.trim();
+    const email = body.email?.trim();
+    const message = body.message?.trim();
+
     if (!personName || !companyName || !email || !message) {
         throw createError({
             statusCode: 400,
-            message: "Todos os campos são obrigatórios.",
+            message: "Preencha nome, empresa, e-mail e descrição.",
         });
     }
 
-    const url = process.env.ODOO_URL;
-    const db = process.env.ODOO_DB;
-    const username = process.env.ODOO_EMAIL;
-    const password = process.env.ODOO_API_KEY;
+    const odooUrl = process.env.ODOO_URL?.trim();
+    const odooDb = process.env.ODOO_DB?.trim();
+    const odooEmail = process.env.ODOO_EMAIL?.trim();
+    const odooApiKey = process.env.ODOO_API_KEY?.trim();
 
-    if (!url || !db || !username || !password) {
-        console.error("[odoo-lead] Credenciais ausentes no .env");
+    console.log("[odoo-lead] env vars loaded:", {
+        url: odooUrl,
+        db: odooDb,
+        email: odooEmail,
+        keyLen: odooApiKey?.length,
+    });
+
+    if (!odooUrl || !odooDb || !odooEmail || !odooApiKey) {
         throw createError({
             statusCode: 500,
-            message: "Erro de configuração do CRM.",
+            message: "Configuração do Odoo não encontrada no ambiente.",
         });
     }
 
-    const rpc = async (method: string, params: unknown[]) => {
-        const res = await $fetch<{ result?: unknown; error?: { message?: string } }>(
-            `${url}/jsonrpc`,
-            {
-                method: "POST",
-                body: {
-                    jsonrpc: "2.0",
-                    method,
-                    params,
-                    id: Math.floor(Math.random() * 100000),
-                },
-            },
-        );
-        if (res.error) throw new Error(res.error.message ?? "Erro na API do Odoo");
-        return res.result;
-    };
-
     try {
-        // 1. Autentica
-        const uid = await rpc("authenticate", [db, username, password, {}]);
-        if (!uid || typeof uid !== "number") {
-            throw new Error("Falha na autenticação com o Odoo");
+        // 1. Autentica no Odoo
+        const uid = await callOdoo<number>(odooUrl, {
+            service: "common",
+            method: "authenticate",
+            args: [odooDb, odooEmail, odooApiKey, {}],
+        });
+
+        console.log("[odoo-lead] authenticate uid:", uid);
+
+        if (!uid) {
+            throw new Error("Falha na autenticação com o Odoo.");
         }
 
         // 2. Cria o lead (crm.lead)
-        const leadId = await rpc("execute_kw", [
-            db,
-            uid,
-            password,
-            "crm.lead",
-            "create",
-            [
-                {
-                    name: `[Educlick] ${companyName} — ${personName}`,
-                    contact_name: personName,
-                    partner_name: companyName,
-                    email_from: email,
-                    description: message,
-                    team_id: false, // fallback para equipe padrão
-                },
+        const leadId = await callOdoo<number>(odooUrl, {
+            service: "object",
+            method: "execute_kw",
+            args: [
+                odooDb,
+                uid,
+                odooApiKey,
+                "crm.lead",
+                "create",
+                [
+                    {
+                        name: companyName,
+                        contact_name: personName,
+                        email_from: email,
+                        description: message,
+                    },
+                ],
             ],
-        ]);
+        });
 
-        console.log(`[odoo-lead] Lead criado: ${leadId}`);
+        console.log("[odoo-lead] lead criado:", leadId);
 
-        return { success: true, leadId };
-    } catch (err) {
-        console.error("[odoo-lead] Erro:", err);
+        return {
+            ok: true,
+            leadId,
+        };
+    } catch (error) {
+        console.log("[odoo-lead] error:", error);
         throw createError({
-            statusCode: 500,
-            message: "Não foi possível enviar o contato. Tente novamente mais tarde.",
+            statusCode: 502,
+            message:
+                (error as { message?: string }).message ??
+                "Não foi possível criar o lead no Odoo.",
         });
     }
 });
