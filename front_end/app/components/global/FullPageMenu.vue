@@ -204,7 +204,7 @@ const userInitial = computed(() => {
                             <div class="flex flex-col text-left">
                                 <span
                                     class="text-sm font-bold text-text group-hover:text-violet-500 transition-colors"
-                                    >Formulários Programas</span
+                                    >Formulários</span
                                 >
                             </div>
                         </button>
@@ -245,7 +245,7 @@ const userInitial = computed(() => {
                                             ? 'text-violet-500'
                                             : 'text-text group-hover:text-violet-500'
                                     "
-                                    >Processos</span
+                                    >Processo Seletivo Estudantes</span
                                 >
                             </div>
                         </button>
@@ -284,6 +284,36 @@ const userInitial = computed(() => {
                                 <span
                                     class="text-sm font-bold text-text group-hover:text-violet-500 transition-colors"
                                     >Matrículas</span
+                                >
+                            </div>
+                        </button>
+                        <!-- NOVO: Docentes -->
+                        <button
+                            @click="handleNavigation('/docentes')"
+                            class="menu-item group disabled:opacity-50"
+                        >
+                            <div
+                                class="menu-icon bg-violet-500/5 text-violet-400"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                            <div class="flex flex-col text-left">
+                                <span
+                                    class="text-sm font-bold text-text group-hover:text-violet-500 transition-colors"
+                                    >Docentes</span
                                 >
                             </div>
                         </button>

@@ -1,0 +1,1 @@
+const $=(n,c,i)=>{if(!n||!c)return"";const e=String(n).trim(),l=String(c).trim().replace(/^\/+/,""),r=i?l.replace(new RegExp(`^${i.replace("/","\\/")}\\/?`),""):l;if(!e||!r)return"";const t=e.indexOf("?");if(t>=0){const a=e.slice(0,t).replace(/\/+$/,""),o=e.slice(t+1);return o?`${a}/${r}?${o}`:`${a}/${r}`}return`${e.replace(/\/+$/,"")}/${r}`};export{$ as buildProtectedFileUrl};

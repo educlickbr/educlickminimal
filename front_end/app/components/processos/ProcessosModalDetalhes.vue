@@ -15,6 +15,8 @@ const fileLinks = ref<Record<string, string>>({});
 const fileNames = ref<Record<string, string>>({});
 const activeTab = ref(0);
 
+function setActiveTab(i: number) { activeTab.value = i; }
+
 function fechar() {
     emit("update:modelValue", false);
 }
@@ -162,7 +164,7 @@ function formatarResposta(valor: any) {
                         <button
                             v-for="(bloco, i) in dados.blocos"
                             :key="i"
-                            @click="activeTab = i"
+                            @click="setActiveTab(Number(i))"
                             class="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex-shrink-0"
                             :class="
                                 activeTab === i

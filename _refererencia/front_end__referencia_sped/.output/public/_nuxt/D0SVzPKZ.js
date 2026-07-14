@@ -1,0 +1,1 @@
+import{t as n,c as o,n as c,i as s}from"./ClqSVliD.js";function D(e,a,r){const t=n(e,r?.in);return isNaN(a)?o(e,NaN):(a&&t.setDate(t.getDate()+a),t)}function u(e,a,r){const[t,i]=c(r?.in,e,a);return+s(t)==+s(i)}export{D as a,u as i};

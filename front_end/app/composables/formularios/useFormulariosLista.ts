@@ -12,7 +12,8 @@ interface FormularioSalvo {
   tipo_proc: string;
   tipo_cand: string;
   total_campos: number;
-  contexto_tipo: "area" | "programa";
+  escopo: "area" | "programa" | "global";
+  contexto_tipo: "area" | "programa" | "global";
   contexto_nome: string;
 }
 

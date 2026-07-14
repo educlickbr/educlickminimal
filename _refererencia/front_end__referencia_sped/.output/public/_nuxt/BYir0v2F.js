@@ -1,0 +1,1 @@
+import{t as i,a as o,n as g,b as c}from"./D4-ptLa7.js";function u(e,t,n){if(typeof e=="string"&&!e.match(i))return o(e,{...n,timeZone:t});e=o(e,n);const s=g(e.getFullYear(),e.getMonth(),e.getDate(),e.getHours(),e.getMinutes(),e.getSeconds(),e.getMilliseconds()).getTime(),r=c(t,new Date(s));return new Date(s+r)}export{u as f};

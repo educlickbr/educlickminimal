@@ -53,20 +53,7 @@ onMounted(async () => {
 
 <template>
     <div class="page-wrap flex flex-col">
-        <div class="page-top-row shrink-0">
-            <div class="flex items-center gap-4">
-                <h1
-                    class="text-xl font-black text-white uppercase tracking-widest"
-                >
-                    Processos Seletivos
-                </h1>
-                <span
-                    class="text-[10px] font-bold text-secondary/40 uppercase tracking-wider"
-                >
-                    {{ core.areas.value.length }} área(s)
-                </span>
-            </div>
-        </div>
+        <div class="page-top-row shrink-0" />
 
         <!-- Loading áreas -->
         <div
@@ -124,7 +111,7 @@ onMounted(async () => {
 
 <style scoped>
 .page-wrap {
-    padding: 1rem 1.5rem;
+    padding: 0.25rem 1.5rem 1rem;
     height: 100%;
 }
 

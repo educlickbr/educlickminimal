@@ -1,0 +1,1 @@
+import{a as i,b as T}from"./D4-ptLa7.js";function l(t,o,n){t=i(t,n);const r=T(o,t,!0),e=new Date(t.getTime()-r),s=new Date(0);return s.setFullYear(e.getUTCFullYear(),e.getUTCMonth(),e.getUTCDate()),s.setHours(e.getUTCHours(),e.getUTCMinutes(),e.getUTCSeconds(),e.getUTCMilliseconds()),s}export{l as t};

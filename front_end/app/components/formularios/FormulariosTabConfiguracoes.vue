@@ -72,7 +72,7 @@
                         </p>
                         <div class="flex items-center gap-2 mt-1 flex-wrap">
                             <span class="form-badge form-badge--scope">{{
-                                f.contexto_tipo === "area" ? "Área" : "Programa"
+                                f.contexto_tipo === "area" ? "Área" : f.contexto_tipo === "global" ? "Global" : "Programa"
                             }}</span>
                             <span class="form-badge form-badge--proc">{{
                                 labelTipoProc[f.tipo_proc] || f.tipo_proc
@@ -221,21 +221,42 @@
                             <div class="flex-1 min-w-[200px]">
                                 <label
                                     class="block text-[10px] font-bold text-secondary/60 mb-1.5 uppercase"
-                                    >Atrelar ao escopo:</label
+                                    >Tipo de Candidato:</label
+                                >
+                                <select
+                                    v-model="builderCtx.selectedTipoCand.value"
+                                    class="w-full text-sm p-2.5 rounded-lg bg-[var(--field-bg)] border border-[var(--field-border)] text-white"
+                                >
+                                    <option value="estudante">Estudante</option>
+                                    <option value="docente">Docente</option>
+                                    <option value="externo">Externo</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 min-w-[200px]">
+                                <label
+                                    class="block text-[10px] font-bold text-secondary/60 mb-1.5 uppercase"
+                                    >Escopo:</label
                                 >
                                 <select
                                     v-model="builderCtx.contextType.value"
                                     class="w-full text-sm p-2.5 rounded-lg bg-[var(--field-bg)] border border-[var(--field-border)] text-white"
+                                    :disabled="builderCtx.selectedTipoCand.value === 'docente'"
                                 >
                                     <option value="area">
-                                        Área Generalista
+                                        Área
                                     </option>
                                     <option value="programa">
-                                        Programa Específico
+                                        Programa
                                     </option>
+                                    <option value="global"
+                                        >Global (Instituição)</option
+                                    >
                                 </select>
                             </div>
-                            <div class="flex-1 min-w-[200px]">
+                            <div
+                                v-if="builderCtx.contextType.value !== 'global'"
+                                class="flex-1 min-w-[200px]"
+                            >
                                 <label
                                     class="block text-[10px] font-bold text-secondary/60 mb-1.5 uppercase"
                                     >Selecione:</label
@@ -286,20 +307,6 @@
                                     <option value="seletivo">
                                         Processo Seletivo
                                     </option>
-                                </select>
-                            </div>
-                            <div class="flex-1 min-w-[200px]">
-                                <label
-                                    class="block text-[10px] font-bold text-secondary/60 mb-1.5 uppercase"
-                                    >Tipo de Candidato:</label
-                                >
-                                <select
-                                    v-model="builderCtx.selectedTipoCand.value"
-                                    class="w-full text-sm p-2.5 rounded-lg bg-[var(--field-bg)] border border-[var(--field-border)] text-white"
-                                >
-                                    <option value="estudante">Estudante</option>
-                                    <option value="docente">Docente</option>
-                                    <option value="externo">Externo</option>
                                 </select>
                             </div>
                         </div>
@@ -749,6 +756,7 @@ defineExpose({
         await listaCtx.fetchContexts();
         await listaCtx.fetchFormulariosSalvos();
     },
+    novoFormulario,
 });
 </script>
 

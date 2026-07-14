@@ -68,7 +68,16 @@ watch(activeTab, async (val) => {
                 @click="perguntasCtx.openNova()"
                 class="add-btn"
             >
-                + Nova Pergunta
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Nova Pergunta
+            </button>
+            <button
+                v-if="activeTab === 'configuracoes'"
+                @click="tabConfigRef?.novoFormulario()"
+                class="add-btn"
+            >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Novo Formulário
             </button>
         </div>
 
@@ -131,20 +140,23 @@ watch(activeTab, async (val) => {
 .add-btn {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.625rem;
-    background: rgba(139, 92, 246, 0.1);
-    color: #a78bfa;
-    font-size: 0.7rem;
-    font-weight: 700;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: all 0.15s;
-    border: none;
+    letter-spacing: 0.08em;
     cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
 }
 .add-btn:hover {
-    background: rgba(139, 92, 246, 0.2);
+    background: linear-gradient(135deg, #6d28d9, #7c3aed);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.45);
+    transform: translateY(-1px);
 }
 </style>

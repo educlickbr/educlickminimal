@@ -13,6 +13,7 @@ export default defineEventHandler(async (event) => {
       p_id_entidade: query.id_entidade,
       p_area_id: query.area_id || null,
       p_programa_id: query.programa_id || null,
+      p_escopo: query.escopo || null,
       p_tipo_proc: query.tipo_proc || 'matricula',
       p_tipo_cand: query.tipo_cand || 'estudante'
     } as any)

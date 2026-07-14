@@ -1,0 +1,43 @@
+{
+  "name": "front_end",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.20",
+    "@fullcalendar/interaction": "^6.1.20",
+    "@fullcalendar/timegrid": "^6.1.20",
+    "@fullcalendar/vue3": "^6.1.20",
+    "@nuxtjs/supabase": "^2.0.3",
+    "@tiptap/extension-link": "^3.17.1",
+    "@tiptap/starter-kit": "^3.17.1",
+    "@tiptap/vue-3": "^3.17.1",
+    "@types/file-saver": "^2.0.7",
+    "@types/formidable": "^3.4.6",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
+    "formidable": "^3.5.4",
+    "html2pdf.js": "^0.14.0",
+    "jspdf": "^4.1.0",
+    "nuxt": "^4.2.2",
+    "pdfmake": "^0.3.3",
+    "qrcode": "^1.5.4",
+    "vue": "^3.5.26",
+    "vue-router": "^4.6.4",
+    "vuedraggable": "^4.1.0"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@pinia/nuxt": "^0.11.3",
+    "@types/html2pdf.js": "^0.10.0",
+    "@types/pdfmake": "^0.3.0"
+  }
+}

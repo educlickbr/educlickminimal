@@ -1,0 +1,1 @@
+import{_ as t}from"./_BY_5Dhg.js";import{c as n,o as s,b as r,aT as a}from"./DTLy1l_x.js";import"./f7y2Urgh.js";const c={class:"h-screen w-screen bg-background overflow-hidden"},d={__name:"inicio",setup(_){return(e,l)=>{const o=t;return s(),n("div",c,[r(o,{isOpen:!0,disableClose:!0}),a(e.$slots,"default")])}}};export{d as default};

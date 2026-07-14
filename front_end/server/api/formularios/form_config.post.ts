@@ -9,6 +9,7 @@ export default defineEventHandler(async (event) => {
       p_id_entidade: body.id_entidade,
       p_area_id: body.area_id || null,
       p_programa_id: body.programa_id || null,
+      p_escopo: body.escopo || null,
       p_tipo_proc: body.tipo_proc || 'matricula',
       p_tipo_cand: body.tipo_cand || 'estudante',
       p_old_area_id: body.old_area_id !== undefined ? body.old_area_id : null,

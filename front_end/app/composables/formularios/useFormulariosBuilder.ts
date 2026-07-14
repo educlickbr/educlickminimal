@@ -5,7 +5,7 @@
  * Extraído do formularios.vue original. ~300 linhas de lógica DnD preservadas.
  */
 
-import { ref, computed, type Ref } from "vue";
+import { ref, computed, watch, type Ref } from "vue";
 import { CEP_DEPENDENT_FIELDS } from "~/utils/viacep";
 import type { Pergunta } from "./useFormulariosPerguntas";
 import { labelTipoProc, labelTipoCand } from "./useFormulariosLista";
@@ -43,10 +43,17 @@ export function useFormulariosBuilder(deps: {
   );
 
   // ── Context ────────────────────────────────────────────
-  const contextType = ref<"area" | "programa">("area");
+  const contextType = ref<"area" | "programa" | "global">("area");
   const selectedContextId = ref("");
   const selectedTipoProc = ref("matricula");
   const selectedTipoCand = ref("estudante");
+
+  // Se tipo_cand = 'docente', força escopo global
+  watch(selectedTipoCand, (val) => {
+    if (val === "docente") {
+      contextType.value = "global";
+    }
+  });
 
   // ── Bloco modal ────────────────────────────────────────
   const showModalBloco = ref(false);
@@ -440,7 +447,7 @@ export function useFormulariosBuilder(deps: {
 
   // ─── Save / Load ───
   async function fetchFormConfig() {
-    if (!selectedContextId.value) {
+    if (contextType.value !== "global" && !selectedContextId.value) {
       builderItems.value = [];
       builderBlocos.value = ["Dados Gerais"];
       activeBuilderBlocoIndex.value = 0;
@@ -453,6 +460,7 @@ export function useFormulariosBuilder(deps: {
         method: "GET",
         params: {
           id_entidade,
+          escopo: contextType.value,
           area_id:
             contextType.value === "area" ? selectedContextId.value : undefined,
           programa_id:
@@ -493,7 +501,7 @@ export function useFormulariosBuilder(deps: {
   }
 
   async function saveFormConfig() {
-    if (!selectedContextId.value) {
+    if (contextType.value !== "global" && !selectedContextId.value) {
       deps.toast.showToast("Selecione uma área ou programa primeiro.", {
         type: "error",
       });
@@ -525,6 +533,7 @@ export function useFormulariosBuilder(deps: {
         method: "POST",
         body: {
           id_entidade,
+          escopo: contextType.value,
           area_id:
             contextType.value === "area" ? selectedContextId.value : null,
           programa_id:
@@ -552,8 +561,8 @@ export function useFormulariosBuilder(deps: {
 
   // ─── Abrir / Novo / Voltar ───
   function abrirFormulario(f: any, areas: any[], programas: any[]) {
-    contextType.value = f.contexto_tipo === "area" ? "area" : "programa";
-    selectedContextId.value = (f.area_id || f.programa_id) as string;
+    contextType.value = f.contexto_tipo === "area" ? "area" : f.contexto_tipo === "global" ? "global" : "programa";
+    selectedContextId.value = (f.area_id || f.programa_id) || "";
     selectedTipoProc.value = f.tipo_proc || "matricula";
     selectedTipoCand.value = f.tipo_cand || "estudante";
     void fetchFormConfig();
@@ -563,6 +572,7 @@ export function useFormulariosBuilder(deps: {
     selectedContextId.value = "";
     selectedTipoProc.value = "matricula";
     selectedTipoCand.value = "estudante";
+    contextType.value = "area";
     builderItems.value = [];
     builderBlocos.value = ["Dados Gerais"];
     activeBuilderBlocoIndex.value = 0;
