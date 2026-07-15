@@ -2,8 +2,31 @@
 const props = defineProps<{
     modelValue: boolean;
     edital?: any | null;
+    idEntidade: string;
     onSave: (dados: any) => Promise<boolean>;
 }>();
+
+const formsDisponiveis = ref<any[]>([]);
+const loadingForms = ref(false);
+
+async function fetchForms() {
+    if (!props.idEntidade) return;
+    loadingForms.value = true;
+    try {
+        const res = (await $fetch("/api/docentes/formularios-disponiveis", {
+            params: {
+                id_entidade: props.idEntidade,
+                tipo_proc: "seletivo",
+                tipo_cand: "docente",
+            },
+        })) as any;
+        formsDisponiveis.value = res?.itens || [];
+    } catch {
+        formsDisponiveis.value = [];
+    } finally {
+        loadingForms.value = false;
+    }
+}
 
 const emit = defineEmits<{
     (e: "update:modelValue", v: boolean): void;
@@ -46,6 +69,7 @@ watch(
                 };
             }
             error.value = "";
+            void fetchForms();
         }
     },
 );
@@ -155,18 +179,35 @@ async function handleSave() {
                     </div>
                 </div>
 
-                <!-- Formulário (placeholder — futuramente dropdown de aca_form_config) -->
+                <!-- Formulário de Inscrição (agora dinâmico) -->
                 <div class="flex flex-col gap-1.5">
                     <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60">
                         Formulário de Inscrição
                     </label>
+                    <div v-if="loadingForms" class="text-[10px] text-secondary/40 py-2">
+                        Carregando formulários...
+                    </div>
                     <select
+                        v-else
                         v-model="form.id_form_config"
                         class="field-input"
                     >
                         <option value="">Sem formulário</option>
-                        <option value="placeholder">Formulário Docente Padrão (futuro)</option>
+                        <option
+                            v-for="f in formsDisponiveis"
+                            :key="f.area_id || f.programa_id || 'global'"
+                            :value="f.area_id || f.programa_id || 'global'"
+                        >
+                            {{ f.contexto_nome || f.escopo }} — {{ f.qtd_perguntas }} perguntas
+                        </option>
                     </select>
+                    <div
+                        v-if="!loadingForms && formsDisponiveis.length === 0"
+                        class="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 mt-1"
+                    >
+                        ⚠ Nenhum formulário de processo seletivo para docentes encontrado.
+                        Crie um em <NuxtLink to="/formularios?tab=configuracoes" class="underline text-primary">Formulários → Configurações</NuxtLink>.
+                    </div>
                 </div>
 
                 <!-- Status -->

@@ -49,6 +49,66 @@ const generatedLink = ref("");
 const generatingLink = ref(false);
 const linkError = ref("");
 const linkCopied = ref(false);
+const linkConviteId = ref("");
+const linkEmail = ref("");
+const linkNome = ref("");
+const showLinkForm = ref(false);
+const sendingInvite = ref(false);
+const inviteSent = ref(false);
+
+async function gerarLink() {
+    linkEmail.value = "";
+    linkNome.value = "";
+    showLinkForm.value = true;
+}
+
+async function confirmarGerarLink() {
+    generatingLink.value = true;
+    linkError.value = "";
+    linkCopied.value = false;
+    inviteSent.value = false;
+    try {
+        const res = (await $fetch("/api/docentes/gerar-convite", {
+            method: "POST",
+            body: {
+                id_entidade: props.idEntidade,
+                email: linkEmail.value.trim() || null,
+            },
+        })) as any;
+        if (res?.success) {
+            const origin = window.location.origin;
+            generatedLink.value = `${origin}/cadastro-docente/${res.token}`;
+            linkConviteId.value = res.id;
+
+            // Se tiver email, já envia o link automaticamente
+            if (linkEmail.value.trim()) {
+                try {
+                    await $fetch("/api/docentes/enviar-convite", {
+                        method: "POST",
+                        body: {
+                            email: linkEmail.value,
+                            nome: linkNome.value || "",
+                            link: generatedLink.value,
+                            token: res.token,
+                        },
+                    });
+                    inviteSent.value = true;
+                } catch {
+                    // webhook pode falhar, mas o link foi gerado
+                }
+            }
+
+            showLinkForm.value = false;
+            showLinkModal.value = true;
+        } else {
+            linkError.value = "Erro ao gerar link.";
+        }
+    } catch (e: any) {
+        linkError.value = e?.message || "Erro ao gerar link.";
+    } finally {
+        generatingLink.value = false;
+    }
+}
 
 // ── Valor hora/aula ────────────────────────────────
 const editandoValor = ref<string | null>(null);
@@ -88,28 +148,7 @@ async function salvarValor(docenteId: string) {
     }
 }
 
-async function gerarLink() {
-    generatingLink.value = true;
-    linkError.value = "";
-    linkCopied.value = false;
-    try {
-        const res = (await $fetch("/api/docentes/gerar-convite", {
-            method: "POST",
-            body: { id_entidade: props.idEntidade },
-        })) as any;
-        if (res?.success) {
-            const origin = window.location.origin;
-            generatedLink.value = `${origin}/cadastro-docente/${res.token}`;
-            showLinkModal.value = true;
-        } else {
-            linkError.value = "Erro ao gerar link.";
-        }
-    } catch (e: any) {
-        linkError.value = e?.message || "Erro ao gerar link.";
-    } finally {
-        generatingLink.value = false;
-    }
-}
+
 
 function copiarLink() {
     if (generatedLink.value) {
@@ -340,6 +379,78 @@ onMounted(() => {
         </div>
     </div>
 
+    <!-- Modal: Informar Email para Convite -->
+    <div
+        v-if="showLinkForm"
+        class="modal-overlay"
+        @click.self="showLinkForm = false"
+    >
+        <div class="modal-panel" style="max-width: 420px;">
+            <div class="modal-accent-bar" />
+
+            <div class="modal-header">
+                <div class="modal-header-icon">
+                    <Icon name="ph:envelope-light" class="w-5 h-5" />
+                </div>
+                <div class="modal-header-text flex-1">
+                    <h3 class="modal-title">Enviar Convite</h3>
+                    <p class="modal-subtitle">Informe os dados para enviar o link</p>
+                </div>
+                <button @click="showLinkForm = false" class="modal-close-btn">
+                    &times;
+                </button>
+            </div>
+
+            <div class="modal-body flex flex-col gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60">
+                        Email do docente
+                    </label>
+                    <input
+                        v-model="linkEmail"
+                        type="email"
+                        placeholder="docente@email.com"
+                        class="field-input"
+                    />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60">
+                        Nome do docente
+                    </label>
+                    <input
+                        v-model="linkNome"
+                        type="text"
+                        placeholder="Nome completo"
+                        class="field-input"
+                    />
+                </div>
+                <p class="text-[10px] text-secondary/40">
+                    Se informar o email, o link será enviado automaticamente.
+                    Se deixar em branco, só gera o link para copiar.
+                </p>
+                <div
+                    v-if="linkError"
+                    class="text-[10px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2"
+                >
+                    {{ linkError }}
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button @click="showLinkForm = false" class="modal-btn-cancel">Cancelar</button>
+                <button
+                    @click="confirmarGerarLink"
+                    :disabled="generatingLink"
+                    class="px-4 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all disabled:opacity-50 flex items-center gap-2"
+                >
+                    <div v-if="generatingLink" class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <Icon v-else name="ph:link-light" class="w-3.5 h-3.5" />
+                    <span>Gerar Link{{ linkEmail.trim() ? ' e Enviar' : '' }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Código de Verificação -->
     <div
         v-if="showCodigoModal"
@@ -450,6 +561,19 @@ onMounted(() => {
             </div>
 
             <div class="modal-footer">
+                <span
+                    v-if="inviteSent"
+                    class="text-[10px] font-bold text-emerald-400 flex items-center gap-1 mr-auto"
+                >
+                    <Icon name="ph:check-circle-bold" class="w-4 h-4" />
+                    Link enviado para {{ linkEmail }}
+                </span>
+                <span
+                    v-else-if="linkEmail"
+                    class="text-[10px] text-secondary/40 mr-auto"
+                >
+                    Link gerado (email não enviado)
+                </span>
                 <button
                     @click="showLinkModal = false"
                     class="modal-btn-cancel"
@@ -588,6 +712,25 @@ onMounted(() => {
     opacity: 0.25;
     cursor: not-allowed;
 }
+
+/* ── Field input (replicado para modais) ─────────── */
+.field-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 9px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(232, 230, 240, 0.9);
+    outline: none;
+    transition: all 0.15s ease;
+}
+.field-input:focus {
+    border-color: rgba(139, 92, 246, 0.45);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+.field-input::placeholder { color: rgba(255, 255, 255, 0.22); }
 
 /* ── Scrollbar ────────────────────────────────────── */
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }

@@ -32,6 +32,8 @@ export default defineNuxtConfig({
         "/",
         "/teste-layout",
         "/oferta",
+        "/trabalhe-conosco",
+        "/cadastro-docente/**",
         "/test",
         "/form/**",
         "/auth/**",
@@ -46,7 +48,15 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
-  // 4. Vite - permitir hosts externos (ngrok)
+  // 4. Runtime config (variáveis de ambiente expostas ao servidor)
+  runtimeConfig: {
+    powerAutomateLinkWebhook:
+      process.env.POWER_AUTOMATE_LINK || "",
+    powerAutomateTokenCadastro:
+      process.env.POWER_AUTOMATE_TOKEN_CADASTRO || "",
+  },
+
+  // 5. Vite - permitir hosts externos (ngrok)
   vite: {
     server: {
       allowedHosts: true,

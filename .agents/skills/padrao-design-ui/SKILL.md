@@ -1,5 +1,6 @@
 ---
-description: Padrão obrigatório de Design System UI — EduClick
+name: padrao-design-ui
+description: Padrão obrigatório de Design System UI — EduClick. Carregue esta skill sempre que for criar ou editar componentes de interface.
 ---
 
 # 🎨 Design System — EduClick UI

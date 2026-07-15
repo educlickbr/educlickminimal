@@ -5,6 +5,8 @@ import { serverSupabaseClient } from "#supabase/server";
  * Body: { id_entidade, email? }
  *
  * Gera um link único de autocadastro para docente.
+ * O webhook é disparado separadamente pelo componente
+ * via POST /api/docentes/enviar-convite.
  */
 export default defineEventHandler(async (event) => {
     const client = await serverSupabaseClient(event);

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 
 definePageMeta({ layout: false });
 
@@ -35,11 +35,7 @@ const form = ref({
     estado: "",
 });
 
-const step = ref<"form" | "loading" | "verificar" | "sucesso" | "erro">("form");
-const authUserId = ref("");
-const codigoInput = ref("");
-const verificarError = ref("");
-const verificando = ref(false);
+const step = ref<"form" | "loading" | "erro">("form");
 const errorMsg = ref("");
 
 const supabase = useSupabaseClient();
@@ -121,35 +117,11 @@ async function handleSubmit() {
             },
         });
 
-        step.value = "verificar";
-        authUserId.value = userIdFromAuth;
+        // Vai direto pra home (signUp já logou automático)
+        await navigateTo("/", { replace: true });
     } catch (e: any) {
         errorMsg.value = e?.message || "Erro ao finalizar cadastro.";
         step.value = "form";
-    }
-}
-
-async function verificarCodigo() {
-    if (!authUserId.value || codigoInput.value.length < 6) return;
-    verificando.value = true;
-    verificarError.value = "";
-    try {
-        const res = (await $fetch("/api/docentes/verificar-codigo", {
-            method: "POST",
-            body: {
-                id_user_expandido: authUserId.value,
-                codigo: codigoInput.value,
-            },
-        })) as any;
-        if (res?.success) {
-            step.value = "sucesso";
-        } else {
-            verificarError.value = res?.message || "Código inválido.";
-        }
-    } catch (e: any) {
-        verificarError.value = e?.message || "Erro ao verificar código.";
-    } finally {
-        verificando.value = false;
     }
 }
 </script>
@@ -170,58 +142,8 @@ async function verificarCodigo() {
 
         <main class="max-w-3xl mx-auto px-6 py-12">
 
-            <!-- Sucesso Final -->
-            <div v-if="step === 'sucesso'" class="text-center py-16">
-                <div class="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-6">
-                    <Icon name="ph:check-circle-bold" class="w-10 h-10 text-emerald-400" />
-                </div>
-                <h1 class="text-2xl font-black mb-3">Cadastro Completo!</h1>
-                <p class="text-secondary/60 max-w-md mx-auto">
-                    Seu cadastro como docente foi realizado e seu email foi verificado com sucesso.
-                </p>
-            </div>
-
-            <!-- Verificação de Email -->
-            <div v-else-if="step === 'verificar'" class="bg-[#0f0f17] border border-white/5 rounded-xl p-8 text-center">
-                <div class="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
-                    <Icon name="ph:envelope-open-light" class="w-8 h-8 text-primary" />
-                </div>
-                <h1 class="text-xl font-black mb-3">Verifique seu Email</h1>
-                <p class="text-sm text-secondary/60 max-w-md mx-auto mb-6">
-                    Solicite ao administrador o código de verificação e insira abaixo para confirmar seu email.
-                </p>
-
-                <div class="flex flex-col items-center gap-3 max-w-xs mx-auto">
-                    <input
-                        v-model="codigoInput"
-                        type="text"
-                        placeholder="000000"
-                        maxlength="6"
-                        class="w-full text-center text-2xl font-black tracking-[0.3em] field-input"
-                        style="font-family: monospace; letter-spacing: 0.5em;"
-                        @keyup.enter="verificarCodigo"
-                    />
-
-                    <div
-                        v-if="verificarError"
-                        class="text-[10px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2 w-full"
-                    >
-                        {{ verificarError }}
-                    </div>
-
-                    <button
-                        @click="verificarCodigo"
-                        :disabled="verificando || codigoInput.length < 6"
-                        class="w-full py-3 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                        <div v-if="verificando" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Verificar Código</span>
-                    </button>
-                </div>
-            </div>
-
             <!-- Formulário -->
-            <div v-else class="bg-[#0f0f17] border border-white/5 rounded-xl p-8">
+            <div class="bg-[#0f0f17] border border-white/5 rounded-xl p-8">
                 <div class="mb-8">
                     <h1 class="text-xl font-black mb-2">Cadastro de Docente</h1>
                     <p class="text-sm text-secondary/60">

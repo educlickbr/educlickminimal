@@ -152,6 +152,7 @@ watch(core.activeTab, async (tab) => {
     <ModalEdital
         v-model="showModalEdital"
         :edital="editalEditando"
+        :idEntidade="core.idEntidade()"
         :onSave="salvarEdital"
     />
 

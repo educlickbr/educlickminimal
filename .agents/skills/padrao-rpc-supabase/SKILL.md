@@ -1,5 +1,6 @@
 ---
-description: Padrão obrigatório para criar funções (RPCs) PostgreSQL no Supabase
+name: padrao-rpc-supabase
+description: Padrão obrigatório para criar funções (RPCs) PostgreSQL no Supabase. Carregue esta skill ao criar ou alterar RPCs e migrations.
 ---
 
 # Padrão de Segurança para RPCs (Supabase / PostgreSQL)

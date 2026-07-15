@@ -475,27 +475,38 @@ sequenceDiagram
 
 ## Ordem de Implementação
 
-| Etapa | O que | Depende |
+| Etapa | O que | Status |
 |---|---|---|
-| **1** | Migrations: 5 tabelas (`aca_docente`, `aca_docente_vinculo`, `aca_edital_docente`, `aca_edital_docente_inscricao`, `aca_docente_proposta`) | Nada |
-| **2** | RPCs de docente (listar, upsert) | Etapa 1 |
-| **3** | RPCs de edital (listar, upsert, delete) | Etapa 1 |
-| **4** | RPCs de inscrição (listar, avaliar) | Etapa 1 |
-| **5** | RPCs de vínculo (listar, upsert batch) | Etapa 1 |
-| **6** | RPCs de proposta (listar, marcar visto, considerar) | Etapa 1 |
-| **7** | BFFs de docente + edital + inscrição + vínculo + proposta | Etapas 2-6 |
-| **8** | Composable `useDocentesCore` | Nada |
-| **9** | Composable `useDocentesEditais` | Etapa 7 |
-| **10** | Composable `useDocentesSelecao` | Etapa 7 |
-| **11** | Composable `useDocentesLista` | Etapa 7 |
-| **12** | Composable `useDocentesCurriculos` | Etapa 7 |
-| **13** | Componentes: `DocentesTabEditais`, `ModalEdital` | Etapas 8, 9 |
-| **14** | Componentes: `DocentesTabSelecao`, `ModalAvaliarCandidato` | Etapas 8, 10 |
-| **15** | Componentes: `DocentesTabDocentes`, `ModalDocente`, `ModalVinculosDocente` | Etapas 8, 11 |
-| **16** | Componente: `DocentesTabCurriculos` | Etapas 8, 12 |
-| **17** | Orquestrador `pages/docentes/index.vue` | Etapas 13-16 |
-| **18** | Página pública `/trabalhe-conosco` + BFF público | Etapa 6 (RPC proposta) |
-| **19** | Adicionar `pageTitle` para `/docentes` no layout | Nada |
+| **1** | Migrations: 5 tabelas (`aca_docente`, `aca_docente_vinculo`, `aca_edital_docente`, `aca_edital_docente_inscricao`, `aca_docente_proposta`) | ✅ |
+| **2** | RPCs de docente (listar, upsert, toggle) | ✅ |
+| **3** | RPCs de edital (listar, upsert, delete) | ✅ |
+| **4** | RPCs de inscrição (listar, avaliar) | ✅ |
+| **5** | RPCs de vínculo (listar, upsert batch) | ✅ |
+| **6** | RPCs de proposta (listar, marcar visto, considerar, inserir pública) | ✅ |
+| **7** | BFFs (17 endpoints) | ✅ |
+| **8-12** | 5 Composables (`Core`, `Editais`, `Selecao`, `Lista`, `Curriculos`) | ✅ |
+| **13-16** | 8 Componentes (4 tabs + 4 modais) | ✅ |
+| **17** | Orquestrador `pages/docentes/index.vue` | ✅ |
+| **18** | Página pública `/trabalhe-conosco` + BFF público | ✅ |
+| **19** | `pageTitle` para `/docentes` no layout | ✅ |
+
+### 🚧 Extras implementados (além do plano original)
+
+| Extra | Migração | Descrição |
+|---|---|---|
+| **Convite/Autocadastro** | `20260713100007` | Tabela `aca_docente_convite` + RPCs `gerar_convite` e `completar_cadastro` |
+| **Verificação de email** | `20260713100008` | Colunas em `user_expandido` + RPCs `gerar_codigo_verificacao` e `verificar_codigo` |
+| **Valor hora/aula** | `20260713100009` | Coluna `valor_hora_aula` em `aca_docente` + edição inline |
+| **Cadastro completo** | `20260713100010` | RPC `aca_criar_docente_completo` com `p_valor_hora_aula` |
+| **Escopo Global** | `20260713100011` | Coluna `escopo` em `aca_form_config` + form builder atualizado |
+| **Acesso público** | `20260713100012` | Grant anon para envio de currículo público |
+
+### 📋 Próximos passos (fora deste plano)
+
+- **Atribuição de Docentes** — vincular professor a aulas no calendário acadêmico
+- **Power Automate** — envio automático de email com link de convite
+- **Página pública de inscrição em edital** — candidato se inscreve via formulário do edital
+- **Página `/cadastro-docente`** — tela de verificação de código após signup
 
 ---
 
@@ -504,3 +515,4 @@ sequenceDiagram
 | Data | Descrição |
 |---|---|
 | 2026-07-13 | Criação do plano — gestão completa de docentes com 4 abas + página pública Trabalhe Conosco |
+| 2026-07-13 | Implementação completa (19 etapas + 6 extras). Build 100% OK. |

@@ -10,6 +10,7 @@
     <persistedState key="aggregateWorkingSetId"/>
     <persistedState key="show_in_time" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;show_in_time/>"/>
     <tags>topLevel</tags>
+    <tags>shellMaximized</tags>
     <children xsi:type="basic:PartSashContainer" xmi:id="_fID1cncZEfG5R8BVxjDBsQ" selectedElement="_fID1c3cZEfG5R8BVxjDBsQ" horizontal="true">
       <children xsi:type="advanced:PerspectiveStack" xmi:id="_fID1c3cZEfG5R8BVxjDBsQ" elementId="org.eclipse.ui.ide.perspectivestack" containerData="7500" selectedElement="_fID1dHcZEfG5R8BVxjDBsQ">
         <children xsi:type="advanced:Perspective" xmi:id="_fID1dHcZEfG5R8BVxjDBsQ" elementId="org.jkiss.dbeaver.core.perspective" selectedElement="_YmWl0H-GEfGQgM95yzOz0w" label="DBeaver" iconURI="platform:/plugin/org.jkiss.dbeaver.ui/icons/dbeaver_perspective.png">
@@ -29,6 +30,8 @@
           <tags>persp.newWizSC:org.jkiss.dbeaver.ui.dashboard.navigator.DashboardCreateWizard</tags>
           <tags>persp.newWizSC:org.jkiss.dbeaver.ui.editors.erd.navigator.DiagramCreateWizard</tags>
           <tags>persp.viewSC:com.dbeaver.ai.chat</tags>
+          <tags>persp.actionSet:org.eclipse.ui.edit.text.actionSet.annotationNavigation</tags>
+          <tags>persp.actionSet:org.eclipse.ui.actionSet.openFiles</tags>
           <tags>persp.editorOnboardingCommand:New Database &amp;Connection$$$Shift+Ctrl+N</tags>
           <tags>persp.editorOnboardingCommand:Last edited SQL script$$$Ctrl+Enter</tags>
           <tags>persp.editorOnboardingCommand:Open File...$$$Ctrl+O</tags>
@@ -38,7 +41,6 @@
             <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl0X-GEfGQgM95yzOz0w" containerData="2500" selectedElement="_YmWl0n-GEfGQgM95yzOz0w">
               <children xsi:type="basic:PartStack" xmi:id="_YmWl0n-GEfGQgM95yzOz0w" elementId="navigation" containerData="7000" selectedElement="_YmWl03-GEfGQgM95yzOz0w">
                 <tags>active</tags>
-                <tags>noFocus</tags>
                 <children xsi:type="advanced:Placeholder" xmi:id="_YmWl03-GEfGQgM95yzOz0w" elementId="org.jkiss.dbeaver.core.databaseNavigator" ref="_fIEdrncZEfG5R8BVxjDBsQ" closeable="true">
                   <tags>View</tags>
                   <tags>categoryTag:Database</tags>

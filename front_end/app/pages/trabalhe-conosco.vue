@@ -81,12 +81,11 @@ async function handleSubmit() {
         return;
     }
 
-    // Envio dos dados
+    // Envio dos dados (via endpoint público)
     try {
-        const res = (await $fetch("/api/docentes/curriculos", {
+        const res = (await $fetch("/api/public/enviar-curriculo", {
             method: "POST",
             body: {
-                acao: "enviar_proposta",
                 id_entidade: idEntidade.value,
                 nome: form.value.nome.trim(),
                 email: form.value.email.trim(),
@@ -95,20 +94,6 @@ async function handleSubmit() {
                 id_curriculo: idCurriculo,
                 id_edital: form.value.id_edital || null,
             },
-        }).catch(() => {
-            // Tenta via RPC pública direta como fallback
-            return $fetch("/api/public/enviar-curriculo", {
-                method: "POST",
-                body: {
-                    id_entidade: idEntidade.value,
-                    nome: form.value.nome.trim(),
-                    email: form.value.email.trim(),
-                    telefone: form.value.telefone.trim() || null,
-                    minibio: form.value.minibio.trim() || null,
-                    id_curriculo: idCurriculo,
-                    id_edital: form.value.id_edital || null,
-                },
-            });
         })) as any;
 
         if (res?.success) {
