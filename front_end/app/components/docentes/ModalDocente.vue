@@ -2,12 +2,16 @@
 const props = defineProps<{
     modelValue: boolean;
     idEntidade: string;
+    editDocenteId?: string | null;
     onSave: (idUserExpandido: string) => Promise<boolean>;
 }>();
 
 const emit = defineEmits<{
     (e: "update:modelValue", v: boolean): void;
 }>();
+
+const editando = computed(() => !!props.editDocenteId);
+const loadingDados = ref(false);
 
 // IDs fixos das perguntas globais (extraídos do banco)
 const PERGUNTAS = {
@@ -35,6 +39,8 @@ const form = ref({
     bairro: "",
     cidade: "",
     estado: "",
+    id_docente: "",
+    id_user_expandido: "",
 });
 
 const saving = ref(false);
@@ -89,11 +95,10 @@ async function handleSave() {
     saving.value = true;
 
     try {
-        // Monta respostas das perguntas globais
         const valorCentavos = Math.round(parseFloat((form.value.valor_hora_aula || "0").replace(",", ".")) * 100);
 
         const respostas: Record<string, string> = {};
-            if (form.value.cpf) respostas[PERGUNTAS.cpf] = form.value.cpf;
+        if (form.value.cpf) respostas[PERGUNTAS.cpf] = form.value.cpf;
         if (form.value.data_nascimento) respostas[PERGUNTAS.data_nascimento] = form.value.data_nascimento;
         if (form.value.cep) respostas[PERGUNTAS.cep] = form.value.cep;
         if (form.value.endereco) respostas[PERGUNTAS.endereco] = form.value.endereco;
@@ -103,34 +108,52 @@ async function handleSave() {
         if (form.value.cidade) respostas[PERGUNTAS.cidade] = form.value.cidade;
         if (form.value.estado) respostas[PERGUNTAS.estado] = form.value.estado;
 
-        const res = (await $fetch("/api/docentes/cadastro-completo", {
-            method: "POST",
-            body: {
-                id_entidade: props.idEntidade,
-                nome: form.value.nome.trim(),
-                email: form.value.email.trim(),
-                valor_hora_aula: valorCentavos > 0 ? valorCentavos : null,
-                respostas,
-            },
-        })) as any;
+        if (editando.value) {
+            const res = (await $fetch("/api/docentes/atualizar-dados", {
+                method: "POST",
+                body: {
+                    id_docente: props.editDocenteId,
+                    id_user_expandido: form.value.id_user_expandido,
+                    id_entidade: props.idEntidade,
+                    valor_hora_aula: valorCentavos > 0 ? valorCentavos : null,
+                    respostas,
+                },
+            })) as any;
 
-        if (res?.success) {
-            const idUserExpandido = res.id_user_expandido;
-
-            // Chama o onSave para atualizar a lista de docentes
-            const ok = await props.onSave(idUserExpandido);
-
-            if (ok) {
-                successMsg.value = "Docente cadastrado com sucesso!";
-                setTimeout(() => emit("update:modelValue", false), 1200);
+            if (res?.success) {
+                successMsg.value = "Dados atualizados com sucesso!";
+                await props.onSave("");
+                setTimeout(() => emit("update:modelValue", false), 1000);
             } else {
-                error.value = "Erro ao vincular como docente.";
+                error.value = res?.message || "Erro ao atualizar.";
             }
         } else {
-            error.value = res?.message || "Erro ao cadastrar docente.";
+            const res = (await $fetch("/api/docentes/cadastro-completo", {
+                method: "POST",
+                body: {
+                    id_entidade: props.idEntidade,
+                    nome: form.value.nome.trim(),
+                    email: form.value.email.trim(),
+                    valor_hora_aula: valorCentavos > 0 ? valorCentavos : null,
+                    respostas,
+                },
+            })) as any;
+
+            if (res?.success) {
+                const idUserExpandido = res.id_user_expandido;
+                const ok = await props.onSave(idUserExpandido);
+                if (ok) {
+                    successMsg.value = "Docente cadastrado com sucesso!";
+                    setTimeout(() => emit("update:modelValue", false), 1200);
+                } else {
+                    error.value = "Erro ao vincular como docente.";
+                }
+            } else {
+                error.value = res?.message || "Erro ao cadastrar docente.";
+            }
         }
     } catch (e: any) {
-        error.value = e?.message || "Erro ao cadastrar docente.";
+        error.value = e?.message || "Erro ao salvar docente.";
     } finally {
         saving.value = false;
     }
@@ -138,15 +161,54 @@ async function handleSave() {
 
 watch(
     () => props.modelValue,
-    (val) => {
+    async (val) => {
         if (val) {
-            form.value = {
-                nome: "", email: "", valor_hora_aula: "", cpf: "", data_nascimento: "",
-                cep: "", endereco: "", numero: "", complemento: "",
-                bairro: "", cidade: "", estado: "",
-            };
             error.value = "";
             successMsg.value = "";
+
+            if (props.editDocenteId) {
+                // Modo edição: carrega dados
+                loadingDados.value = true;
+                try {
+                    const res = (await $fetch("/api/docentes/docente-detalhes", {
+                        params: { id: props.editDocenteId },
+                    })) as any;
+                    if (res?.success) {
+                        const d = res.docente;
+                        const r = d.respostas || {};
+                        form.value = {
+                            nome: d.nome_completo || "",
+                            email: d.email || "",
+                            valor_hora_aula: d.valor_hora_aula
+                                ? (d.valor_hora_aula / 100).toFixed(2).replace(".", ",")
+                                : "",
+                            cpf: r["05c0186e-af01-4220-8031-383c8611c4fa"]?.resposta || "",
+                            data_nascimento: r["ebf7837b-545e-45a7-ac0d-55d7b235a2c2"]?.resposta || "",
+                            cep: r["a918d49a-8ac2-4796-a656-4181897a00d1"]?.resposta || "",
+                            endereco: r["745b61c2-161d-4cbb-af1c-e9065d3362f2"]?.resposta || "",
+                            numero: r["1eebb87e-ec33-4155-be21-cc50f85d7fc5"]?.resposta || "",
+                            complemento: r["23a6698e-8e01-4d58-965e-f927b2fb3d31"]?.resposta || "",
+                            bairro: r["b30fee6d-29b4-4bf9-8569-2a141150d10e"]?.resposta || "",
+                            cidade: r["9b638554-16c5-4a1a-aed8-755d85849c6c"]?.resposta || "",
+                            estado: r["44b8bfef-6ad1-4a18-8f5c-83949895f44f"]?.resposta || "",
+                            id_docente: d.id || "",
+                            id_user_expandido: d.id_user_expandido || "",
+                        };
+                    }
+                } catch {
+                    error.value = "Erro ao carregar dados.";
+                } finally {
+                    loadingDados.value = false;
+                }
+            } else {
+                // Modo criação: zera tudo
+                form.value = {
+                    nome: "", email: "", valor_hora_aula: "", cpf: "", data_nascimento: "",
+                    cep: "", endereco: "", numero: "", complemento: "",
+                    bairro: "", cidade: "", estado: "",
+                    id_docente: "", id_user_expandido: "",
+                };
+            }
         }
     },
 );
@@ -166,8 +228,8 @@ watch(
                     <Icon name="ph:user-plus-light" class="w-5 h-5" />
                 </div>
                 <div class="modal-header-text flex-1">
-                    <h3 class="modal-title">Cadastrar Docente</h3>
-                    <p class="modal-subtitle">Preencha os dados do novo docente</p>
+                    <h3 class="modal-title">{{ editando ? 'Editar Docente' : 'Cadastrar Docente' }}</h3>
+                    <p class="modal-subtitle">{{ editando ? 'Altere os dados cadastrais' : 'Preencha os dados do novo docente' }}</p>
                 </div>
                 <button @click="emit('update:modelValue', false)" class="modal-close-btn">
                     &times;

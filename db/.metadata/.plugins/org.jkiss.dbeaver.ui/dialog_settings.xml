@@ -14,7 +14,7 @@
 		<item key="DIALOG_Y_ORIGIN" value="20"/>
 		<item key="DIALOG_WIDTH" value="522"/>
 		<item key="DIALOG_HEIGHT" value="502"/>
-		<item key="DIALOG_FONT_NAME" value="1|Cantarell|11.0|0|GTK|1|"/>
+		<item key="DIALOG_FONT_NAME" value="1|Noto Sans|10.0|0|GTK|1|"/>
 	</section>
 	<section name="DBeaver.QM.LogViewer">
 	</section>

@@ -48,6 +48,7 @@ async function salvarEdital(dados: any): Promise<boolean> {
 
 // ── Modal: Docente ───────────────────────────────────────
 const showModalDocente = ref(false);
+const editDocenteId = ref<string | null>(null);
 
 // ── Modal: Vínculos ──────────────────────────────────────
 const showModalVinculos = ref(false);
@@ -139,6 +140,7 @@ watch(core.activeTab, async (tab) => {
                 :ctx="listaCtx"
                 :idEntidade="core.idEntidade()"
                 @novo-docente="showModalDocente = true"
+                @editar-docente="(d) => { editDocenteId = d.id; showModalDocente = true }"
                 @editar-vinculos="abrirVinculos"
             />
             <DocentesTabCurriculos
@@ -159,6 +161,7 @@ watch(core.activeTab, async (tab) => {
     <ModalDocente
         v-model="showModalDocente"
         :idEntidade="core.idEntidade()"
+        :editDocenteId="editDocenteId"
         :onSave="async (idUserExpandido: string) => { await listaCtx.fetchDocentes(); return true; }"
     />
 

@@ -92,3 +92,46 @@ Restaurado do commit `43eabb3`. Características:
 - Layout em árvore original restaurado do git para Feriados, Eventos e Calendário
 - `timelineMonths` adicionado aos composables de Feriados e Eventos
 - Meses sempre visíveis mesmo sem dados (permite adicionar inline)
+
+---
+
+## Detalhamento da Aba Calendário
+
+### Seletor de Programa
+
+A aba **Calendário** possui um dropdown que carrega a lista de `aca_programa` da entidade. Ao selecionar um programa, a função `fetchCalendarEvents` é disparada chamando o endpoint `/api/programas/calendario`.
+
+### Visões Mensal e Semanal
+
+- **Mensal:** grade 7×N semanas gerada por `calMonthGrid`, navegável via `prevMonth` / `nextMonth`.
+- **Semanal:** grade de 7 colunas gerada por `calWeekDays`, navegável via `prevWeek` / `nextWeek`.
+- O alternador entre modos é controlado por `viewMode` (`'mensal'` | `'semanal'`).
+- Cada célula recebe os eventos do dia via o computed `eventsMap` (um `Record<YYYY-MM-DD, item[]>`).
+
+### RPC `aca_get_calendario_programa` (v1 → v2)
+
+Toda a lógica de busca de dados do calendário foi centralizada numa única RPC com `SECURITY INVOKER`. A RPC retorna um array `itens` unificado com o campo `_tipo` discriminando cada registro:
+
+| `_tipo` | Fonte | Campos-chave |
+|---|---|---|
+| `'aula'` | `aca_calendario` | `data`, `hora_ini`, `hora_fim`, `ciclo_desc` |
+| `'feriado'` | `aca_feriado` | `data`, `nome`, `recorrente_anual`, `is_global` |
+| `'evento'` | `aca_evento` | `data_inicio`, `data_fim`, `nome_evento` |
+
+**v2** corrigiu dois pontos da v1:
+1. **Projeção de feriados recorrentes:** Feriados com `recorrente_anual = true` são projetados para **cada ano** coberto pelas aulas do programa via `generate_series`, em vez de retornados apenas pela data original.
+2. **Inclusão de Eventos:** `aca_evento` é consultado filtrando pelo overlap de datas com o período das aulas (`data_fim >= v_min_date AND data_inicio <= v_max_date`).
+
+### `eventsMap` — Computed Unificado
+
+Processa os três tipos de item em um único passo:
+- **Aulas e Feriados:** indexados diretamente pela chave `data` (YYYY-MM-DD).
+- **Eventos multi-day:** expandidos dia a dia com `expandMultiDay()`, cada dia recebendo uma cópia com `id` único (`{id}_api_{data}`).
+- **Fallback:** eventos do `eventos.value` (fetch separado, aba Eventos) também são expandidos, evitando duplicidade.
+
+### Separação de Estados de Loading
+
+Para evitar que o spinner do calendário bloqueasse os dados de feriados/eventos, foram criados refs separados:
+- `loading` — exclusivo de `fetchCalendarEvents` (calendário do programa)
+- `loadingFeriados` — exclusivo de `fetchFeriados` (aba Feriados)
+- `loadingEventos` — exclusivo de `fetchEventos` (aba Eventos)

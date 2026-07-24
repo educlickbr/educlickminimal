@@ -17,23 +17,25 @@ export default defineEventHandler(async (event) => {
     }
 
     // Gera código
-    const { data, error } = await client.rpc("aca_gerar_codigo_verificacao", {
+    const { data, error } = await (client as any).rpc("aca_gerar_codigo_verificacao", {
         p_id_user_expandido: body.id_user_expandido,
-    } as any);
+    });
 
     if (error) {
         throw createError({ statusCode: 500, message: error.message });
     }
 
+    const rpcResult = data as any;
+
     // Dispara webhook
     const webhookUrl = config.powerAutomateTokenCadastro;
-    if (webhookUrl && data?.codigo) {
+    if (webhookUrl && rpcResult?.codigo) {
         $fetch(webhookUrl, {
             method: "POST",
             body: {
                 email: body.email,
                 nome: body.nome || "",
-                codigo: data.codigo,
+                codigo: rpcResult.codigo,
             },
         }).catch((err) => {
             console.warn("[Power Automate] Falha webhook token:", err.message);

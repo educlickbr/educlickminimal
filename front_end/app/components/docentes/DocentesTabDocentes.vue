@@ -9,6 +9,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: "novo-docente"): void;
+    (e: "editar-docente", docente: any): void;
     (e: "editar-vinculos", docente: any): void;
 }>();
 
@@ -55,6 +56,31 @@ const linkNome = ref("");
 const showLinkForm = ref(false);
 const sendingInvite = ref(false);
 const inviteSent = ref(false);
+
+// ── Convidar docente p/ login ─────────────────────────
+const convidando = ref<string | null>(null);
+
+async function convidarDocente(docente: any) {
+    convidando.value = docente.id;
+    try {
+        const res = (await $fetch("/api/docentes/enviar-convite-login", {
+            method: "POST",
+            body: {
+                id_docente: docente.id,
+                email: docente.email,
+                nome: docente.nome_completo,
+            },
+        })) as any;
+        if (res?.success) {
+            // Feedback: toast simples
+            console.log("Convite enviado para", docente.email);
+        }
+    } catch {
+        // silent
+    } finally {
+        convidando.value = null;
+    }
+}
 
 async function gerarLink() {
     linkEmail.value = "";
@@ -277,6 +303,12 @@ onMounted(() => {
                                     >
                                         {{ docente.ativo ? '● Ativo' : '○ Inativo' }}
                                     </span>
+                                    <span
+                                        v-if="!docente.tem_conta"
+                                        class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border bg-amber-500/10 border-amber-500/20 text-amber-400"
+                                    >
+                                        ○ Aguardando Conta
+                                    </span>
                                 </div>
                                 <span class="text-[10px] text-secondary/60 truncate">
                                     {{ docente.email || "—" }}
@@ -318,7 +350,7 @@ onMounted(() => {
                                     <template v-if="docente.componentes?.length > 0">
                                         <span class="text-[9px] text-secondary/30">|</span>
                                         <span class="text-[9px] text-primary/60 font-bold truncate max-w-[200px]">
-                                            {{ docente.componentes.join(", ") }}
+                                            {{ docente.componentes.map((c: any) => c.nome_componente || c.nome || c).join(", ") }}
                                         </span>
                                     </template>
                                 </div>
@@ -327,12 +359,21 @@ onMounted(() => {
 
                         <div class="flex items-center gap-2 shrink-0">
                             <button
-                                @click="gerarCodigo(docente)"
-                                :disabled="generatingCodigo"
-                                class="card-btn-icon"
-                                title="Gerar código de verificação"
+                                v-if="!docente.tem_conta"
+                                @click="convidarDocente(docente)"
+                                :disabled="convidando === docente.id"
+                                class="card-btn-icon text-amber-400/60 hover:text-amber-400"
+                                title="Enviar convite para criar conta"
                             >
-                                <Icon name="ph:shield-check-light" class="w-4 h-4" />
+                                <div v-if="convidando === docente.id" class="w-3.5 h-3.5 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
+                                <Icon v-else name="ph:envelope-light" class="w-4 h-4" />
+                            </button>
+                            <button
+                                @click="emit('editar-docente', docente)"
+                                class="card-btn-icon"
+                                title="Editar dados"
+                            >
+                                <Icon name="ph:pencil-light" class="w-4 h-4" />
                             </button>
                             <button
                                 @click="emit('editar-vinculos', docente)"

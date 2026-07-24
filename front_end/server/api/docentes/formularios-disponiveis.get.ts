@@ -25,7 +25,8 @@ export default defineEventHandler(async (event) => {
     }
 
     // Filtra no BFF para manter a RPC genérica
-    const itens = (data?.itens || []).filter(
+    const result = data as any;
+    const itens = (result?.data || []).filter(
         (f: any) =>
             f.tipo_proc === tipo_proc &&
             f.tipo_cand === tipo_cand &&

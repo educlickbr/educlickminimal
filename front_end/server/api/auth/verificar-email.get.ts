@@ -5,7 +5,7 @@ import { serverSupabaseClient } from "#supabase/server";
  *
  * Verifica se o email existe em user_expandido e se
  * o usuário ainda não tem conta (id_user IS NULL).
- * Usado pela tela de login para onboarding inline.
+ * Usa RPC SECURITY DEFINER para bypassar RLS.
  */
 export default defineEventHandler(async (event) => {
     const client = await serverSupabaseClient(event);
@@ -16,20 +16,13 @@ export default defineEventHandler(async (event) => {
         return { existe: false, pode_criar_conta: false };
     }
 
-    const { data, error } = await (client as any)
-        .from("user_expandido")
-        .select("id, nome_completo, id_user")
-        .eq("email", email)
-        .maybeSingle();
+    const { data, error } = await client.rpc("auth_verificar_email", {
+        p_email: email,
+    } as any);
 
     if (error || !data) {
         return { existe: false, pode_criar_conta: false };
     }
 
-    return {
-        existe: true,
-        pode_criar_conta: !data.id_user,
-        nome: data.nome_completo || "",
-        id_user_expandido: data.id,
-    };
+    return data;
 });

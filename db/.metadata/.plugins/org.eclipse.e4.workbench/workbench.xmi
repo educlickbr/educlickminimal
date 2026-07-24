@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="ASCII"?>
 <application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_fID1cHcZEfG5R8BVxjDBsQ" elementId="org.eclipse.e4.legacy.ide.application" contributorURI="platform:/plugin/org.jkiss.dbeaver.ui.app.standalone" selectedElement="_fID1cXcZEfG5R8BVxjDBsQ" bindingContexts="_fIFESHcZEfG5R8BVxjDBsQ">
-  <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;workbench>&#xA;&lt;mruList>&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.jkiss.dbeaver.ui.editors.sql.SQLEditor&quot; name=&quot;Script.sql&quot; tooltip=&quot;General/Scripts/tables/Script.sql&quot;>&#xA;&lt;persistable path=&quot;/General/Scripts/tables/Script.sql&quot;/>&#xA;&lt;/file>&#xA;&lt;file factoryID=&quot;org.jkiss.dbeaver.ui.editors.NodeEditorInputFactory&quot; id=&quot;org.jkiss.dbeaver.ui.editors.entity.FolderEditor&quot; name=&quot;Connections&quot; tooltip=&quot;aic_db connections&quot;>&#xA;&lt;persistable node=&quot;node://aic_db/datasources&quot;/>&#xA;&lt;/file>&#xA;&lt;/mruList>&#xA;&lt;/workbench>"/>
+  <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;workbench>&#xA;&lt;mruList>&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.jkiss.dbeaver.ui.editors.sql.SQLEditor&quot; name=&quot;tabelas_academico.sql&quot; tooltip=&quot;General/Scripts/tables/tabelas_academico.sql&quot;>&#xA;&lt;persistable path=&quot;/General/Scripts/tables/tabelas_academico.sql&quot;/>&#xA;&lt;/file>&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.jkiss.dbeaver.ui.editors.sql.SQLEditor&quot; name=&quot;Script.sql&quot; tooltip=&quot;General/Scripts/tables/Script.sql&quot;>&#xA;&lt;persistable path=&quot;/General/Scripts/tables/Script.sql&quot;/>&#xA;&lt;/file>&#xA;&lt;file factoryID=&quot;org.jkiss.dbeaver.ui.editors.NodeEditorInputFactory&quot; id=&quot;org.jkiss.dbeaver.ui.editors.entity.FolderEditor&quot; name=&quot;Connections&quot; tooltip=&quot;aic_db connections&quot;>&#xA;&lt;persistable node=&quot;node://aic_db/datasources&quot;/>&#xA;&lt;/file>&#xA;&lt;/mruList>&#xA;&lt;/workbench>"/>
   <tags>activeSchemeId:org.jkiss.dbeaver.defaultKeyScheme</tags>
-  <children xsi:type="basic:TrimmedWindow" xmi:id="_fID1cXcZEfG5R8BVxjDBsQ" elementId="IDEWindow" contributorURI="platform:/plugin/org.jkiss.dbeaver.ui.app.standalone" selectedElement="_fID1cncZEfG5R8BVxjDBsQ" label="%trimmedwindow.label.dbeaver" x="26" y="23" width="942" height="1004">
+  <children xsi:type="basic:TrimmedWindow" xmi:id="_fID1cXcZEfG5R8BVxjDBsQ" elementId="IDEWindow" contributorURI="platform:/plugin/org.jkiss.dbeaver.ui.app.standalone" selectedElement="_fID1cncZEfG5R8BVxjDBsQ" label="%trimmedwindow.label.dbeaver" x="0" y="44" width="1536" height="879">
     <persistedState key="coolBarVisible" value="true"/>
     <persistedState key="perspectiveBarVisible" value="true"/>
     <persistedState key="isRestored" value="true"/>
@@ -10,7 +10,6 @@
     <persistedState key="aggregateWorkingSetId"/>
     <persistedState key="show_in_time" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;show_in_time/>"/>
     <tags>topLevel</tags>
-    <tags>shellMaximized</tags>
     <children xsi:type="basic:PartSashContainer" xmi:id="_fID1cncZEfG5R8BVxjDBsQ" selectedElement="_fID1c3cZEfG5R8BVxjDBsQ" horizontal="true">
       <children xsi:type="advanced:PerspectiveStack" xmi:id="_fID1c3cZEfG5R8BVxjDBsQ" elementId="org.eclipse.ui.ide.perspectivestack" containerData="7500" selectedElement="_fID1dHcZEfG5R8BVxjDBsQ">
         <children xsi:type="advanced:Perspective" xmi:id="_fID1dHcZEfG5R8BVxjDBsQ" elementId="org.jkiss.dbeaver.core.perspective" selectedElement="_YmWl0H-GEfGQgM95yzOz0w" label="DBeaver" iconURI="platform:/plugin/org.jkiss.dbeaver.ui/icons/dbeaver_perspective.png">
@@ -37,10 +36,9 @@
           <tags>persp.editorOnboardingCommand:Open File...$$$Ctrl+O</tags>
           <tags>persp.editorOnboardingCommand:Show Key Assist$$$Shift+Ctrl+L</tags>
           <tags>persp.editorOnboardingCommand:Find Actions$$$Ctrl+3</tags>
-          <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl0H-GEfGQgM95yzOz0w" selectedElement="_YmWl0X-GEfGQgM95yzOz0w" horizontal="true">
-            <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl0X-GEfGQgM95yzOz0w" containerData="2500" selectedElement="_YmWl0n-GEfGQgM95yzOz0w">
+          <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl0H-GEfGQgM95yzOz0w" selectedElement="_YmWl2X-GEfGQgM95yzOz0w" horizontal="true">
+            <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl0X-GEfGQgM95yzOz0w" containerData="2500" selectedElement="_YmWl1n-GEfGQgM95yzOz0w">
               <children xsi:type="basic:PartStack" xmi:id="_YmWl0n-GEfGQgM95yzOz0w" elementId="navigation" containerData="7000" selectedElement="_YmWl03-GEfGQgM95yzOz0w">
-                <tags>active</tags>
                 <children xsi:type="advanced:Placeholder" xmi:id="_YmWl03-GEfGQgM95yzOz0w" elementId="org.jkiss.dbeaver.core.databaseNavigator" ref="_fIEdrncZEfG5R8BVxjDBsQ" closeable="true">
                   <tags>View</tags>
                   <tags>categoryTag:Database</tags>
@@ -66,8 +64,8 @@
                 </children>
               </children>
             </children>
-            <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl2X-GEfGQgM95yzOz0w" containerData="7500">
-              <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl2n-GEfGQgM95yzOz0w" containerData="7000" horizontal="true">
+            <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl2X-GEfGQgM95yzOz0w" containerData="7500" selectedElement="_YmWl2n-GEfGQgM95yzOz0w">
+              <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl2n-GEfGQgM95yzOz0w" containerData="7000" selectedElement="_YmWl23-GEfGQgM95yzOz0w" horizontal="true">
                 <children xsi:type="advanced:Placeholder" xmi:id="_YmWl23-GEfGQgM95yzOz0w" elementId="org.eclipse.ui.editorss" containerData="7000" ref="_fIEdoXcZEfG5R8BVxjDBsQ"/>
                 <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl3H-GEfGQgM95yzOz0w" containerData="3000">
                   <children xsi:type="basic:PartStack" xmi:id="_YmWl3X-GEfGQgM95yzOz0w" elementId="rightTop" containerData="5000" selectedElement="_YmWl3n-GEfGQgM95yzOz0w">
@@ -146,21 +144,17 @@
       <children xsi:type="basic:PartStack" xmi:id="_fID1k3cZEfG5R8BVxjDBsQ" elementId="stickyFolderRight" toBeRendered="false" containerData="2500"/>
     </children>
     <sharedElements xsi:type="advanced:Area" xmi:id="_fIEdoXcZEfG5R8BVxjDBsQ" elementId="org.eclipse.ui.editorss" selectedElement="_fIEdoncZEfG5R8BVxjDBsQ">
-      <children xsi:type="basic:PartStack" xmi:id="_fIEdoncZEfG5R8BVxjDBsQ" elementId="PartStack@6775c0d1" selectedElement="_fIEdo3cZEfG5R8BVxjDBsQ">
+      <children xsi:type="basic:PartStack" xmi:id="_fIEdoncZEfG5R8BVxjDBsQ" elementId="PartStack@6775c0d1" selectedElement="_fIEdqHcZEfG5R8BVxjDBsQ">
         <tags>EditorStack</tags>
         <tags>org.eclipse.e4.primaryDataStack</tags>
-        <tags>noFocus</tags>
-        <children xsi:type="basic:Part" xmi:id="_fIEdo3cZEfG5R8BVxjDBsQ" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="&lt;none> tabelas_academico" iconURI="platform:/plugin/org.jkiss.dbeaver.model/icons/tree/script.svg" closeable="true">
-          <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;editor id=&quot;org.jkiss.dbeaver.ui.editors.sql.SQLEditor&quot; name=&quot;tabelas_academico.sql&quot; partName=&quot;&amp;lt;none&amp;gt; tabelas_academico&quot; title=&quot;&amp;lt;none&amp;gt; tabelas_academico&quot; tooltip=&quot;General/Scripts/tables/tabelas_academico.sql&quot;>&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/General/Scripts/tables/tabelas_academico.sql&quot;/>&#xA;&lt;editorState selectionHorizontalPixel=&quot;0&quot; selectionLength=&quot;15983&quot; selectionOffset=&quot;0&quot; selectionTopPixel=&quot;4488&quot;/>&#xA;&lt;/editor>"/>
-          <tags>Editor</tags>
-          <tags>removeOnHide</tags>
-          <tags>org.jkiss.dbeaver.ui.editors.sql.SQLEditor</tags>
-        </children>
+        <tags>active</tags>
         <children xsi:type="basic:Part" xmi:id="_fIEdqHcZEfG5R8BVxjDBsQ" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="Connections" iconURI="platform:/plugin/org.jkiss.dbeaver.ui/icons/properties.svg" closeable="true">
           <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;editor id=&quot;org.jkiss.dbeaver.ui.editors.entity.FolderEditor&quot; name=&quot;Connections&quot; partName=&quot;Connections&quot; title=&quot;Connections&quot; tooltip=&quot;aic_db connections&quot;>&#xA;&lt;input factoryID=&quot;org.jkiss.dbeaver.ui.editors.NodeEditorInputFactory&quot; node=&quot;node://aic_db/datasources&quot;/>&#xA;&lt;/editor>"/>
           <tags>Editor</tags>
           <tags>removeOnHide</tags>
           <tags>org.jkiss.dbeaver.ui.editors.entity.FolderEditor</tags>
+          <tags>active</tags>
+          <tags>activeOnClose</tags>
         </children>
         <children xsi:type="basic:Part" xmi:id="_fIEdqXcZEfG5R8BVxjDBsQ" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="&lt;none> tabelas_usuario" iconURI="platform:/plugin/org.jkiss.dbeaver.model/icons/tree/script.svg" closeable="true">
           <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;editor id=&quot;org.jkiss.dbeaver.ui.editors.sql.SQLEditor&quot; name=&quot;tabelas_usuario.sql&quot; partName=&quot;&amp;lt;none&amp;gt; tabelas_usuario&quot; title=&quot;&amp;lt;none&amp;gt; tabelas_usuario&quot; tooltip=&quot;General/Scripts/tables/tabelas_usuario.sql&quot;>&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/General/Scripts/tables/tabelas_usuario.sql&quot;/>&#xA;&lt;editorState selectionHorizontalPixel=&quot;0&quot; selectionLength=&quot;0&quot; selectionOffset=&quot;6242&quot; selectionTopPixel=&quot;3349&quot;/>&#xA;&lt;/editor>"/>
@@ -176,8 +170,6 @@
       <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;view filterType=&quot;connection&quot;/>"/>
       <tags>View</tags>
       <tags>categoryTag:Database</tags>
-      <tags>active</tags>
-      <tags>activeOnClose</tags>
       <menus xmi:id="_fIEdr3cZEfG5R8BVxjDBsQ" elementId="org.jkiss.dbeaver.core.databaseNavigator">
         <tags>ViewMenu</tags>
         <tags>menuContribution:menu</tags>
@@ -303,7 +295,7 @@
       <children xsi:type="menu:ToolBar" xmi:id="_fIEd2ncZEfG5R8BVxjDBsQ" elementId="dbeaver-general">
         <tags>Draggable</tags>
       </children>
-      <children xsi:type="menu:ToolBar" xmi:id="_fIEd7HcZEfG5R8BVxjDBsQ" elementId="dbeaver-transactions">
+      <children xsi:type="menu:ToolBar" xmi:id="_fIEd7HcZEfG5R8BVxjDBsQ" elementId="dbeaver-transactions" visible="false">
         <tags>Draggable</tags>
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_fIEd93cZEfG5R8BVxjDBsQ" elementId="dbeaver-edit" visible="false">
@@ -317,9 +309,6 @@
         <tags>Draggable</tags>
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_fIEeGHcZEfG5R8BVxjDBsQ" elementId="org.eclipse.ui.edit.text.actionSet.navigation" visible="false">
-        <tags>Draggable</tags>
-      </children>
-      <children xsi:type="menu:ToolBar" xmi:id="_fIEeHHcZEfG5R8BVxjDBsQ" elementId="org.jkiss.dbeaver.ui.editors.entity.FolderEditor" visible="false">
         <tags>Draggable</tags>
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_fIEeHncZEfG5R8BVxjDBsQ" elementId="group.editor" toBeRendered="false">
@@ -1935,6 +1924,7 @@
   <commands xmi:id="_X9BU8H-GEfGQgM95yzOz0w" elementId="com.dbeaver.ai.chat.attach" commandName="Attach" description="Attach file" category="_X9At4X-GEfGQgM95yzOz0w"/>
   <commands xmi:id="_X9BU8X-GEfGQgM95yzOz0w" elementId="com.dbeaver.ai.chat.toggle" commandName="AI Chat" description="Toggle AI Chat visibility" category="_X9At4X-GEfGQgM95yzOz0w"/>
   <commands xmi:id="_X9B8AH-GEfGQgM95yzOz0w" elementId="com.dbeaver.ai.chat.sendPrompt" commandName="Send" description="Send prompt to AI engine" category="_X9At4X-GEfGQgM95yzOz0w"/>
+  <commands xmi:id="_UJ8-0YeQEfGxRJgRfE4DSQ" elementId="org.jkiss.dbeaver.ui.app.config.showWizard" commandName="Show Product Configuration..." description="Show product configuration wizard" category="_fIGUzHcZEfG5R8BVxjDBsQ"/>
   <addons xmi:id="_fIGUrXcZEfG5R8BVxjDBsQ" elementId="org.eclipse.e4.core.commands.service" contributorURI="platform:/plugin/org.jkiss.dbeaver.ui.app.standalone" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_fIGUrncZEfG5R8BVxjDBsQ" elementId="org.eclipse.e4.ui.contexts.service" contributorURI="platform:/plugin/org.jkiss.dbeaver.ui.app.standalone" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
   <addons xmi:id="_fIGUr3cZEfG5R8BVxjDBsQ" elementId="org.eclipse.e4.ui.bindings.service" contributorURI="platform:/plugin/org.jkiss.dbeaver.ui.app.standalone" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>

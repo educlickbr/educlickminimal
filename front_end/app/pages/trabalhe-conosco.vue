@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 
+const user = useSupabaseUser();
+
 definePageMeta({ layout: false });
 
 const loading = ref(true);
@@ -8,6 +10,7 @@ const enviando = ref(false);
 const enviado = ref(false);
 const errorMsg = ref("");
 const editais = ref<any[]>([]);
+const inscricoes = ref<Set<string>>(new Set());
 
 const BRAZIL_TIME_ZONE = "America/Sao_Paulo";
 const fallbackId = "00ca60ea-6667-482d-8a96-09b877707b08";
@@ -34,10 +37,31 @@ async function fetchEditais() {
         if (res?.success) editais.value = res.itens || [];
     } catch (e) {
         console.error("Erro ao carregar editais:", e);
+    }
+}
+
+async function fetchInscricoes() {
+    if (!user.value?.email) {
+        loading.value = false;
+        return;
+    }
+    try {
+        const res = (await $fetch("/api/public/verificar-inscricoes", {
+            params: { email: user.value.email },
+        })) as any;
+        if (res?.success && res.ids) {
+            inscricoes.value = new Set(res.ids);
+        }
+    } catch (e) {
+        console.error("Erro ao carregar inscrições:", e);
     } finally {
         loading.value = false;
     }
 }
+
+onMounted(async () => {
+    await Promise.all([fetchEditais(), fetchInscricoes()]);
+});
 
 async function handleUpload(): Promise<string | null> {
     if (!arquivoCurriculo.value) return null;
@@ -251,13 +275,18 @@ onMounted(() => {
                                     —
                                     {{ new Date(edital.data_fim + "T00:00:00").toLocaleDateString("pt-BR") }}
                                 </div>
-                                <button
-                                    @click="form.id_edital = edital.id"
-                                    class="w-full mt-2 px-8 py-3 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
-                                    :class="{ 'ring-2 ring-primary': form.id_edital === edital.id }"
+                                <template v-if="inscricoes.has(edital.id)">
+                                    <span class="w-full mt-2 px-8 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-widest inline-block text-center cursor-default">
+                                        <Icon name="ph:check-circle-bold" class="w-4 h-4 inline-block mr-1.5 -mt-0.5" />
+                                        Inscrito
+                                    </span>
+                                </template>
+                                <NuxtLink v-else
+                                    :to="`/inscricao-edital/${edital.id}`"
+                                    class="w-full mt-2 px-8 py-3 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 inline-block text-center"
                                 >
-                                    {{ form.id_edital === edital.id ? "Selecionado ✓" : "Inscrever-se" }}
-                                </button>
+                                    Inscrever-se
+                                </NuxtLink>
                             </div>
                         </div>
                     </div>
@@ -273,10 +302,8 @@ onMounted(() => {
                                 name="ph:envelope-light"
                                 class="w-6 h-6 text-primary"
                             />
-                            <h2
-                                class="text-xl font-black tracking-tight"
-                            >
-                                Envio Espontâneo de Currículo
+                            <h2 class="text-xl font-black tracking-tight">
+                                Envio de Currículo
                             </h2>
                         </div>
 
@@ -373,7 +400,7 @@ onMounted(() => {
                                     class="field-input"
                                 >
                                     <option value="">
-                                        Envio espontâneo
+                                        Sem edital
                                     </option>
                                     <option
                                         v-for="e in editais"

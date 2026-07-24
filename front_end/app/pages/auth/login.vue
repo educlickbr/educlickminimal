@@ -22,7 +22,9 @@ const showCriarSenha = ref(false)
 const codigoEnviado = ref(false)
 const codigoInput = ref('')
 const novaSenha = ref('')
+const showNovaSenha = ref(false)
 const confirmarSenha = ref('')
+const showConfirmarSenha = ref(false)
 const criandoConta = ref(false)
 const codigoError = ref('')
 
@@ -90,6 +92,7 @@ async function criarConta() {
 
     criandoConta.value = true
     try {
+        // 1. Verifica código via BFF
         const res = await $fetch("/api/auth/criar-conta", {
             method: "POST",
             body: {
@@ -100,19 +103,39 @@ async function criarConta() {
             },
         }) as any
 
-        if (res?.success) {
-            // Login automático
-            const { error: loginError } = await supabase.auth.signInWithPassword({
-                email: email.value,
-                password: novaSenha.value,
-            })
-            if (loginError) throw loginError
+        if (!res?.success) {
+            codigoError.value = res?.message || "Erro ao verificar código."
+            return
+        }
 
+        // 2. Cria auth user (client-side, não precisa de service role)
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+            email: email.value.trim(),
+            password: novaSenha.value,
+        })
+
+        if (signUpError || !authData?.user) {
+            codigoError.value = signUpError?.message || "Erro ao criar conta."
+            return
+        }
+
+        // 3. Vincula auth user ao user_expandido + papel
+        const vinculo = await $fetch("/api/auth/vincular-conta", {
+            method: "POST",
+            body: {
+                id_user_expandido: onboarding.value!.id_user_expandido,
+                id_user: authData.user.id,
+                email: email.value.trim(),
+            },
+        }) as any
+
+        if (vinculo?.success) {
+            // Login automático (signUp já logou, mas vamos garantir)
             await store.initSession()
             const redirectTo = route.query.redirectTo as string
             router.push(redirectTo || '/')
         } else {
-            codigoError.value = res?.message || "Erro ao criar conta."
+            codigoError.value = vinculo?.message || "Erro ao vincular conta."
         }
     } catch (e: any) {
         codigoError.value = e?.message || "Erro ao criar conta."
@@ -169,29 +192,125 @@ const handleLogin = async () => {
                 </p>
             </div>
 
-            <!-- ── ONBOARDING: Criar senha ── -->
-            <div v-if="showCriarSenha" class="space-y-5">
-                <div class="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-xl">
-                    <Icon name="ph:user-light" class="w-8 h-8 text-primary" />
-                    <div>
-                        <p class="text-sm font-bold text-text">Olá, {{ onboarding?.nome || "..." }}!</p>
-                        <p class="text-[10px] text-secondary/60">Você ainda não tem senha. Crie sua conta agora.</p>
+            <!-- ── Fluxo 1: Login normal ── -->
+            <div v-if="!showCriarSenha">
+                <form @submit.prevent="handleLogin" class="space-y-6">
+                    
+                    <!-- Email -->
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60 ml-1">E-mail</label>
+                        <div class="relative group">
+                            <input 
+                                v-model="email"
+                                type="email" 
+                                required
+                                placeholder="seu@email.com"
+                                @input="onEmailInput"
+                                @blur="verificarEmail"
+                                class="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-white/10 group-hover:border-white/20"
+                            />
+                        </div>
                     </div>
+
+                    <!-- Onboarding banner -->
+                    <button
+                        v-if="onboarding"
+                        type="button"
+                        class="w-full flex items-center gap-4 p-5 bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/25 rounded-xl cursor-pointer hover:from-primary/25 hover:to-primary/10 transition-all text-left"
+                        @click="showCriarSenha = true"
+                    >
+                        <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                            <Icon name="ph:magic-wand-bold" class="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                            <p class="text-sm font-black text-text">Olá, <span class="text-primary">{{ onboarding.nome }}</span>!</p>
+                            <p class="text-xs text-secondary/70 mt-0.5">Você ainda não tem senha. Clique aqui para criar sua conta.</p>
+                        </div>
+                    </button>
+
+                    <!-- Password (só aparece se NÃO está no onboarding) -->
+                    <template v-if="!onboarding">
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between px-1">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60">Senha</label>
+                                <NuxtLink to="/auth/recuperar_senha" class="text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors">Esqueceu?</NuxtLink>
+                            </div>
+                            <div class="relative group">
+                                <input 
+                                    v-model="password"
+                                    :type="showPassword ? 'text' : 'password'" 
+                                    required
+                                    placeholder="••••••••"
+                                    class="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-white/10 group-hover:border-white/20"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Error -->
+                        <div v-if="errorMsg" class="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-[10px] font-bold text-red-400 text-center">
+                            {{ errorMsg }}
+                        </div>
+
+                        <!-- Submit -->
+                        <button 
+                            type="submit" 
+                            :disabled="loading"
+                            class="w-full bg-primary text-white font-black py-5 rounded-lg text-sm uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:bg-primary-dark hover:shadow-primary/40 hover:-translate-y-0.5 transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
+                        >
+                            <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                            {{ loading ? 'Sincronizando...' : 'Entrar' }}
+                        </button>
+                    </template>
+
+                </form>
+
+                <div v-if="!onboarding" class="mt-8 text-center space-y-4">
+                    <p class="text-[10px] font-bold text-secondary/40 uppercase tracking-widest">
+                        Ainda não tem uma conta?
+                    </p>
+                    <NuxtLink to="/auth/cadastro" class="inline-block text-[10px] font-black uppercase tracking-widest text-white/80 bg-white/5 border border-white/10 px-8 py-4 rounded-lg hover:bg-white/10 hover:text-white transition-all">
+                        Criar conta / Inscrever-se
+                    </NuxtLink>
+                </div>
+            </div>
+
+            <!-- ── Fluxo 2: Criar senha (onboarding) ── -->
+            <div v-else class="space-y-6">
+                <!-- Header -->
+                <div class="text-center">
+                    <div class="w-14 h-14 rounded-full bg-primary/15 border border-primary/25 flex items-center justify-center mx-auto mb-4">
+                        <Icon name="ph:user-light" class="w-7 h-7 text-primary" />
+                    </div>
+                    <h2 class="text-lg font-black text-text">Bem-vindo, {{ onboarding?.nome || "..." }}!</h2>
+                    <p class="text-xs text-secondary/60 mt-1">Você está pré-cadastrado. Crie sua senha para ativar sua conta.</p>
                 </div>
 
-                <!-- Enviar código -->
-                <div v-if="!codigoEnviado" class="text-center">
+                <!-- Passo 1: Enviar código -->
+                <div v-if="!codigoEnviado" class="space-y-4">
+                    <p class="text-sm text-secondary/60 text-center leading-relaxed">
+                        Vamos enviar um código de verificação para:
+                        <strong class="text-text block mt-1">{{ email }}</strong>
+                    </p>
                     <button
                         @click="enviarCodigo"
-                        class="w-full py-4 rounded-lg bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                        class="w-full py-4 rounded-xl bg-primary text-white text-sm font-black uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-3"
                     >
-                        <Icon name="ph:envelope-bold" class="w-4 h-4" />
-                        Enviar Código para meu Email
+                        <Icon name="ph:envelope-bold" class="w-5 h-5" />
+                        Enviar Código
+                    </button>
+                    <button @click="showCriarSenha = false" class="w-full text-[10px] font-bold text-secondary/40 hover:text-white transition-colors">
+                        Voltar
                     </button>
                 </div>
 
-                <!-- Código + Senha -->
+                <!-- Passo 2: Código + Senha -->
                 <div v-else class="space-y-4">
+                    <div class="bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-3">
+                        <p class="text-xs text-emerald-400 font-bold text-center">
+                            ✓ Código enviado! Verifique seu email.
+                        </p>
+                    </div>
+
                     <div>
                         <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60">Código de verificação</label>
                         <input
@@ -205,21 +324,31 @@ const handleLogin = async () => {
                     </div>
                     <div>
                         <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60">Nova senha</label>
-                        <input
-                            v-model="novaSenha"
-                            type="password"
-                            placeholder="Mínimo 6 caracteres"
-                            class="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-                        />
+                        <div class="relative mt-1">
+                            <input
+                                v-model="novaSenha"
+                                :type="showNovaSenha ? 'text' : 'password'"
+                                placeholder="Mínimo 6 caracteres"
+                                class="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 pr-12 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                            />
+                            <button type="button" @click="showNovaSenha = !showNovaSenha" class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary/40 hover:text-white transition-colors">
+                                <Icon :name="showNovaSenha ? 'ph:eye-closed-light' : 'ph:eye-light'" class="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60">Confirmar senha</label>
-                        <input
-                            v-model="confirmarSenha"
-                            type="password"
-                            placeholder="Repita a senha"
-                            class="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-                        />
+                        <div class="relative mt-1">
+                            <input
+                                v-model="confirmarSenha"
+                                :type="showConfirmarSenha ? 'text' : 'password'"
+                                placeholder="Repita a senha"
+                                class="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 pr-12 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                            />
+                            <button type="button" @click="showConfirmarSenha = !showConfirmarSenha" class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary/40 hover:text-white transition-colors">
+                                <Icon :name="showConfirmarSenha ? 'ph:eye-closed-light' : 'ph:eye-light'" class="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
 
                     <div v-if="codigoError" class="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-[10px] font-bold text-red-400 text-center">
@@ -235,97 +364,10 @@ const handleLogin = async () => {
                         <span>Criar Conta e Entrar</span>
                     </button>
 
-                    <button @click="showCriarSenha = false; codigoEnviado = false" class="w-full text-[10px] font-bold text-secondary/40 hover:text-white transition-colors">
-                        Voltar
+                    <button @click="codigoEnviado = false" class="w-full text-[10px] font-bold text-secondary/40 hover:text-white transition-colors">
+                        Reenviar Código
                     </button>
                 </div>
-            </div>
-
-            <!-- ── LOGIN NORMAL ── -->
-            <form v-else @submit.prevent="handleLogin" class="space-y-6">
-                
-                <!-- Email -->
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60 ml-1">E-mail</label>
-                    <div class="relative group">
-                        <input 
-                            v-model="email"
-                            type="email" 
-                            required
-                            placeholder="seu@email.com"
-                            @input="onEmailInput"
-                            @blur="verificarEmail"
-                            class="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-white/10 group-hover:border-white/20"
-                        />
-                        <div class="absolute right-5 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-primary transition-colors">
-                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Onboarding banner -->
-                <transition name="fade">
-                    <div v-if="onboarding" class="flex items-center gap-3 p-4 bg-primary/10 border border-primary/20 rounded-xl cursor-pointer hover:bg-primary/15 transition-all" @click="showCriarSenha = true">
-                        <Icon name="ph:magic-wand-bold" class="w-6 h-6 text-primary shrink-0" />
-                        <div>
-                            <p class="text-xs font-bold text-text">Olá, {{ onboarding.nome }}!</p>
-                            <p class="text-[10px] text-primary/70">Clique aqui para criar sua senha e ativar sua conta.</p>
-                        </div>
-                    </div>
-                </transition>
-
-                <!-- Password -->
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between px-1">
-                        <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60">Senha</label>
-                        <NuxtLink to="/auth/recuperar_senha" class="text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors">Esqueceu?</NuxtLink>
-                    </div>
-                    <div class="relative group">
-                        <input 
-                            v-model="password"
-                            :type="showPassword ? 'text' : 'password'" 
-                            required
-                            placeholder="••••••••"
-                            class="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-white/10 group-hover:border-white/20"
-                        />
-                        <button 
-                            type="button"
-                            @click="showPassword = !showPassword"
-                            class="absolute right-5 top-1/2 -translate-y-1/2 text-white/10 hover:text-primary transition-colors focus:outline-none"
-                        >
-                            <svg v-if="!showPassword" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                            <svg v-else class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Error -->
-                <transition name="fade">
-                    <div v-if="errorMsg" class="bg-primary/20 border border-primary/30 p-4 rounded-xl text-xs font-bold text-primary text-center">
-                        {{ errorMsg }}
-                    </div>
-                </transition>
-
-                <!-- Submit -->
-                <button 
-                    type="submit" 
-                    :disabled="loading"
-                    class="w-full bg-primary text-white font-black py-5 rounded-lg text-sm uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:bg-primary-dark hover:shadow-primary/40 hover:-translate-y-0.5 transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 disabled:pointer-events-none"
-                >
-                    <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                    {{ loading ? 'Sincronizando...' : 'Entrar' }}
-                    <svg v-if="!loading" class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </button>
-
-            </form>
-
-            <div v-if="!showCriarSenha" class="mt-8 text-center space-y-4">
-                <p class="text-[10px] font-bold text-secondary/40 uppercase tracking-widest">
-                    Ainda não tem uma conta?
-                </p>
-                <NuxtLink to="/auth/cadastro" class="inline-block text-[10px] font-black uppercase tracking-widest text-white/80 bg-white/5 border border-white/10 px-8 py-4 rounded-lg hover:bg-white/10 hover:text-white transition-all">
-                    Criar conta / Inscrever-se
-                </NuxtLink>
             </div>
 
         </div>
