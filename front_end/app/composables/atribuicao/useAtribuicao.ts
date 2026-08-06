@@ -32,6 +32,21 @@ export function useAtribuicao(idEntidade: () => string) {
       if (res?.success) {
         programas.value = res.programas || []
         docentes.value = res.docentes || []
+
+        // Se o programa selecionado sumiu da lista, limpa
+        if (programaSelecionado.value && !programas.value.some((p: any) => p.id === programaSelecionado.value)) {
+          programaSelecionado.value = null
+        }
+
+        // Auto-select: se só tem 1, seleciona. Se tem vários e nenhum, seleciona o 1º
+        if (programas.value.length === 1) {
+          programaSelecionado.value = programas.value[0].id
+        } else if (programas.value.length > 0 && !programaSelecionado.value) {
+          programaSelecionado.value = programas.value[0].id
+        }
+      } else {
+        programas.value = []
+        programaSelecionado.value = null
       }
     } catch (e) {
       console.error('Erro ao carregar dados iniciais:', e)
@@ -124,7 +139,7 @@ export function useAtribuicao(idEntidade: () => string) {
                 {
                   id_atribuicao: res.id,
                   id_docente: idDocente,
-                  docente_nome: docente?.nome || '—',
+                  docente_nome: docente?.nome || docente?.nome_completo || '—',
                   docente_email: docente?.email || '',
                   tipo,
                 },

@@ -1,23 +1,22 @@
-2026-07-24 15:48:51.507 - DBeaver 26.1.3.202607191738 is starting
-2026-07-24 15:48:51.507 - OS: Linux 6.12.95+deb13-amd64 (amd64)
-2026-07-24 15:48:51.508 - Java version: 25.0.3 by Eclipse Adoptium (64bit)
-2026-07-24 15:48:51.508 - Install path: '/usr/share/dbeaver-ce'
-2026-07-24 15:48:51.508 - Instance path: 'file:/home/eikmeier/Documentos/dev/nuxt/educlickminimal/db/'
-2026-07-24 15:48:51.509 - Memory available 64Mb/1024Mb
-2026-07-24 15:48:51.516 - Initialize desktop platform...
-2026-07-24 15:48:51.712 - BounceCastle bundle found. Use JCE provider BC
+2026-07-28 14:39:26.748 - DBeaver 26.1.3.202607191738 is starting
+2026-07-28 14:39:26.749 - OS: Linux 6.12.95+deb13-amd64 (amd64)
+2026-07-28 14:39:26.749 - Java version: 25.0.3 by Eclipse Adoptium (64bit)
+2026-07-28 14:39:26.750 - Install path: '/usr/share/dbeaver-ce'
+2026-07-28 14:39:26.750 - Instance path: 'file:/home/eikmeier/Documentos/dev/nuxt/educlickminimal/db/'
+2026-07-28 14:39:26.751 - Memory available 64Mb/1024Mb
+2026-07-28 14:39:26.758 - Initialize desktop platform...
+2026-07-28 14:39:27.007 - BounceCastle bundle found. Use JCE provider BC
 > Start Core File Systems [org.eclipse.core.filesystem 1.11.400.v20251107-0507]
 > Start Core Resource Management [org.eclipse.core.resources 3.24.0.v20260518-1150]
-> Start DBeaver UI Navigator [org.jkiss.dbeaver.ui.navigator 1.0.183.202607191738]
 > Start Team Support Core [org.eclipse.team.core 3.10.1000.v20260112-1030]
-2026-07-24 15:48:51.839 - Initialize base platform...
-2026-07-24 15:48:51.857 - Schedule collected statistics send
-2026-07-24 15:48:51.858 - Platform initialized (342ms)
-2026-07-24 15:48:51.872 - 	Create display
-2026-07-24 15:48:51.959 - 	Patch workbench configuration
-2026-07-24 15:48:52.051 - 	Starting instance server at http://localhost:38005
-2026-07-24 15:48:52.057 - Run workbench
-> Start Eclipse IDE UI [org.eclipse.ui.ide 3.23.100.v20260505-0615]
+> Start DBeaver UI Navigator [org.jkiss.dbeaver.ui.navigator 1.0.183.202607191738]
+2026-07-28 14:39:27.171 - Initialize base platform...
+2026-07-28 14:39:27.198 - Schedule collected statistics send
+2026-07-28 14:39:27.198 - Platform initialized (440ms)
+2026-07-28 14:39:27.216 - 	Create display
+2026-07-28 14:39:27.346 - 	Patch workbench configuration
+2026-07-28 14:39:27.481 - 	Starting instance server at http://localhost:39297
+2026-07-28 14:39:27.489 - Run workbench
 > Start Eclipse e4 Workbench SWT [org.eclipse.e4.ui.workbench.swt 0.18.100.v20260430-1313]
 > Start Eclipse Application Services [org.eclipse.e4.core.services 2.5.400.v20260430-1313]
 > Start Eclipse UI Application Services [org.eclipse.e4.ui.services 1.6.700.v20260430-1313]
@@ -41,100 +40,28 @@
 > Start Text [org.eclipse.text 3.14.700.v20260326-1107]
 > Start Default Text Editor [org.eclipse.ui.editors 3.22.0.v20260421-0620]
 > Start Text Editor Framework [org.eclipse.ui.workbench.texteditor 3.20.100.v20260505-0620]
-2026-07-24 15:48:54.191 - Configure workbench window
+2026-07-28 14:39:29.774 - Configure workbench window
 > Start DBeaver SQL Model [org.jkiss.dbeaver.model.sql 1.0.173.202607191738]
-2026-07-24 15:48:54.400 - Total database drivers: 133 (133)
+2026-07-28 14:39:29.944 - Total database drivers: 133 (133)
 > Start Help System Core [org.eclipse.help 3.11.100.v20260408-1441]
-2026-07-24 15:48:54.497 - Create actions
-2026-07-24 15:48:55.002 - Initialize workbench window
-2026-07-24 15:48:55.018 - Finish initialization
+2026-07-28 14:39:30.058 - Create actions
+2026-07-28 14:39:30.491 - Initialize workbench window
+2026-07-28 14:39:30.514 - Finish initialization
 > Start DBeaver UI Editors - Data [org.jkiss.dbeaver.ui.editors.data 1.0.183.202607191738]
 > Start DBeaver UI Editors - SQL [org.jkiss.dbeaver.ui.editors.sql 1.0.183.202607191738]
-> Start DBeaver SQL Terminal [org.jkiss.dbeaver.ui.editors.sql.terminal 1.0.159.202607191738]
-> Start Core Compare Support [org.eclipse.compare.core 3.8.800.v20250718-1505]
 > Start DBeaver Sample Database [org.jkiss.dbeaver.ui.config.sample 1.0.220.202607191738]
-2026-07-24 15:48:57.264 - Open [https://dbeaver.io/product/version.xml]
+2026-07-28 14:39:31.879 - Open [https://dbeaver.io/product/version.xml]
 > Start DBeaver NIO Model [org.jkiss.dbeaver.model.nio 1.0.67.202607191738]
 > Start DBeaver Dashboard UI [org.jkiss.dbeaver.ui.dashboard 1.0.180.202607191738]
 > Start DBeaver ERD UI [org.jkiss.dbeaver.ui.editors.erd 3.1.24.202607191738]
 > Start DBeaver ERD Model [org.jkiss.dbeaver.model.erd 1.1.24.202607191738]
-> Start Console [org.eclipse.ui.console 3.17.0.v20260430-1810]
-> Start Debug Core [org.eclipse.debug.core 3.23.300.v20260513-0740]
-> Start DBeaver SQL Language Semantic Model [org.jkiss.dbeaver.model.lsm 1.0.78.202607191738]
-2026-07-24 15:49:01.996 - Connect with 'educlick_aca' (postgres-jdbc-19d3ecf601e-460ffb8683828b8d)
-> Start DBeaver JDBC Model [org.jkiss.dbeaver.model.jdbc 1.0.76.202607191738]
-> Start DBeaver PostgreSQL Model [org.jkiss.dbeaver.ext.postgresql 2.1.256.202607191738]
-2026-07-24 15:49:02.064 - Execution context opened (educlick_aca; Main <postgres>; 0)
-2026-07-24 15:49:02.072 - Initiate connection to PostgreSQL database [postgres@aws-1-sa-east-1.pooler.supabase.com] for Main <postgres>
-> Start DBeaver GIS Support [org.jkiss.dbeaver.data.gis 1.0.207.202607191738]
-2026-07-24 15:49:07.791 - Execution context opened (educlick_aca; Metadata <postgres>; 1)
-2026-07-24 15:49:07.792 - Initiate connection to PostgreSQL database [postgres@aws-1-sa-east-1.pooler.supabase.com] for Metadata <postgres>
-2026-07-24 15:49:08.355 - Connected (postgres-jdbc-19d3ecf601e-460ffb8683828b8d, PostgreSQL JDBC Driver [42.7.11])
-2026-07-24 15:49:34.244 - Bad constraint attribute index: 0
-2026-07-24 15:49:35.278 - Role 'public' not found
-2026-07-24 15:49:35.278 - Role 'public' not found
-2026-07-24 15:49:35.515 - Role 'public' not found
-2026-07-24 15:49:35.516 - Role 'public' not found
-2026-07-24 15:49:35.633 - Role 'public' not found
-2026-07-24 15:49:35.775 - Role 'public' not found
-2026-07-24 15:49:35.896 - Role 'public' not found
-2026-07-24 15:49:35.896 - Role 'public' not found
-2026-07-24 15:49:36.019 - Role 'public' not found
-2026-07-24 15:49:36.020 - Role 'public' not found
-2026-07-24 15:49:36.138 - Role 'public' not found
-2026-07-24 15:49:36.282 - Role 'public' not found
-2026-07-24 15:49:36.501 - Role 'public' not found
-2026-07-24 15:49:36.644 - Role 'public' not found
-2026-07-24 15:49:36.882 - Role 'public' not found
-2026-07-24 15:49:36.882 - Role 'public' not found
-2026-07-24 15:49:36.883 - Role 'public' not found
-2026-07-24 15:49:36.883 - Role 'public' not found
-2026-07-24 15:49:37.045 - Role 'public' not found
-2026-07-24 15:49:37.207 - Role 'public' not found
-2026-07-24 15:49:37.398 - Role 'public' not found
-2026-07-24 15:49:37.583 - Role 'public' not found
-2026-07-24 15:49:37.702 - Role 'public' not found
-2026-07-24 15:49:37.821 - Role 'public' not found
-2026-07-24 15:49:37.991 - Role 'public' not found
-2026-07-24 15:49:37.991 - Role 'public' not found
-2026-07-24 15:49:37.992 - Role 'public' not found
-2026-07-24 15:49:37.992 - Role 'public' not found
-2026-07-24 15:49:38.227 - Role 'public' not found
-2026-07-24 15:49:38.228 - Role 'public' not found
-2026-07-24 15:49:38.228 - Role 'public' not found
-2026-07-24 15:49:38.228 - Role 'public' not found
-2026-07-24 15:49:38.228 - Role 'public' not found
-2026-07-24 15:49:38.229 - Role 'public' not found
-2026-07-24 15:49:38.344 - Role 'public' not found
-2026-07-24 15:49:38.345 - Role 'public' not found
-2026-07-24 15:49:38.488 - Role 'public' not found
-2026-07-24 15:49:38.488 - Role 'public' not found
-2026-07-24 15:49:38.603 - Role 'public' not found
-2026-07-24 15:49:38.839 - Role 'public' not found
-2026-07-24 15:49:39.079 - Role 'public' not found
-2026-07-24 15:49:39.080 - Role 'public' not found
-2026-07-24 15:49:39.080 - Role 'public' not found
-2026-07-24 15:49:39.080 - Role 'public' not found
-2026-07-24 15:49:39.080 - Role 'public' not found
-2026-07-24 15:49:39.194 - Role 'public' not found
-2026-07-24 15:49:39.195 - Role 'public' not found
-2026-07-24 15:49:39.311 - Role 'public' not found
-2026-07-24 15:49:39.451 - Role 'public' not found
-2026-07-24 15:49:39.451 - Role 'public' not found
-2026-07-24 15:49:39.619 - Role 'public' not found
-2026-07-24 15:49:39.619 - Role 'public' not found
-2026-07-24 15:49:39.619 - Role 'public' not found
-2026-07-24 15:49:39.620 - Role 'public' not found
-2026-07-24 18:25:49.766 - Dispose navigator model
-2026-07-24 18:25:49.820 - DBeaver is stopping
-2026-07-24 18:25:49.831 - Stop instance server
-2026-07-24 18:25:49.834 - Instance server has been stopped
-2026-07-24 18:25:49.841 - DBeaver shutdown completed
-2026-07-24 18:25:49.948 - Shutdown desktop platform...
-2026-07-24 18:25:49.951 - Send collected statistics
-2026-07-24 18:25:49.954 - Open [https://stats.dbeaver.com/send-statistics?session=63b6f46a-8fb2-44e1-930f-0593081243be&time=1784918936]
-2026-07-24 18:25:50.694 - Statistics sent (OK)
-2026-07-24 18:25:50.723 - Execution context closed (educlick_aca, 0)
-2026-07-24 18:25:50.735 - Execution context closed (educlick_aca, 1)
-2026-07-24 18:25:50.737 - Disconnected (postgres-jdbc-19d3ecf601e-460ffb8683828b8d)
-2026-07-24 18:25:50.857 - Platform shutdown completed (907ms)
+2026-07-28 14:40:02.857 - Dispose navigator model
+2026-07-28 14:40:02.921 - DBeaver is stopping
+2026-07-28 14:40:02.922 - Stop instance server
+2026-07-28 14:40:02.922 - Instance server has been stopped
+2026-07-28 14:40:02.932 - DBeaver shutdown completed
+2026-07-28 14:40:02.952 - Shutdown desktop platform...
+2026-07-28 14:40:02.953 - Send collected statistics
+2026-07-28 14:40:02.954 - Open [https://stats.dbeaver.com/send-statistics?session=15223466-565e-42b7-839f-3d8056da3e12&time=1785260372]
+2026-07-28 14:40:03.527 - Statistics sent (OK)
+2026-07-28 14:40:03.588 - Platform shutdown completed (636ms)

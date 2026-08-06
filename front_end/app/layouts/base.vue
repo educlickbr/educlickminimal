@@ -21,6 +21,7 @@ const pageTitle = computed(() => {
     if (route.path === "/academico_calendario") return "Acadêmico - Calendário";
     if (route.path === "/meus-processos") return "Minhas Inscrições";
     if (route.path === "/matriculas") return "Matrículas";
+    if (route.path === "/calendario-salas") return "Calendário de Salas";
     if (route.path === "/docentes") return "Gestão de Docentes";
     return "EduClick";
 });

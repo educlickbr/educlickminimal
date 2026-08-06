@@ -366,7 +366,7 @@ const userInitial = computed(() => {
                             </div>
                         </button>
                         <button
-                            @click="handleNavigation('/calendario_salas')"
+                            @click="handleNavigation('/calendario-salas')"
                             class="menu-item group disabled:opacity-50"
                         >
                             <div

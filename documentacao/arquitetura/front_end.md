@@ -239,6 +239,10 @@ Funções **puras e testáveis**, sem estado:
 
 ## 7. Design System — Contrato Visual
 
+> **Este documento contém os tokens fundacionais (cores, tipografia, campos).  
+> O contrato visual completo e atualizado — incluindo cards premium, accent bars, hierarquia de aninhamento, badges e modais — está em:**  
+> **`documentacao/arquitetura/design_system.md`**
+
 ### 7.1 Paleta de Cores
 
 | Cor | Variável CSS | Valor | Uso |
@@ -864,6 +868,7 @@ import type { Area } from "~/types/aca";
 
 | Data | Descrição |
 |---|---|
+| 2026-07-24 | Criado `documentacao/arquitetura/design_system.md` como referência canônica do Design System premium (cards, accent bars, pills, filtros, modais, hierarquia de aninhamento) |
 | 2026-07-23 | Consolidação dos documentos: `UX_DESIGN.md`, `contrato-visual.md`, `rotas.md`, `tipos.md` em documento único de arquitetura front-end |
 
 ---

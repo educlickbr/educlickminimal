@@ -103,7 +103,9 @@ CREATE TABLE public.acd_sala (
 );
 ```
 
-### 2. `acd_sala_horario` — Grade de horários (slots)
+### 2. `acd_horario` — Horários globais (vale para todas as salas)
+
+> **Migrado:** `acd_sala_horario` → `acd_horario` (global, sem id_sala)
 
 ```sql
 CREATE TABLE public.acd_sala_horario (
@@ -121,35 +123,42 @@ CREATE TABLE public.acd_sala_horario (
 
 > **Nota:** A grade pode ser gerada automaticamente a partir de turnos/config, ou manual pelo admin.
 
-### 3. `acd_reserva_sala` — Reservas
+### 3. `acd_reserva_sala` — Reservas (estrutura atual)
 
 ```sql
 CREATE TABLE public.acd_reserva_sala (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     id_entidade UUID NOT NULL REFERENCES public.user_entidades(id) ON DELETE CASCADE,
-    id_sala_horario UUID NOT NULL REFERENCES public.acd_sala_horario(id),
-    data DATE NOT NULL,                        -- data da reserva (yyyy-mm-dd)
+    id_sala UUID NOT NULL REFERENCES public.acd_sala(id),
+    id_horario UUID NOT NULL REFERENCES public.acd_horario(id),
+    data DATE NOT NULL,
     tipo TEXT NOT NULL CHECK (tipo IN ('aula', 'evento')),
     status TEXT NOT NULL DEFAULT 'reservado' CHECK (status IN ('reservado', 'cancelado')),
-    
+
     -- Se for aula vinculada ao calendário acadêmico
-    id_aula UUID REFERENCES public.aca_programa_aula(id) ON DELETE SET NULL,
-    
-    -- Se for evento avulso
+    id_aula UUID REFERENCES public.aca_calendario(id) ON DELETE SET NULL,
+
+    -- Se for programa (preenchido automaticamente ao selecionar aula, ou manual)
+    id_programa UUID REFERENCES public.aca_programa(id) ON DELETE SET NULL,
+
+    -- Se for evento (referência à tabela aca_evento)
+    id_evento UUID REFERENCES public.aca_evento(id) ON DELETE SET NULL,
+
+    -- Se for evento avulso (legado, será substituído por id_evento)
     evento_nome TEXT,
-    
+
     -- Geral
     observacoes TEXT,
     criado_por UUID REFERENCES public.user_expandido(id),
     criado_em TIMESTAMPTZ DEFAULT NOW(),
     modificado_por UUID REFERENCES public.user_expandido(id),
-    modificado_em TIMESTAMPTZ
-);
+    modificado_em TIMESTAMPTZ,
 
--- Índice para busca por range de data
-CREATE INDEX idx_reserva_sala_data ON public.acd_reserva_sala (data);
-CREATE INDEX idx_reserva_sala_range ON public.acd_reserva_sala (id_sala_horario, data);
+    CONSTRAINT uq_acd_reserva_slot UNIQUE (id_sala, id_horario, data)
+);
 ```
+
+> **Vínculos:** `id_aula` + `id_programa` (juntos ao selecionar aula), `id_programa` (solo), `id_evento` (evento). O `evento_nome` será mantido como legado até o modal ser atualizado para usar `id_evento`.
 
 ### 4. RPCs Necessárias
 

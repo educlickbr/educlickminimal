@@ -2,7 +2,7 @@
 <application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_fID1cHcZEfG5R8BVxjDBsQ" elementId="org.eclipse.e4.legacy.ide.application" contributorURI="platform:/plugin/org.jkiss.dbeaver.ui.app.standalone" selectedElement="_fID1cXcZEfG5R8BVxjDBsQ" bindingContexts="_fIFESHcZEfG5R8BVxjDBsQ">
   <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;workbench>&#xA;&lt;mruList>&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.jkiss.dbeaver.ui.editors.sql.SQLEditor&quot; name=&quot;tabelas_academico.sql&quot; tooltip=&quot;General/Scripts/tables/tabelas_academico.sql&quot;>&#xA;&lt;persistable path=&quot;/General/Scripts/tables/tabelas_academico.sql&quot;/>&#xA;&lt;/file>&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.jkiss.dbeaver.ui.editors.sql.SQLEditor&quot; name=&quot;Script.sql&quot; tooltip=&quot;General/Scripts/tables/Script.sql&quot;>&#xA;&lt;persistable path=&quot;/General/Scripts/tables/Script.sql&quot;/>&#xA;&lt;/file>&#xA;&lt;file factoryID=&quot;org.jkiss.dbeaver.ui.editors.NodeEditorInputFactory&quot; id=&quot;org.jkiss.dbeaver.ui.editors.entity.FolderEditor&quot; name=&quot;Connections&quot; tooltip=&quot;aic_db connections&quot;>&#xA;&lt;persistable node=&quot;node://aic_db/datasources&quot;/>&#xA;&lt;/file>&#xA;&lt;/mruList>&#xA;&lt;/workbench>"/>
   <tags>activeSchemeId:org.jkiss.dbeaver.defaultKeyScheme</tags>
-  <children xsi:type="basic:TrimmedWindow" xmi:id="_fID1cXcZEfG5R8BVxjDBsQ" elementId="IDEWindow" contributorURI="platform:/plugin/org.jkiss.dbeaver.ui.app.standalone" selectedElement="_fID1cncZEfG5R8BVxjDBsQ" label="%trimmedwindow.label.dbeaver" x="0" y="44" width="1536" height="879">
+  <children xsi:type="basic:TrimmedWindow" xmi:id="_fID1cXcZEfG5R8BVxjDBsQ" elementId="IDEWindow" contributorURI="platform:/plugin/org.jkiss.dbeaver.ui.app.standalone" selectedElement="_fID1cncZEfG5R8BVxjDBsQ" label="%trimmedwindow.label.dbeaver" x="26" y="23" width="1908" height="981">
     <persistedState key="coolBarVisible" value="true"/>
     <persistedState key="perspectiveBarVisible" value="true"/>
     <persistedState key="isRestored" value="true"/>
@@ -36,9 +36,11 @@
           <tags>persp.editorOnboardingCommand:Open File...$$$Ctrl+O</tags>
           <tags>persp.editorOnboardingCommand:Show Key Assist$$$Shift+Ctrl+L</tags>
           <tags>persp.editorOnboardingCommand:Find Actions$$$Ctrl+3</tags>
-          <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl0H-GEfGQgM95yzOz0w" selectedElement="_YmWl2X-GEfGQgM95yzOz0w" horizontal="true">
-            <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl0X-GEfGQgM95yzOz0w" containerData="2500" selectedElement="_YmWl1n-GEfGQgM95yzOz0w">
+          <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl0H-GEfGQgM95yzOz0w" selectedElement="_YmWl0X-GEfGQgM95yzOz0w" horizontal="true">
+            <children xsi:type="basic:PartSashContainer" xmi:id="_YmWl0X-GEfGQgM95yzOz0w" containerData="2500" selectedElement="_YmWl0n-GEfGQgM95yzOz0w">
               <children xsi:type="basic:PartStack" xmi:id="_YmWl0n-GEfGQgM95yzOz0w" elementId="navigation" containerData="7000" selectedElement="_YmWl03-GEfGQgM95yzOz0w">
+                <tags>active</tags>
+                <tags>noFocus</tags>
                 <children xsi:type="advanced:Placeholder" xmi:id="_YmWl03-GEfGQgM95yzOz0w" elementId="org.jkiss.dbeaver.core.databaseNavigator" ref="_fIEdrncZEfG5R8BVxjDBsQ" closeable="true">
                   <tags>View</tags>
                   <tags>categoryTag:Database</tags>
@@ -147,14 +149,11 @@
       <children xsi:type="basic:PartStack" xmi:id="_fIEdoncZEfG5R8BVxjDBsQ" elementId="PartStack@6775c0d1" selectedElement="_fIEdqHcZEfG5R8BVxjDBsQ">
         <tags>EditorStack</tags>
         <tags>org.eclipse.e4.primaryDataStack</tags>
-        <tags>active</tags>
         <children xsi:type="basic:Part" xmi:id="_fIEdqHcZEfG5R8BVxjDBsQ" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="Connections" iconURI="platform:/plugin/org.jkiss.dbeaver.ui/icons/properties.svg" closeable="true">
           <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;editor id=&quot;org.jkiss.dbeaver.ui.editors.entity.FolderEditor&quot; name=&quot;Connections&quot; partName=&quot;Connections&quot; title=&quot;Connections&quot; tooltip=&quot;aic_db connections&quot;>&#xA;&lt;input factoryID=&quot;org.jkiss.dbeaver.ui.editors.NodeEditorInputFactory&quot; node=&quot;node://aic_db/datasources&quot;/>&#xA;&lt;/editor>"/>
           <tags>Editor</tags>
           <tags>removeOnHide</tags>
           <tags>org.jkiss.dbeaver.ui.editors.entity.FolderEditor</tags>
-          <tags>active</tags>
-          <tags>activeOnClose</tags>
         </children>
         <children xsi:type="basic:Part" xmi:id="_fIEdqXcZEfG5R8BVxjDBsQ" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="&lt;none> tabelas_usuario" iconURI="platform:/plugin/org.jkiss.dbeaver.model/icons/tree/script.svg" closeable="true">
           <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;editor id=&quot;org.jkiss.dbeaver.ui.editors.sql.SQLEditor&quot; name=&quot;tabelas_usuario.sql&quot; partName=&quot;&amp;lt;none&amp;gt; tabelas_usuario&quot; title=&quot;&amp;lt;none&amp;gt; tabelas_usuario&quot; tooltip=&quot;General/Scripts/tables/tabelas_usuario.sql&quot;>&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/General/Scripts/tables/tabelas_usuario.sql&quot;/>&#xA;&lt;editorState selectionHorizontalPixel=&quot;0&quot; selectionLength=&quot;0&quot; selectionOffset=&quot;6242&quot; selectionTopPixel=&quot;3349&quot;/>&#xA;&lt;/editor>"/>
@@ -170,6 +169,8 @@
       <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xA;&lt;view filterType=&quot;connection&quot;/>"/>
       <tags>View</tags>
       <tags>categoryTag:Database</tags>
+      <tags>active</tags>
+      <tags>activeOnClose</tags>
       <menus xmi:id="_fIEdr3cZEfG5R8BVxjDBsQ" elementId="org.jkiss.dbeaver.core.databaseNavigator">
         <tags>ViewMenu</tags>
         <tags>menuContribution:menu</tags>
