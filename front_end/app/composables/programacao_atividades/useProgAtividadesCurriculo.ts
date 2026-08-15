@@ -267,14 +267,16 @@ export function useProgAtividadesCurriculo(deps: {
 
       conteudosDisponiveis.value = itens.map((c: any) => {
         const at = ativosMap.value.get(c.id);
+        const associado = !!at?.op_id;
         return {
           id: c.id,
           titulo: c.titulo,
           tipo: c.tipo,
           descricao: c.descricao,
           blocos: c.blocos,
-          ativo: at?.ativo ?? false,
-          op_id: at?.op_id ?? null,
+          // Sem linha = herdado = visível (aluno vê)
+          ativo: associado ? !!at!.ativo : true,
+          op_id: associado ? at!.op_id : null,
           criado_por_nome: c.criado_por_nome,
           id_arquivo: c.id_arquivo,
           url: c.url,
@@ -330,38 +332,73 @@ export function useProgAtividadesCurriculo(deps: {
     }
   }
 
-  // ── Toggle ativo (no painel direito) ────────────────────
+  // ── Radio: associa/desassocia (cria/remove linha no operacional) ──
+  async function toggleAssociacaoPainel(conteudo: ConteudoPanel) {
+    if (!programaSelecionado.value) return;
+    try {
+      const id_entidade = await deps.garantirEntidade();
+
+      if (conteudo.op_id) {
+        // Desassocia: remove a linha (volta à herança = ativo)
+        await $fetch("/api/programacao_atividades/curriculo", {
+          method: "DELETE",
+          body: { id: conteudo.op_id, id_entidade },
+        });
+        conteudo.op_id = null;
+        conteudo.ativo = true;
+        ativosMap.value.delete(conteudo.id);
+        deps.toast.showToast("Associação removida", { type: "success" });
+      } else {
+        // Associa: cria linha ativa
+        const body = montarBodyOperacional({
+          id_entidade, id_conteudo: conteudo.id,
+          ativo: true, usuario_id: store.user_expandido_id,
+        });
+        const res = (await $fetch("/api/programacao_atividades/curriculo", {
+          method: "POST", body,
+        })) as any;
+        conteudo.op_id = res?.id;
+        conteudo.ativo = true;
+        if (res?.id) ativosMap.value.set(conteudo.id, { ativo: true, op_id: res.id });
+        deps.toast.showToast("Conteúdo associado!", { type: "success" });
+      }
+      selectedScopeKey.value = null;
+    } catch (e: any) {
+      deps.toast.showToast(e.message || "Erro ao alterar", { type: "error" });
+    }
+  }
+
+  // ── Toggle: só muda visibilidade (ativo) — aluno vê ou não ──
   async function toggleAtivoPainel(conteudo: ConteudoPanel) {
     if (!programaSelecionado.value) return;
     try {
       const id_entidade = await deps.garantirEntidade();
 
-      if (conteudo.ativo && conteudo.op_id) {
-        await $fetch("/api/programacao_atividades/curriculo", {
-          method: "DELETE",
-          body: { id: conteudo.op_id, id_entidade },
-        });
-        conteudo.ativo = false;
-        conteudo.op_id = null;
-        ativosMap.value.delete(conteudo.id);
-      } else if (!conteudo.ativo) {
-        // Constraint exclusiva: ciclo/aula substituem o programa (soma = 1)
+      if (conteudo.op_id) {
+        // Linha existe: upsert com ativo invertido
         const body = montarBodyOperacional({
           id_entidade, id_conteudo: conteudo.id,
-          ativo: true, usuario_id: store.user_expandido_id,
+          ativo: !conteudo.ativo, usuario_id: store.user_expandido_id,
         });
-
         const res = (await $fetch("/api/programacao_atividades/curriculo", {
-          method: "POST",
-          body,
+          method: "POST", body,
         })) as any;
-        conteudo.ativo = true;
+        conteudo.ativo = !conteudo.ativo;
+        if (res?.id) ativosMap.value.set(conteudo.id, { ativo: conteudo.ativo, op_id: res.id });
+      } else if (conteudo.ativo) {
+        // Herdado ativo → desliga: cria linha com ativo:false (override)
+        const body = montarBodyOperacional({
+          id_entidade, id_conteudo: conteudo.id,
+          ativo: false, usuario_id: store.user_expandido_id,
+        });
+        const res = (await $fetch("/api/programacao_atividades/curriculo", {
+          method: "POST", body,
+        })) as any;
         conteudo.op_id = res?.id;
-        if (res?.id) ativosMap.value.set(conteudo.id, { ativo: true, op_id: res.id });
-
-        // Limpa escopo alvo depois de associar
-        selectedScopeKey.value = null;
+        conteudo.ativo = false;
+        if (res?.id) ativosMap.value.set(conteudo.id, { ativo: false, op_id: res.id });
       }
+      selectedScopeKey.value = null;
     } catch (e: any) {
       deps.toast.showToast(e.message || "Erro ao alterar", { type: "error" });
     }
@@ -440,7 +477,7 @@ export function useProgAtividadesCurriculo(deps: {
     // Painel direito
     busca, filtroTipo, filtroMeus,
     conteudosDisponiveis, conteudosExibidos, loadingConteudos,
-    fetchConteudosRepositorio, toggleAtivoPainel,
+    fetchConteudosRepositorio, toggleAtivoPainel, toggleAssociacaoPainel,
 
     // Helpers
     aulasDoCiclo, aulasDoModulo, ciclosDoModulo,
