@@ -25,18 +25,19 @@ app/components/programacao_atividades/
 ├── ModalProgAtividadesConteudo.vue                       ← modal de conteúdo (3 passos: geral/perguntas/blocos)
 ├── ModalProgAtividadesBloco.vue                          ← modal de bloco organizador
 ├── ConteudoRow.vue                                       ← linha de conteúdo (toggle + destaque + abrir arquivo)
-├── UploadArquivo.vue                                     ← upload R2 reutilizável
-└── ModalProgAtividadesDistribuicao.vue                   ← (não utilizado — substituído por toggle inline)
+└── UploadArquivo.vue                                     ← upload R2 reutilizável
 app/composables/programacao_atividades/
 ├── useProgAtividadesCore.ts                              ← entidade ativa + toast + init
-├── useProgAtividadesRepositorio.ts                       ← CRUD conteúdos/blocos + busca/filtros
+├── useProgAtividadesRepositorio.ts                       ← CRUD conteúdos/blocos + busca/filtros + salvar avaliação
 ├── useProgAtividadesDistribuicao.ts                      ← escopos + associação toggle inline
-└── useProgAtividadesCurriculo.ts                         ← programa + estrutura lazy + escopo alvo
+└── useProgAtividadesCurriculo.ts                         ← programa + estrutura lazy + escopo alvo + radio/toggle
 server/api/programacao_atividades/
 ├── conteudos.get.ts / .post.ts / .delete.ts              ← CRUD de conteúdos
 ├── blocos.get.ts / .post.ts / .delete.ts                 ← CRUD de blocos
 ├── bloco_itens.get.ts                                    ← itens do bloco
 ├── conteudo_bloco.post.ts / .delete.ts                   ← associação N:N conteúdo↔bloco
+├── avaliacao.get.ts                                      ← GET avaliação completa (perguntas + alternativas)
+├── avaliacao.post.ts                                     ← POST salva avaliação + perguntas
 ├── distribuicao/
 │   ├── escopos.get.ts                                    ← lista itens do escopo (área/curso/módulo/componente)
 │   └── index.get.ts / .post.ts / .delete.ts              ← listar/associar/desassociar distribuição
@@ -44,8 +45,8 @@ server/api/programacao_atividades/
     ├── programas.get.ts                                  ← programas para o dropdown
     ├── index.get.ts                                      ← estrutura do currículo (lazy)
     ├── conteudos.get.ts                                  ← conteúdos de um escopo (lazy)
-    ├── ativos.get.ts                                     ← conteúdos ativos do programa
-    ├── index.post.ts                                     ← upsert operacional (ativo/destaque)
+    ├── ativos.get.ts                                     ← linhas operacionais do programa (id_ciclo/calendario NULL)
+    ├── index.post.ts                                     ← upsert operacional (associar/ativo/destaque)
     └── index.delete.ts                                   ← remover operacional
 supabase/migrations/
 ├── 20260727100000_create_lms_tables.sql                  ← 12 tabelas + RLS
@@ -67,7 +68,12 @@ supabase/migrations/
 ├── 20260727100017_fix_lms_list_curriculo_order_by.sql    ← ORDER BY sub.titulo
 ├── 20260727100018_fix_lms_list_curriculo_outer_refs.sql  ← aliases externos (ciclo_json/aula_json)
 ├── 20260727100019_fix_lms_list_curriculo_componentes_filter.sql ← componentes do curso do programa
-└── 20260729100000_refactor_lms_curriculo_lazy.sql        ← lazy: estrutura + conteudos por escopo
+├── 20260729100000_refactor_lms_curriculo_lazy.sql        ← lazy: estrutura + conteudos por escopo
+├── 20260729100001_add_programa_escopo.sql                ← escopo 'programa' na RPC de conteúdos
+├── 20260806100000_create_lms_rpc_avaliacao.sql           ← RPCs de avaliação completa (GET + UPSERT)
+├── 20260806100001_fix_lms_upsert_avaliacao_completa.sql  ← fix alias value AS p (jsonb_array_elements)
+├── 20260806100002_fix_lms_get_avaliacao_completa.sql     ← fix criado_em no ORDER BY das subqueries
+└── 20260806100003_add_audit_cols_operacional.sql         ← modificado_por/modificado_em no operacional
 ```
 
 ---
@@ -87,11 +93,25 @@ GET /api/programacao_atividades/conteudos?id_entidade=X&page=1&limit=200&busca=&
 
 ### Aba Repositório — criar/editar conteúdo
 ```
-POST /api/programacao_atividades/conteudos { id?, id_entidade, tipo, titulo, descricao, id_arquivo?, url?, blocos[], usuario_id }
+POST /api/programacao_atividades/conteudos { id?, id_entidade, tipo, titulo, descricao, id_arquivo?, url?, usuario_id }
   → RPC lms_upsert_conteudo(...)
     → UPSERT em lms_conteudo
-    → (se blocos[]) sincroniza lms_conteudo_bloco (N:N)
     → retorna { success, id }
+```
+
+### Aba Repositório — salvar questionário (avaliação + perguntas)
+```
+POST /api/programacao_atividades/avaliacao { id_conteudo, id_entidade, nome, descricao, perguntas[], usuario_id }
+  → RPC lms_upsert_avaliacao_completa(...)
+    → UPSERT lms_avaliacao (1:1 com conteúdo, ON CONFLICT id_conteudo)
+    → REPLACE: DELETE lms_pergunta (CASCADE apaga alternativas) + INSERT novas
+    → retorna { success, id, qtd_perguntas }
+
+GET /api/programacao_atividades/avaliacao?id_conteudo=X&id_entidade=Y
+  → RPC lms_get_avaliacao_completa(...)
+    → lms_avaliacao JOIN lms_conteudo (valida entidade)
+    → lms_pergunta + subquery lms_resposta_possivel (alternativas[])
+    → retorna { avaliacao{ id, nome, descricao, ordem_perguntas }, perguntas[{ id, tipo, enunciado, pontuacao, obrigatoria, ordem, alternativas[{ id, texto, correta }] }] }
 ```
 
 ### Aba Distribuição — escopos
@@ -133,16 +153,20 @@ GET /api/programacao_atividades/curriculo/conteudos?id_programa=X&id_entidade=Y&
     → retorna { conteudos[{ id_conteudo, titulo, tipo, id_arquivo, url, ativo, destaque, herdado, op_id }] }
 ```
 
-### Aba Currículo — ativar/desativar/destacar
+### Aba Currículo — associar / ativar / destacar (painel direito)
 ```
-POST /api/programacao_atividades/curriculo { id_entidade, id_conteudo, id_programa, id_ciclo?, id_calendario?, ativo?, destaque?, usuario_id }
-  → RPC lms_upsert_operacional(...)
-    → UPSERT em lms_conteudo_operacional
-    → retorna { success, id }
+RADIO (associação):
+  POST /api/programacao_atividades/curriculo { id_entidade, id_conteudo, id_programa | id_ciclo | id_calendario, ativo:true, usuario_id }
+    → RPC lms_upsert_operacional(...) — cria linha (override)
+  DELETE /api/programacao_atividades/curriculo { id: op_id, id_entidade }
+    → RPC lms_delete_operacional(...) — remove linha (volta à herança = ativo)
 
-DELETE /api/programacao_atividades/curriculo { id, id_entidade }
-  → RPC lms_delete_operacional(p_id, p_id_entidade)
-    → DELETE → volta ao estado herdado (sem linha = ativo)
+TOGGLE (visibilidade):
+  POST /api/programacao_atividades/curriculo { id_entidade, id_conteudo, id_programa | id_ciclo | id_calendario, ativo: !atual, usuario_id }
+    → RPC lms_upsert_operacional(...) — ON CONFLICT atualiza a linha existente
+
+⚠️ CONSTRAINT EXCLUSIVA: exatamente UM de (id_programa, id_ciclo, id_calendario) preenchido.
+   Ciclo/aula substituem o programa no body (helper montarBodyOperacional).
 ```
 
 ---
@@ -158,8 +182,10 @@ DELETE /api/programacao_atividades/curriculo { id, id_entidade }
 | `POST` | `/api/programacao_atividades/blocos` | → RPC `lms_upsert_bloco` |
 | `DELETE` | `/api/programacao_atividades/blocos` | → RPC `lms_delete_bloco` |
 | `GET` | `/api/programacao_atividades/bloco_itens` | → RPC `lms_list_bloco_itens` |
-| `POST` | `/api/programacao_atividades/conteudo_bloco` | → RPC `lms_add_conteudo_bloco` |
-| `DELETE` | `/api/programacao_atividades/conteudo_bloco` | → RPC `lms_remove_conteudo_bloco` |
+| `POST` | `/api/programacao_atividades/conteudo_bloco` | → RPC `lms_associar_conteudo_bloco` (2 params) |
+| `DELETE` | `/api/programacao_atividades/conteudo_bloco` | → RPC `lms_desassociar_conteudo_bloco` |
+| `GET` | `/api/programacao_atividades/avaliacao` | → RPC `lms_get_avaliacao_completa` |
+| `POST` | `/api/programacao_atividades/avaliacao` | → RPC `lms_upsert_avaliacao_completa` |
 | `GET` | `/api/programacao_atividades/distribuicao/escopos` | → RPC `lms_list_escopos` |
 | `GET` | `/api/programacao_atividades/distribuicao` | → RPC `lms_list_distribuicoes` |
 | `POST` | `/api/programacao_atividades/distribuicao` | → RPC `lms_upsert_distribuicao` |
@@ -167,7 +193,7 @@ DELETE /api/programacao_atividades/curriculo { id, id_entidade }
 | `GET` | `/api/programacao_atividades/curriculo/programas` | → RPC `lms_list_programas_para_curriculo` |
 | `GET` | `/api/programacao_atividades/curriculo` | → RPC `lms_get_curriculo_estrutura` |
 | `GET` | `/api/programacao_atividades/curriculo/conteudos` | → RPC `lms_get_curriculo_conteudos` |
-| `GET` | `/api/programacao_atividades/curriculo/ativos` | → query direta `lms_conteudo_operacional` |
+| `GET` | `/api/programacao_atividades/curriculo/ativos` | → query direta `lms_conteudo_operacional` (programa) |
 | `POST` | `/api/programacao_atividades/curriculo` | → RPC `lms_upsert_operacional` |
 | `DELETE` | `/api/programacao_atividades/curriculo` | → RPC `lms_delete_operacional` |
 
@@ -178,9 +204,9 @@ DELETE /api/programacao_atividades/curriculo { id, id_entidade }
 | Composable | Responsabilidade |
 |---|---|
 | `useProgAtividadesCore` | Entidade ativa (`getEntidadeAtivaId`, `garantirEntidade`) + instância do toast |
-| `useProgAtividadesRepositorio` | CRUD de conteúdos e blocos, busca, filtro por tipo, "só meus", paginação, modal de conteúdo (3 passos) |
+| `useProgAtividadesRepositorio` | CRUD de conteúdos e blocos, busca, filtro por tipo, "só meus", paginação, modal de conteúdo (3 passos), salvar avaliação+perguntas após conteúdo |
 | `useProgAtividadesDistribuicao` | Sub-abas de escopo (área/curso/módulo/componente), lista de itens do escopo, conteúdos com status de associação, filtros (tipo/só meus/associados/disponíveis), toggle inline |
-| `useProgAtividadesCurriculo` | Programas, estrutura lazy (árvore), conteúdos por escopo sob demanda (`conteudosMap`), escopo alvo para adicionar, toggle ativo/destaque (árvore + painel) |
+| `useProgAtividadesCurriculo` | Programas, estrutura lazy (árvore), conteúdos por escopo sob demanda (`conteudosMap`), escopo alvo para adicionar, **radio (associação) + toggle (ativo)** no painel, helper `montarBodyOperacional` (constraint exclusiva) |
 
 ---
 
@@ -190,8 +216,8 @@ DELETE /api/programacao_atividades/curriculo { id, id_entidade }
 |---|---|---|---|
 | `ProgAtividadesTabRepositorio` | `ctx: UseRepositorioReturn` | — | Lista de conteúdos com filtros, cards com criador/data, modais de conteúdo e bloco |
 | `ProgAtividadesTabDistribuicao` | `ctx: UseDistribuicaoReturn` | — | 2 colunas: escopos à esquerda, conteúdos com toggle de associação à direita |
-| `ProgAtividadesTabCurriculo` | `ctx: UseCurriculoReturn` | — | 2 colunas: árvore acordeon (programa → componentes → módulos/ciclos → aulas) + navegador de conteúdos com filtros e escopo alvo |
-| `ModalProgAtividadesConteudo` | `modelValue`, `isEdit`, `initialData`, `onSave`, `blocosDisponiveis`, `blocosSelecionados`, `abaAtiva` | `update:modelValue`, `saved`, `update:blocosSelecionados`, `update:abaAtiva` | Modal 3 passos: geral → perguntas (só avaliação) → blocos |
+| `ProgAtividadesTabCurriculo` | `ctx: UseCurriculoReturn` | — | 2 colunas: árvore acordeon (programa → componentes → módulos/ciclos → aulas) + navegador de conteúdos com **radio de associação** + **toggle de visibilidade** |
+| `ModalProgAtividadesConteudo` | `modelValue`, `isEdit`, `initialData`, `onSave`, `blocosDisponiveis`, `blocosSelecionados`, `abaAtiva`, `getEntidadeId` | `update:modelValue`, `saved`, `update:blocosSelecionados`, `update:abaAtiva` | Modal 3 passos: geral → perguntas (só avaliação, carrega/salva via `/avaliacao`) → blocos |
 | `ModalProgAtividadesBloco` | `modelValue`, `isEdit`, `initialData`, `onSave` | `update:modelValue`, `saved` | Criação/edição de bloco organizador |
 | `ConteudoRow` | `item: ConteudoItem` | `toggle`, `destaque` | Linha de conteúdo na árvore: toggle ativo, tipo, título, abrir arquivo (R2 assinado), destaque ⭐, badge Blueprint |
 | `UploadArquivo` | `fileId`, `onUploaded`, `onRemoved` | `update:fileId` | Upload R2 reutilizável com nome original e abrir arquivo |
@@ -208,7 +234,9 @@ DELETE /api/programacao_atividades/curriculo { id, id_entidade }
 4. **Herança no Currículo** — sem linha em `lms_conteudo_operacional` = herdado = ativo. Com linha = override (ativo/destaque)
 5. **Toggle inline na Distribuição** — sem modal: checkbox violeta direto na linha
 6. **Acordeon no Currículo** — Programa → Componentes → Módulos/Ciclos → Aulas, com lazy loading por nível
-7. **Escopo alvo** — botão "Adicionar" em cada seção define o escopo; toggle no painel direito associa a ele
+7. **Escopo alvo** — botão "Adicionar" em cada seção define o escopo; associação no painel respeita a constraint exclusiva
+8. **Radio + Toggle no painel do Currículo** — radio = associação (cria/remove linha), toggle = visibilidade (aluno vê ou não); sem linha = herdado = visível
+9. **Questionário REPLACE** — salvar avaliação apaga e reinsere perguntas (aceitável enquanto não há submissões; migrar para diff quando existirem)
 
 ### Tabelas principais
 
@@ -219,11 +247,24 @@ lms_conteudo                -- conteúdo perene (material/atividade/avaliação)
   ativo, criado_por, criado_em
 
 lms_bloco                   -- organizador opcional
-  id, id_entidade, titulo, descricao, criado_por, criado_em
+  id, id_entidade, titulo, descricao, cor_ident, criado_por, criado_em
 
 lms_conteudo_bloco          -- N:N conteúdo ↔ bloco
   id, id_conteudo, id_bloco
   UNIQUE (id_conteudo, id_bloco)
+
+lms_avaliacao               -- 1:1 com lms_conteudo (tipo = 'avaliacao')
+  id, id_conteudo UNIQUE, nome, descricao,
+  id_arquivo_referencia, ordem_perguntas ('fixa'|'aleatoria'),
+  criado_em, modificado_em
+
+lms_pergunta                -- perguntas do questionário
+  id, id_avaliacao CASCADE, tipo ('dissertativa'|'multipla_escolha'),
+  enunciado, pontuacao, obrigatoria, ordem, id_arquivo,
+  criado_em, modificado_em
+
+lms_resposta_possivel       -- alternativas da múltipla escolha
+  id, id_pergunta CASCADE, texto, correta, ordem, id_arquivo, criado_em
 
 lms_distribuicao            -- blueprint: conteúdo → escopo
   id, id_entidade, id_conteudo,
@@ -232,20 +273,16 @@ lms_distribuicao            -- blueprint: conteúdo → escopo
   UNIQUE funcional (id_conteudo + escopo)
 
 lms_conteudo_operacional    -- execução: override por programa
-  id, id_entidade, id_conteudo, id_programa,
-  id_ciclo, id_calendario,                          -- nullable (escopo fino)
-  ativo, destaque, criado_por, criado_em
-  CHECK: (id_ciclo IS NULL AND id_calendario IS NULL) OR
-         (id_ciclo IS NOT NULL) OR (id_calendario IS NOT NULL)
+  id, id_entidade, id_conteudo,
+  id_programa | id_ciclo | id_calendario,           -- CHECK: exatamente 1
+  id_distribuicao_origem, ativo, destaque,
+  criado_por, criado_em, modificado_por, modificado_em   -- (auditoria)
   UNIQUE funcional (id_conteudo, id_programa, id_ciclo, id_calendario)
 ```
 
-### Tabelas complementares (avaliação e submissões — criadas, uso futuro)
+### Tabelas complementares (submissões — criadas, uso futuro)
 
 ```sql
-lms_avaliacao               -- 1:1 com lms_conteudo (tipo = 'avaliacao'): ordem_perguntas
-lms_pergunta                -- perguntas (dissertativa / multipla_escolha)
-lms_resposta_possivel       -- alternativas da múltipla escolha
 lms_submissao_atividade     -- envio do aluno (arquivo/texto), tentativa, status, datas
 lms_submissao_avaliacao     -- início/término por tentativa; UNIQUE (id_bloco_item, id_matricula, tentativa)
 lms_resposta_aluno          -- resposta por pergunta (id_resposta_possivel ou texto)
@@ -256,6 +293,7 @@ lms_progresso_aluno         -- progresso por conteúdo/aluno
 
 - **Gestor** (membro da entidade): acesso via helper `lms_usuario_pertence_entidade(id_entidade)`
 - **Aluno** (com matrícula): acesso somente ao próprio conteúdo via `lms_usuario_eh_gestor` / matrícula vinculada
+- `lms_avaliacao`/`lms_pergunta`/`lms_resposta_possivel`: gestor all via EXISTS em `lms_conteudo.id_entidade`
 
 ---
 
@@ -269,8 +307,10 @@ lms_progresso_aluno         -- progresso por conteúdo/aluno
 | Acordeon fechado | Apenas trigger com contador de itens |
 | Acordeon aberto sem conteúdos | Botão "Adicionar" com ícone `+` |
 | Escopo alvo ativo | Barra "Escopo alvo" violeta com botão Cancelar (X) |
-| Conteúdo com arquivo | Ícone olho 👁 → abre URL assinada do R2 em nova aba |
-| Conteúdo herdado | Badge "Blueprint" azul |
+| Conteúdo com arquivo | Ícone de arquivo → abre URL assinada do R2 em nova aba |
+| Conteúdo herdado (sem linha) | Radio desmarcado + toggle "Visível" ligado |
+| Conteúdo associado e ativo | Radio marcado + toggle "Visível" ligado + accent bar violet |
+| Conteúdo associado e oculto | Radio marcado + toggle "Oculto" + título riscado/esmaecido |
 | Conteúdo destacado | Estrela ★ âmbar + fundo âmbar sutil |
 | Toast (sucesso/erro) | Notificação inferior direita por 3s |
 
@@ -289,7 +329,7 @@ lms_progresso_aluno         -- progresso por conteúdo/aluno
 - **Chips de tipo**: Material azul (`#93c5fd`), Atividade verde (`#6ee7b7`), Avaliação laranja (`#fdba74`)
 - **Botão "Adicionar"**: `border 1px dashed rgba(255,255,255,0.06)` com ícone `+`; ativo (escopo alvo) → borda violeta + "Cancelar" com `X`
 - **Barra de busca**: `bg rgba(255,255,255,0.015)` com lupa SVG posicionada
-- **Assoc row**: hover `border rgba(255,255,255,0.04)`; associado → `accent bar violet` lateral `w-2px` + fundo `rgba(139,92,246,0.03)`
+- **Assoc row (painel direito)**: radio à esquerda (checkbox violeta `#8b5cf6` quando marcado), toggle switch à direita com label "Visível"/"Oculto"; título riscado (`line-through` + `opacity 0.4`) quando oculto
 - **Escopo alvo**: badge violeta com label "Escopo alvo" + botão Cancelar vermelho suave
 
 ### Modal de Conteúdo (3 passos)
@@ -297,6 +337,7 @@ lms_progresso_aluno         -- progresso por conteúdo/aluno
 - **Steps numerados** com bolhas (`step--done` com check, `step--future` cinza); aba "Perguntas" só aparece para tipo `avaliacao`
 - Overlay `rgba(0,0,0,0.82)` + painel `bg #13131a border rgba(139,92,246,0.2) rounded-18px`
 - Upload de arquivo com componente `UploadArquivo` (R2 + `global_arquivos`)
+- **Perguntas**: card por pergunta, tipo (dissertativa/múltipla escolha), pontuação, obrigatória; alternativas com radio "Correta" (`:checked` + `@change` — v-model em radio booleano não funciona)
 - Botão Confirmar gradiente `#7c3aed → #8b5cf6` com glow
 
 ---
@@ -312,16 +353,32 @@ lms_progresso_aluno         -- progresso por conteúdo/aluno
 
 ### Nova infraestrutura criada
 - 12 tabelas `lms_*` (migration 00000) com RLS completo
-- ~15 RPCs de repositório, blocos, distribuição e currículo (migrations 00001 a 00030)
+- ~17 RPCs de repositório, blocos, avaliação, distribuição e currículo (migrations 00001 a 00030 + 06/08)
 - 3 RLS helpers: `lms_usuario_pertence_entidade`, `lms_usuario_eh_gestor`, `lms_user_expandido_id`
-- 18 BFFs em `server/api/programacao_atividades/`
+- 20 BFFs em `server/api/programacao_atividades/`
 - 4 composables em `composables/programacao_atividades/`
-- 8 componentes em `components/programacao_atividades/`
+- 7 componentes em `components/programacao_atividades/`
 - Página orquestradora em `pages/programacao_atividades/index.vue`
 
 ---
 
 ## Histórico de Mudanças
+
+### 2026-08-06 — Questionários completos + radio/toggle no Currículo + fixes
+
+**Banco:**
+- Migration `00000` (06/08): RPCs `lms_get_avaliacao_completa` e `lms_upsert_avaliacao_completa` (REPLACE de perguntas)
+- Migration `00001` (06/08): fix `lms_upsert_avaliacao_completa` — `SELECT value AS p FROM jsonb_array_elements(...)` (alias correto; `AS p` direto criava campo `value`)
+- Migration `00002` (06/08): fix `lms_get_avaliacao_completa` — `criado_em` adicionado aos SELECTs das subqueries (ORDER BY referenciava campo inexistente)
+- Migration `00003` (06/08): `modificado_por`/`modificado_em` na `lms_conteudo_operacional` — RPC já gravava, colunas não existiam (erro 500 ao associar)
+
+**Frontend:**
+- `ModalProgAtividadesConteudo`: **carrega perguntas** ao editar avaliação (via GET `/avaliacao`) e **envia perguntas** no save (via POST `/avaliacao` após salvar conteúdo)
+- Radio "Correta" das alternativas: `v-model` booleano em `<input type="radio">` não funciona — trocado por `:checked` + `@change` + função `marcarCorreta` (garante só uma correta)
+- `conteudo_bloco.post.ts`: removido `p_ordem` — função no banco tem 2 params (causava "function not found")
+- **Painel do Currículo**: separadas associação e visibilidade — **radio** à esquerda (cria/remove linha) + **toggle switch** "Visível/Oculto" (aluno vê ou não); sem linha = herdado = visível; título riscado quando oculto
+- `montarBodyOperacional`: constraint exclusiva respeitada — ciclo/aula **substituem** id_programa no body (soma = 1)
+- Limpeza: removidos `ModalProgAtividadesDistribuicao.vue` (não usado) e `.bak`/`.bak2`; `config.toml` `project_id` corrigido (`oto_nuxt` → `educlickminimal`)
 
 ### 2026-07-29 — Currículo lazy + escopo alvo + abrir arquivo
 
@@ -332,7 +389,7 @@ lms_progresso_aluno         -- progresso por conteúdo/aluno
 **Frontend:**
 - `useProgAtividadesCurriculo`: lazy loading por nível (conteudosMap), helpers `aulasDoModulo`/`aulasDoCiclo`/`ciclosDoModulo`, escopo alvo (`selectedScopeKey`/`definirEscopoAlvo`), `toggleAtivoPainel` com escopo (id_ciclo/id_calendario)
 - `ProgAtividadesTabCurriculo`: estrutura final (Programa → Componentes → Módulos/Ciclos → Aulas), botões "Adicionar" por seção com escopo alvo, ícones SVG, barra "Escopo alvo" no painel direito
-- `ConteudoRow` + painel direito: botão olho 👁 para abrir arquivo via `/api/r2/sign` em nova aba
+- `ConteudoRow` + painel direito: botão de arquivo para abrir via `/api/r2/sign` em nova aba
 - Removidos: seção "Por Área" e pasta "Aulas" solta (aulas agora dentro de cada módulo)
 
 ### 2026-07-28 — Distribuição + Currículo v1
@@ -359,6 +416,6 @@ lms_progresso_aluno         -- progresso por conteúdo/aluno
 ## Próximos passos (planejado)
 
 - **Aba "Minhas Atividades"** (aluno) — consumir conteúdos, responder atividades/avaliações, upload de arquivos
-- **Paleta de conteúdos** no painel direito do Currículo com associação por escopo (já em andamento com escopo alvo)
 - **Submissões** — usar `lms_submissao_atividade`/`lms_submissao_avaliacao` (UNIQUE por tentativa já previsto)
+- **Questionário com diff** — quando submissões existirem, migrar o REPLACE para diff por id (evita apagar respostas em cascata)
 - **Índices adicionais** — monitorar performance das RPCs de currículo

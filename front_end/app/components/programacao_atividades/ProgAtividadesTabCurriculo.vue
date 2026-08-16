@@ -293,7 +293,71 @@
                                 <div class="toggle-thumb" />
                             </div>
                         </button>
+
+                        <!-- Configurar exibição (timing) -->
+                        <button v-if="c.op_id" @click="ctx.abrirConfigTiming(c)" class="gear-btn" title="Configurar disponibilidade/prazo">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                        </button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Modal: Configurar exibição (timing) ──────────── -->
+        <div v-if="ctx.showModalTiming.value && ctx.timingAlvo.value" class="modal-overlay" @click.self="ctx.showModalTiming.value = false">
+            <div class="modal-panel">
+                <div class="modal-accent-bar" />
+                <div class="flex items-start justify-between px-6 pt-5 pb-4 border-b border-white/5">
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-sm font-black text-white/85">Configurar exibição</span>
+                        <span class="text-[11px] font-bold text-white/25">{{ ctx.timingAlvo.value.titulo }}</span>
+                    </div>
+                    <button @click="ctx.showModalTiming.value = false" class="modal-xclose" title="Fechar">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+
+                <div class="p-6 flex flex-col gap-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-2">
+                            <label class="field-label">Disponível a partir de</label>
+                            <input v-model="ctx.formTiming.data_disponivel" type="datetime-local" class="field-input" />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="field-label">Entrega limite</label>
+                            <input v-model="ctx.formTiming.data_entrega_limite" type="datetime-local" class="field-input" />
+                        </div>
+                    </div>
+
+                    <div v-if="ctx.timingAlvo.value.tipo !== 'material'" class="grid grid-cols-3 gap-4">
+                        <div class="flex flex-col gap-2">
+                            <label class="field-label">Duração (min)</label>
+                            <input v-model.number="ctx.formTiming.duracao_minutos" type="number" min="1" step="5" class="field-input" placeholder="—" />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="field-label">Tentativas</label>
+                            <input v-model.number="ctx.formTiming.tentativas_permitidas" type="number" min="1" class="field-input" placeholder="—" />
+                        </div>
+                        <div v-if="ctx.timingAlvo.value.tipo === 'avaliacao'" class="flex flex-col gap-2">
+                            <label class="field-label">Pontuação máx.</label>
+                            <input v-model.number="ctx.formTiming.pontuacao_maxima" type="number" min="0" step="0.5" class="field-input" placeholder="—" />
+                        </div>
+                    </div>
+
+                    <p class="text-[10px] font-bold text-white/20 leading-relaxed">
+                        Deixe em branco para sem restrição. Datas em horário local.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button @click="ctx.showModalTiming.value = false" class="modal-btn-cancel">Cancelar</button>
+                    <button @click="ctx.salvarTiming()" class="modal-btn-save" :disabled="ctx.savingTiming.value">
+                        <div v-if="ctx.savingTiming.value" class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Salvar
+                    </button>
                 </div>
             </div>
         </div>
@@ -458,4 +522,23 @@ onMounted(() => ctx.fetchProgramas());
     from { opacity: 0; transform: translateX(20px); }
     to { opacity: 1; transform: translateX(0); }
 }
+.gear-btn { width: 26px; height: 26px; flex-shrink: 0; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: rgba(255,255,255,0.2); transition: all 0.15s; }
+.gear-btn:hover { color: #a78bfa; background: rgba(139,92,246,0.1); }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.82); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.modal-panel { width: 480px; max-width: calc(100vw - 32px); background: #13131a; border: 1px solid rgba(139,92,246,0.2); border-radius: 18px; box-shadow: 0 32px 80px rgba(0,0,0,0.6); animation: slideUp 0.2s ease; overflow: hidden; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.modal-accent-bar { height: 2px; background: linear-gradient(90deg, #7c3aed, #a78bfa, transparent); }
+.modal-xclose { width: 28px; height: 28px; border-radius: 8px; border: none; background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.35); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.modal-xclose:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+.field-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.35); }
+.field-input { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.02); color: rgba(232,230,240,0.75); font-size: 12px; font-weight: 600; outline: none; transition: all 0.15s; }
+.field-input:focus { border-color: rgba(139,92,246,0.35); box-shadow: 0 0 0 2px rgba(139,92,246,0.08); }
+.modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 14px 24px; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
+.modal-btn-cancel { padding: 8px 18px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.08); background: transparent; color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s; }
+.modal-btn-cancel:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.15); }
+.modal-btn-save { padding: 8px 18px; border-radius: 9px; border: none; background: linear-gradient(135deg, #7c3aed, #8b5cf6); color: white; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.15s; box-shadow: 0 4px 14px rgba(139,92,246,0.35); }
+.modal-btn-save:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139,92,246,0.45); }
+.modal-btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>

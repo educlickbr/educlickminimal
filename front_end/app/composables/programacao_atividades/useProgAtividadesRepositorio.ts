@@ -215,6 +215,7 @@ export function useProgAtividadesRepositorio(deps: {
               id_entidade,
               nome: formData.titulo,
               descricao: formData.descricao || null,
+              ordem_perguntas: formData.ordem_perguntas || "fixa",
               perguntas: formData.perguntas,
               usuario_id: store.user_expandido_id,
             },

@@ -12,6 +12,11 @@ export default defineEventHandler(async (event) => {
     p_id_calendario: body.id_calendario || null,
     p_ativo: body.ativo ?? null,
     p_destaque: body.destaque ?? null,
+    p_data_disponivel: body.data_disponivel || null,
+    p_data_entrega_limite: body.data_entrega_limite || null,
+    p_duracao_minutos: body.duracao_minutos ?? null,
+    p_tentativas_permitidas: body.tentativas_permitidas ?? null,
+    p_pontuacao_maxima: body.pontuacao_maxima ?? null,
     p_usuario_id: body.usuario_id,
   })
 

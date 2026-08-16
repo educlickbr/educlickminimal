@@ -94,13 +94,32 @@
             <!-- Passo 2: Perguntas (só para avaliação) -->
             <div v-if="abaAtiva === 'perguntas'" class="p-6 flex flex-col gap-5">
                 <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">{{ perguntas.length }} pergunta(s)</span>
+                    <div class="flex items-center gap-4">
+                        <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">{{ perguntas.length }} pergunta(s)</span>
+                        <!-- Ordem das perguntas -->
+                        <div class="flex items-center gap-1">
+                            <span class="text-[9px] font-bold text-white/25 uppercase tracking-widest">Ordem:</span>
+                            <button @click="ordemPerguntas = 'fixa'"
+                                class="tipo-btn small" :class="{ 'tipo-btn--active': ordemPerguntas === 'fixa' }">Fixa</button>
+                            <button @click="ordemPerguntas = 'aleatoria'"
+                                class="tipo-btn small" :class="{ 'tipo-btn--active': ordemPerguntas === 'aleatoria' }">Aleatória</button>
+                        </div>
+                    </div>
                     <button @click="addPergunta" class="add-btn small">+ Pergunta</button>
                 </div>
 
                 <div v-for="(p, idx) in perguntas" :key="idx" class="pergunta-card">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-[10px] font-black text-secondary/40 uppercase tracking-widest">Pergunta {{ idx + 1 }}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-black text-secondary/40 uppercase tracking-widest">Pergunta {{ idx + 1 }}</span>
+                            <!-- Anexo da pergunta -->
+                            <UploadMini
+                                v-model="p.id_arquivo"
+                                label="Anexar imagem/arquivo à pergunta"
+                                :getUserExpandidoId="() => (useAppStore() as any).user_expandido_id"
+                                :getIdEntidade="getEntidadeId"
+                            />
+                        </div>
                         <button @click="perguntas.splice(idx, 1)" class="action-btn action-delete" title="Remover">✕</button>
                     </div>
 
@@ -141,9 +160,16 @@
                             <label class="flex items-center gap-1 text-[10px] font-bold text-white/30 whitespace-nowrap">
                                 <input type="radio" :name="'correta_' + idx" :checked="alt.correta" @change="marcarCorreta(idx, ai)" /> Correta
                             </label>
+                            <!-- Anexo da alternativa -->
+                            <UploadMini
+                                v-model="alt.id_arquivo"
+                                label="Anexar imagem/arquivo à alternativa"
+                                :getUserExpandidoId="() => (useAppStore() as any).user_expandido_id"
+                                :getIdEntidade="getEntidadeId"
+                            />
                             <button @click="p.alternativas.splice(ai, 1)" class="action-btn action-delete" title="Remover">✕</button>
                         </div>
-                        <button @click="p.alternativas.push({ texto: '', correta: false })" class="text-[10px] font-bold text-secondary/40 hover:text-secondary/60 transition-colors self-start">
+                        <button @click="p.alternativas.push({ texto: '', correta: false, id_arquivo: null })" class="text-[10px] font-bold text-secondary/40 hover:text-secondary/60 transition-colors self-start">
                             + Alternativa
                         </button>
                     </div>
@@ -210,6 +236,7 @@
 import { ref, reactive, watch, computed } from "vue";
 import { useAppStore } from "~~/stores/app";
 import UploadArquivo from "~/components/programacao_atividades/UploadArquivo.vue";
+import UploadMini from "~/components/programacao_atividades/UploadMini.vue";
 
 const props = defineProps<{
     modelValue: boolean;
@@ -268,7 +295,7 @@ const blocosSelecionados = computed({
     set: (v) => emit("update:blocosSelecionados", v),
 });
 
-interface Alternativa { id?: string; texto: string; correta: boolean }
+interface Alternativa { id?: string; texto: string; correta: boolean; id_arquivo?: string | null }
 interface Pergunta {
     id?: string;
     tipo: string;
@@ -276,15 +303,20 @@ interface Pergunta {
     pontuacao: number;
     obrigatoria: boolean;
     alternativas: Alternativa[];
+    id_arquivo?: string | null;
 }
 
 const perguntas = ref<Pergunta[]>([]);
+const ordemPerguntas = ref<"fixa" | "aleatoria">("fixa");
 
 async function carregarPerguntas(idConteudo: string) {
     try {
         const res = (await $fetch("/api/programacao_atividades/avaliacao", {
             params: { id_conteudo: idConteudo, id_entidade: props.getEntidadeId?.() },
         })) as any;
+        if (res?.avaliacao?.ordem_perguntas) {
+            ordemPerguntas.value = res.avaliacao.ordem_perguntas === "aleatoria" ? "aleatoria" : "fixa";
+        }
         if (Array.isArray(res?.perguntas)) {
             perguntas.value = res.perguntas.map((p: any) => ({
                 id: p.id,
@@ -292,8 +324,9 @@ async function carregarPerguntas(idConteudo: string) {
                 enunciado: p.enunciado || "",
                 pontuacao: Number(p.pontuacao || 0),
                 obrigatoria: p.obrigatoria !== false,
+                id_arquivo: p.id_arquivo || null,
                 alternativas: Array.isArray(p.alternativas)
-                    ? p.alternativas.map((a: any) => ({ id: a.id, texto: a.texto || "", correta: !!a.correta }))
+                    ? p.alternativas.map((a: any) => ({ id: a.id, texto: a.texto || "", correta: !!a.correta, id_arquivo: a.id_arquivo || null }))
                     : [],
             }));
         } else {
@@ -352,6 +385,7 @@ function addPergunta() {
         pontuacao: 0,
         obrigatoria: true,
         alternativas: [],
+        id_arquivo: null,
     });
 }
 
@@ -416,6 +450,7 @@ async function handleSave() {
     const payload = {
         ...form,
         perguntas: form.tipo === "avaliacao" ? perguntas.value : undefined,
+        ordem_perguntas: form.tipo === "avaliacao" ? ordemPerguntas.value : undefined,
         usuario_id: (useAppStore() as any).user_expandido_id,
     };
 

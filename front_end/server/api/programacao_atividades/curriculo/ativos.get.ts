@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
 
   const { data, error } = await client
     .from('lms_conteudo_operacional')
-    .select('id, id_conteudo, ativo, destaque')
+    .select('id, id_conteudo, ativo, destaque, data_disponivel, data_entrega_limite, duracao_minutos, tentativas_permitidas, pontuacao_maxima')
     .eq('id_programa', id_programa)
     .eq('id_entidade', id_entidade)
     .is('id_ciclo', null)

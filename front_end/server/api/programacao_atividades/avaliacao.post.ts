@@ -9,6 +9,7 @@ export default defineEventHandler(async (event) => {
     p_id_entidade: body.id_entidade,
     p_nome: body.nome || null,
     p_descricao: body.descricao || null,
+    p_ordem_perguntas: body.ordem_perguntas || 'fixa',
     p_perguntas: body.perguntas || [],
     p_usuario_id: body.usuario_id || null,
   })

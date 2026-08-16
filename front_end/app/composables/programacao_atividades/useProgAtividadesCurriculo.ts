@@ -7,7 +7,7 @@
  *   Direita:  navegador de conteúdos com busca/filtros + toggle ativo
  */
 
-import { ref, computed, watch } from "vue";
+import { ref, reactive, computed, watch } from "vue";
 import { useAppStore } from "~~/stores/app";
 
 export interface ProgramaOption {
@@ -40,6 +40,11 @@ export interface ConteudoPanel {
   op_id?: string | null;
   id_arquivo?: string | null;
   url?: string | null;
+  data_disponivel?: string | null;
+  data_entrega_limite?: string | null;
+  duracao_minutos?: number | null;
+  tentativas_permitidas?: number | null;
+  pontuacao_maxima?: number | null;
   criado_por_nome?: string | null;
   criado_em?: string;
 }
@@ -189,8 +194,100 @@ export function useProgAtividadesCurriculo(deps: {
   const conteudosDisponiveis = ref<ConteudoPanel[]>([]);
   const loadingConteudos = ref(false);
 
-  // Mapa: id_conteudo → { ativo, op_id }
-  const ativosMap = ref<Map<string, { ativo: boolean; op_id?: string }>>(new Map());
+  // Mapa: id_conteudo → { ativo, op_id, timing }
+  const ativosMap = ref<Map<string, {
+    ativo: boolean;
+    op_id?: string;
+    data_disponivel?: string | null;
+    data_entrega_limite?: string | null;
+    duracao_minutos?: number | null;
+    tentativas_permitidas?: number | null;
+    pontuacao_maxima?: number | null;
+  }>>(new Map());
+
+  // ── Modal de configuração de exibição (timing) ──────────
+  const showModalTiming = ref(false);
+  const timingAlvo = ref<ConteudoPanel | null>(null);
+  const formTiming = reactive({
+    data_disponivel: "" as string,
+    data_entrega_limite: "" as string,
+    duracao_minutos: null as number | null,
+    tentativas_permitidas: null as number | null,
+    pontuacao_maxima: null as number | null,
+  });
+  const savingTiming = ref(false);
+
+  function abrirConfigTiming(conteudo: ConteudoPanel) {
+    timingAlvo.value = conteudo;
+    const at = ativosMap.value.get(conteudo.id);
+    formTiming.data_disponivel = at?.data_disponivel ? toLocalInput(at.data_disponivel) : "";
+    formTiming.data_entrega_limite = at?.data_entrega_limite ? toLocalInput(at.data_entrega_limite) : "";
+    formTiming.duracao_minutos = at?.duracao_minutos ?? null;
+    formTiming.tentativas_permitidas = at?.tentativas_permitidas ?? null;
+    formTiming.pontuacao_maxima = at?.pontuacao_maxima ?? null;
+    showModalTiming.value = true;
+  }
+
+  // Converte ISO para datetime-local (YYYY-MM-DDTHH:mm)
+  function toLocalInput(iso: string): string {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function limparTiming() {
+    formTiming.data_disponivel = "";
+    formTiming.data_entrega_limite = "";
+    formTiming.duracao_minutos = null;
+    formTiming.tentativas_permitidas = null;
+    formTiming.pontuacao_maxima = null;
+  }
+
+  async function salvarTiming() {
+    if (!timingAlvo.value || !programaSelecionado.value) return;
+    savingTiming.value = true;
+    try {
+      const id_entidade = await deps.garantirEntidade();
+      const body = montarBodyOperacional({
+        id_entidade,
+        id_conteudo: timingAlvo.value.id,
+        ativo: timingAlvo.value.ativo,
+        usuario_id: store.user_expandido_id,
+      });
+      body.data_disponivel = formTiming.data_disponivel ? new Date(formTiming.data_disponivel).toISOString() : null;
+      body.data_entrega_limite = formTiming.data_entrega_limite ? new Date(formTiming.data_entrega_limite).toISOString() : null;
+      body.duracao_minutos = formTiming.duracao_minutos || null;
+      body.tentativas_permitidas = formTiming.tentativas_permitidas || null;
+      body.pontuacao_maxima = formTiming.pontuacao_maxima || null;
+
+      const res = (await $fetch("/api/programacao_atividades/curriculo", {
+        method: "POST", body,
+      })) as any;
+      if (res?.id) {
+        const c = timingAlvo.value;
+        c.data_disponivel = body.data_disponivel;
+        c.data_entrega_limite = body.data_entrega_limite;
+        c.duracao_minutos = body.duracao_minutos;
+        c.tentativas_permitidas = body.tentativas_permitidas;
+        c.pontuacao_maxima = body.pontuacao_maxima;
+        ativosMap.value.set(c.id, {
+          ativo: c.ativo, op_id: c.op_id || res.id,
+          data_disponivel: body.data_disponivel,
+          data_entrega_limite: body.data_entrega_limite,
+          duracao_minutos: body.duracao_minutos,
+          tentativas_permitidas: body.tentativas_permitidas,
+          pontuacao_maxima: body.pontuacao_maxima,
+        });
+        deps.toast.showToast("Configuração salva!", { type: "success" });
+      }
+      showModalTiming.value = false;
+    } catch (e: any) {
+      deps.toast.showToast(e.message || "Erro ao salvar", { type: "error" });
+    } finally {
+      savingTiming.value = false;
+    }
+  }
 
   // ── Watch ──────────────────────────────────────────────
   watch(busca, () => { if (programaSelecionado.value) fetchConteudosRepositorio(); });
@@ -235,10 +332,26 @@ export function useProgAtividadesCurriculo(deps: {
       estrutura.value = estruturaRes;
 
       // Monta mapa de ativos
-      const map = new Map<string, { ativo: boolean; op_id?: string }>();
+      const map = new Map<string, {
+        ativo: boolean;
+        op_id?: string;
+        data_disponivel?: string | null;
+        data_entrega_limite?: string | null;
+        duracao_minutos?: number | null;
+        tentativas_permitidas?: number | null;
+        pontuacao_maxima?: number | null;
+      }>();
       if (Array.isArray(ativosRes?.itens)) {
         for (const a of ativosRes.itens) {
-          map.set(a.id_conteudo, { ativo: a.ativo, op_id: a.id });
+          map.set(a.id_conteudo, {
+            ativo: a.ativo,
+            op_id: a.id,
+            data_disponivel: a.data_disponivel || null,
+            data_entrega_limite: a.data_entrega_limite || null,
+            duracao_minutos: a.duracao_minutos ?? null,
+            tentativas_permitidas: a.tentativas_permitidas ?? null,
+            pontuacao_maxima: a.pontuacao_maxima ?? null,
+          });
         }
       }
       ativosMap.value = map;
@@ -277,6 +390,11 @@ export function useProgAtividadesCurriculo(deps: {
           // Sem linha = herdado = visível (aluno vê)
           ativo: associado ? !!at!.ativo : true,
           op_id: associado ? at!.op_id : null,
+          data_disponivel: at?.data_disponivel ?? null,
+          data_entrega_limite: at?.data_entrega_limite ?? null,
+          duracao_minutos: at?.duracao_minutos ?? null,
+          tentativas_permitidas: at?.tentativas_permitidas ?? null,
+          pontuacao_maxima: at?.pontuacao_maxima ?? null,
           criado_por_nome: c.criado_por_nome,
           id_arquivo: c.id_arquivo,
           url: c.url,
@@ -478,6 +596,10 @@ export function useProgAtividadesCurriculo(deps: {
     busca, filtroTipo, filtroMeus,
     conteudosDisponiveis, conteudosExibidos, loadingConteudos,
     fetchConteudosRepositorio, toggleAtivoPainel, toggleAssociacaoPainel,
+
+    // Modal de timing
+    showModalTiming, timingAlvo, formTiming, savingTiming,
+    abrirConfigTiming, salvarTiming, limparTiming,
 
     // Helpers
     aulasDoCiclo, aulasDoModulo, ciclosDoModulo,
