@@ -22,11 +22,12 @@
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div v-for="ped in pedidos" :key="ped.id"
-        class="bg-[#0f0f17] border border-white/5 rounded-xl overflow-hidden hover:border-primary/30 transition-all"
+      <button v-for="ped in pedidos" :key="ped.id"
+        @click="entrarNoCurso(ped)"
+        :class="['curso-card', ped.status === 'concluido' ? 'curso-card--clickable' : 'curso-card--bloqueado']"
       >
         <div class="h-1 bg-gradient-to-r from-primary to-purple-500" />
-        <div class="p-6">
+        <div class="p-6 text-left flex-1">
           <p class="text-lg font-black mb-1">{{ ped.programa_descricao || ped.nome_curso }}</p>
           <p v-if="ped.nome_curto" class="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-3">{{ ped.nome_curto }}</p>
           <div class="flex items-center gap-2 mb-4">
@@ -41,7 +42,13 @@
             {{ new Date(ped.criado_em).toLocaleDateString('pt-BR') }}
           </p>
         </div>
-      </div>
+        <div v-if="ped.status === 'concluido'" class="flex items-center pr-5">
+          <span class="text-[10px] font-black text-primary/70 uppercase tracking-widest">Abrir</span>
+          <svg class="ml-1 text-primary/60" width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </button>
     </div>
   </div>
 </template>
@@ -55,6 +62,11 @@ definePageMeta({ layout: "base" })
 const store = useAppStore()
 const pedidos = ref<any[]>([])
 const loading = ref(true)
+
+function entrarNoCurso(ped: any) {
+  if (ped.status !== "concluido") return
+  navigateTo("/minhas_atividades")
+}
 
 onMounted(async () => {
   if (!store.initialized) await store.initSession()
@@ -84,4 +96,8 @@ onMounted(async () => {
 }
 .badge--ativo { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25); color: #34d399; }
 .badge--inativo { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); }
+.curso-card { background: #0f0f17; border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; overflow: hidden; display: flex; width: 100%; text-align: left; transition: all 0.2s; cursor: default; }
+.curso-card--clickable { cursor: pointer; }
+.curso-card--clickable:hover { border-color: rgba(139,92,246,0.3); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,0,0,0.25); }
+.curso-card--bloqueado { opacity: 0.65; }
 </style>

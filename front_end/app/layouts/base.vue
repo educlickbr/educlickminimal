@@ -23,6 +23,7 @@ const pageTitle = computed(() => {
     if (route.path === "/matriculas") return "Matrículas";
     if (route.path === "/calendario-salas") return "Calendário de Salas";
     if (route.path === "/docentes") return "Gestão de Docentes";
+    if (route.path === "/minhas_atividades") return "Minhas Atividades";
     return "EduClick";
 });
 </script>
