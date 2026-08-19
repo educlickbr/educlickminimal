@@ -1,9 +1,11 @@
 <script setup lang="ts">
-definePageMeta({ layout: "base" });
-
+import { useProgAtividadesCore } from "~/composables/programacao_atividades/useProgAtividadesCore";
+import { useProgAtividadesCurriculo } from "~/composables/programacao_atividades/useProgAtividadesCurriculo";
+import { useToast } from "~/composables/useToast";
 import ProgAtividadesTabRepositorio from "~/components/programacao_atividades/ProgAtividadesTabRepositorio.vue";
 import ProgAtividadesTabDistribuicao from "~/components/programacao_atividades/ProgAtividadesTabDistribuicao.vue";
 import ProgAtividadesTabCurriculo from "~/components/programacao_atividades/ProgAtividadesTabCurriculo.vue";
+import ProgAtividadesCurriculoSidebar from "~/components/programacao_atividades/ProgAtividadesCurriculoSidebar.vue";
 
 const tabs = [
     { key: "repositorio", label: "Repositório" },
@@ -24,35 +26,62 @@ function setActiveTab(k: string) {
     activeTab.value = k;
     router.replace({ query: { ...route.query, tab: k } });
 }
+
+// Contexto do Currículo compartilhado entre a aba e o sidebar
+const core = useProgAtividadesCore();
+const toast = useToast();
+
+const ctxCurriculo = useProgAtividadesCurriculo({
+    getEntidadeAtivaId: () => core.getEntidadeAtivaId(),
+    garantirEntidade: () => core.garantirEntidade(),
+    toast,
+});
 </script>
 
 <template>
-    <div class="page-wrap">
+    <NuxtLayout name="base">
+        <!-- Quadrante direito reservado no layout base -->
+        <template #sidebar>
+            <ProgAtividadesCurriculoSidebar v-if="activeTab === 'curriculo'" :ctx="ctxCurriculo" />
+            <div v-else class="flex flex-col gap-3">
+                <div class="dash-card">
+                    <span class="dash-title">💡 Programação de Atividades</span>
+                    <p class="dash-text">
+                        <b>Repositório</b> — cadastre conteúdos e blocos.<br />
+                        <b>Distribuição</b> — associe a áreas, cursos, módulos e componentes (blueprint).<br />
+                        <b>Currículo</b> — monte o programa com visibilidade, prazos e destaques.
+                    </p>
+                </div>
+            </div>
+        </template>
+
+        <div class="page-wrap">
 
 
-        <!-- Tabs -->
-        <div class="page-top-row">
-            <nav class="tabs-nav">
-                <button
-                    v-for="tab in tabs"
-                    :key="tab.key"
-                    @click="setActiveTab(tab.key)"
-                    :class="[
-                        'tab-btn',
-                        activeTab === tab.key ? 'tab-btn--active' : '',
-                    ]"
-                >
-                    {{ tab.label }}
-                </button>
-            </nav>
+            <!-- Tabs -->
+            <div class="page-top-row">
+                <nav class="tabs-nav">
+                    <button
+                        v-for="tab in tabs"
+                        :key="tab.key"
+                        @click="setActiveTab(tab.key)"
+                        :class="[
+                            'tab-btn',
+                            activeTab === tab.key ? 'tab-btn--active' : '',
+                        ]"
+                    >
+                        {{ tab.label }}
+                    </button>
+                </nav>
+            </div>
+
+            <div>
+                <ProgAtividadesTabRepositorio v-if="activeTab === 'repositorio'" />
+                <ProgAtividadesTabDistribuicao v-if="activeTab === 'distribuicao'" />
+                <ProgAtividadesTabCurriculo v-if="activeTab === 'curriculo'" :ctx="ctxCurriculo" />
+            </div>
         </div>
-
-        <div>
-            <ProgAtividadesTabRepositorio v-if="activeTab === 'repositorio'" />
-            <ProgAtividadesTabDistribuicao v-if="activeTab === 'distribuicao'" />
-            <ProgAtividadesTabCurriculo v-if="activeTab === 'curriculo'" />
-        </div>
-    </div>
+    </NuxtLayout>
 </template>
 
 <style scoped>
@@ -101,4 +130,10 @@ function setActiveTab(k: string) {
     background: rgba(139, 92, 246, 0.14);
     color: #c4b5fd;
 }
+
+/* Sidebar placeholder */
+.dash-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 12px 14px; }
+.dash-title { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.35); display: block; margin-bottom: 8px; }
+.dash-text { font-size: 10.5px; font-weight: 600; color: rgba(255,255,255,0.45); line-height: 1.55; }
+.dash-text b { color: rgba(255,255,255,0.75); }
 </style>

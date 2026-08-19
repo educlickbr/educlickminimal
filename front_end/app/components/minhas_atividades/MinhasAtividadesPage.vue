@@ -33,7 +33,7 @@
                         </div>
                         <div class="flex flex-col items-start gap-1 text-left flex-1 min-w-0">
                             <span class="curso-titulo">{{ p.descricao }}</span>
-                            <span class="curso-sub">{{ p.curso_nome }}</span>
+                            <span class="curso-sub">{{ p.nome_curso }}</span>
                             <span class="curso-ciclos">{{ p.qtd_ciclos }} ciclo(s)</span>
                         </div>
                         <svg class="curso-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -57,130 +57,90 @@
                     </button>
                     <div class="flex flex-col leading-none gap-0.5">
                         <span class="text-sm font-black text-white/85">{{ ctx.programaSelecionado.value.descricao }}</span>
-                        <span class="text-[10px] font-bold text-white/25">{{ ctx.programaSelecionado.value.curso_nome }}</span>
+                        <span class="text-[10px] font-bold text-white/25">{{ ctx.programaSelecionado.value.nome_curso }}</span>
                     </div>
                 </div>
 
                 <div class="flex gap-5" style="height: calc(100vh - 220px); min-height: 500px;">
 
-                    <!-- ── ESQUERDA: árvore ───────────────── -->
-                    <div class="w-80 flex-shrink-0 flex flex-col bg-white/[0.015] border border-white/5 rounded-2xl overflow-hidden shadow-sm relative">
-                        <div class="px-5 py-4 border-b border-white/5 bg-white/[0.01]">
-                            <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">Conteúdos</span>
+                    <!-- ══ SEM CONTEÚDO: visão central em tamanho grande ══ -->
+                    <template v-if="!ctx.conteudoAtivo.value">
+
+                        <!-- Visão Menu: árvore grande (como o currículo) -->
+                        <ConteudoArvore v-if="ctx.visaoCentral.value === 'menu'" :ctx="ctx" class="flex-1">
+                            <template #header-right>
+                                <VisaoToggle :ctx="ctx" />
+                            </template>
+                        </ConteudoArvore>
+
+                        <!-- Visão Resumo: lista grande -->
+                        <div v-else class="flex-1 flex flex-col bg-white/[0.015] border border-white/5 rounded-2xl overflow-hidden shadow-sm relative">
+                            <div class="px-5 py-4 border-b border-white/5 bg-white/[0.01] flex items-center justify-between gap-2">
+                                <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">Resumo</span>
+                                <div class="flex items-center gap-2">
+                                    <VisaoToggle :ctx="ctx" />
+                                    <button class="filtros-btn lg:!hidden" @click="filtrosAbertos = true" title="Filtros e resumo">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"></path></svg>
+                                        Filtros
+                                    </button>
+                                </div>
+                            </div>
+                            <div v-if="ctx.loadingEstrutura.value" class="flex-1 flex flex-col items-center justify-center gap-3">
+                                <div class="w-5 h-5 border-2 border-secondary/10 border-t-primary rounded-full animate-spin" />
+                                <span class="text-[10px] font-bold text-secondary/30 uppercase tracking-widest">Carregando...</span>
+                            </div>
+                            <div v-else class="flex-1 overflow-y-auto p-3 custom-scrollbar">
+                                <ConteudoLista
+                                    :secoes="ctx.secoesLista.value"
+                                    :ativo-id="null"
+                                    @abrir="ctx.selecionarConteudo($event)" />
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- ══ COM CONTEÚDO: visão recolhe à esquerda + conteúdo no centro ══ -->
+                    <template v-else>
+
+                        <!-- Visão recolhida (desktop apenas) -->
+                        <div class="hidden lg:flex w-80 flex-shrink-0 flex-col bg-white/[0.015] border border-white/5 rounded-2xl overflow-hidden shadow-sm relative">
+                            <ConteudoArvore v-if="ctx.visaoCentral.value === 'menu'" :ctx="ctx" class="flex-1">
+                                <template #header-right>
+                                    <VisaoToggle :ctx="ctx" />
+                                </template>
+                            </ConteudoArvore>
+                            <template v-else>
+                                <div class="px-5 py-4 border-b border-white/5 bg-white/[0.01] flex items-center justify-between gap-2">
+                                    <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">Resumo</span>
+                                    <VisaoToggle :ctx="ctx" />
+                                </div>
+                                <div class="flex-1 overflow-y-auto p-3 custom-scrollbar">
+                                    <ConteudoLista
+                                        :secoes="ctx.secoesLista.value"
+                                        :ativo-id="ctx.conteudoAtivo.value?.id_conteudo || null"
+                                        @abrir="ctx.selecionarConteudo($event)" />
+                                </div>
+                            </template>
                         </div>
 
-                        <div v-if="ctx.loadingEstrutura.value" class="flex-1 flex flex-col items-center justify-center gap-3">
-                            <div class="w-5 h-5 border-2 border-secondary/10 border-t-primary rounded-full animate-spin" />
-                            <span class="text-[10px] font-bold text-secondary/30 uppercase tracking-widest">Carregando...</span>
-                        </div>
-
-                        <div v-else class="flex-1 overflow-y-auto p-3 flex flex-col gap-1.5 custom-scrollbar">
-
-                            <!-- Programa -->
-                            <div class="flex flex-col">
-                                <button @click="ctx.toggleSection('programa')" class="accordion-trigger">
-                                    <svg :class="{ 'rotated': ctx.isExpanded('programa') }" class="accordion-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 5l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                                    <svg class="text-violet-400 mr-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-                                    Programa
-                                    <span class="accordion-count">{{ ctx.getConteudos('programa').length }}</span>
+                        <!-- Conteúdo no centro -->
+                        <div class="flex-1 flex flex-col bg-white/[0.015] border border-white/5 rounded-2xl overflow-hidden shadow-sm relative">
+                            <div class="flex items-center justify-between gap-2 px-4 pt-3 shrink-0">
+                                <button @click="ctx.voltarParaLista()" class="voltar-lista-btn">
+                                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    Todos os conteúdos
                                 </button>
-                                <div v-if="ctx.isExpanded('programa')" class="accordion-content">
-                                    <div v-if="ctx.isLoadingConteudos('programa')" class="flex items-center gap-2 p-3">
-                                        <div class="w-3 h-3 border-2 border-white/20 border-t-primary rounded-full animate-spin" />
-                                    </div>
-                                    <ConteudoLinha v-for="c in ctx.getConteudos('programa')" :key="'prog_' + c.id_conteudo"
-                                        :item="c" :ativo="ctx.conteudoAtivo.value?.id_conteudo === c.id_conteudo"
-                                        @select="ctx.selecionarConteudo(c)" />
+                                <div class="flex items-center gap-2 lg:hidden">
+                                    <button class="filtros-btn" @click="visaoAbertos = true" title="Navegar pelos conteúdos">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"></path></svg>
+                                        Menu
+                                    </button>
+                                    <button class="filtros-btn" @click="filtrosAbertos = true" title="Filtros e resumo">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"></path></svg>
+                                        Filtros
+                                    </button>
                                 </div>
                             </div>
 
-                            <!-- Componentes -->
-                            <div v-if="(ctx.estrutura.value?.componentes || []).length > 0" class="flex flex-col">
-                                <button @click="togglePasta('componentes')" class="accordion-trigger">
-                                    <svg :class="{ 'rotated': pastaAberta.componentes }" class="accordion-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 5l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                                    <svg class="text-violet-400 mr-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                                    Componentes
-                                    <span class="accordion-count">{{ ctx.estrutura.value.componentes.length }}</span>
-                                </button>
-                                <div v-if="pastaAberta.componentes" class="accordion-content">
-                                    <div v-for="comp in ctx.estrutura.value.componentes" :key="'comp_' + comp.id" class="flex flex-col">
-                                        <button @click="ctx.toggleSection('componente:' + comp.id)" class="accordion-trigger sub">
-                                            <svg :class="{ 'rotated': ctx.isExpanded('componente:' + comp.id) }" class="accordion-arrow" width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M4 5l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                                            <span class="flex-1 text-left truncate">{{ comp.nome }}</span>
-                                            <span class="accordion-count">{{ ctx.getConteudos('componente:' + comp.id).length }}</span>
-                                        </button>
-                                        <div v-if="ctx.isExpanded('componente:' + comp.id)" class="accordion-content">
-                                            <div v-if="ctx.isLoadingConteudos('componente:' + comp.id)" class="flex items-center gap-2 p-3">
-                                                <div class="w-3 h-3 border-2 border-white/20 border-t-primary rounded-full animate-spin" />
-                                            </div>
-                                            <ConteudoLinha v-for="c in ctx.getConteudos('componente:' + comp.id)" :key="'comp_' + c.id_conteudo"
-                                                :item="c" :ativo="ctx.conteudoAtivo.value?.id_conteudo === c.id_conteudo"
-                                                @select="ctx.selecionarConteudo(c)" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Módulos/Ciclos -->
-                            <div v-if="(ctx.estrutura.value?.modulos || []).length > 0" class="flex flex-col">
-                                <button @click="togglePasta('modulos')" class="accordion-trigger">
-                                    <svg :class="{ 'rotated': pastaAberta.modulos }" class="accordion-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 5l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                                    <svg class="text-violet-400 mr-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                                    Módulos/Ciclos
-                                    <span class="accordion-count">{{ ctx.estrutura.value.modulos.length }}</span>
-                                </button>
-                                <div v-if="pastaAberta.modulos" class="accordion-content">
-                                    <div v-for="mod in ctx.estrutura.value.modulos" :key="'mod_' + mod.id" class="flex flex-col">
-                                        <button @click="ctx.toggleSection('modulo:' + mod.id)" class="accordion-trigger sub">
-                                            <svg :class="{ 'rotated': ctx.isExpanded('modulo:' + mod.id) }" class="accordion-arrow" width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M4 5l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                                            <span class="flex-1 text-left truncate">{{ mod.nome }}</span>
-                                            <span class="accordion-count">{{ ctx.getConteudos('modulo:' + mod.id).length + ctx.aulasDoModulo(mod.id).length }}</span>
-                                        </button>
-                                        <div v-if="ctx.isExpanded('modulo:' + mod.id)" class="accordion-content">
-                                            <div v-if="ctx.isLoadingConteudos('modulo:' + mod.id)" class="flex items-center gap-2 p-3">
-                                                <div class="w-3 h-3 border-2 border-white/20 border-t-primary rounded-full animate-spin" />
-                                            </div>
-                                            <ConteudoLinha v-for="c in ctx.getConteudos('modulo:' + mod.id)" :key="'mod_' + c.id_conteudo"
-                                                :item="c" :ativo="ctx.conteudoAtivo.value?.id_conteudo === c.id_conteudo"
-                                                @select="ctx.selecionarConteudo(c)" />
-
-                                            <!-- Aulas do módulo -->
-                                            <div v-if="ctx.aulasDoModulo(mod.id).length > 0" class="flex flex-col ml-3 mt-2 mb-1">
-                                                <span class="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1 flex items-center gap-1">
-                                                    <svg class="text-white/20" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                                    Aulas
-                                                </span>
-                                                <div v-for="aula in ctx.aulasDoModulo(mod.id)" :key="'aula_' + aula.id" class="flex flex-col">
-                                                    <button @click="ctx.toggleSection('calendario:' + aula.id)" class="accordion-trigger sub">
-                                                        <svg :class="{ 'rotated': ctx.isExpanded('calendario:' + aula.id) }" class="accordion-arrow" width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M4 5l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                                                        <span class="flex-1 text-left truncate">{{ aula.nome }}</span>
-                                                        <span class="accordion-count">{{ ctx.getConteudos('calendario:' + aula.id).length }}</span>
-                                                    </button>
-                                                    <div v-if="ctx.isExpanded('calendario:' + aula.id)" class="accordion-content">
-                                                        <div v-if="ctx.isLoadingConteudos('calendario:' + aula.id)" class="flex items-center gap-2 p-3">
-                                                            <div class="w-3 h-3 border-2 border-white/20 border-t-primary rounded-full animate-spin" />
-                                                        </div>
-                                                        <ConteudoLinha v-for="c in ctx.getConteudos('calendario:' + aula.id)" :key="'aula_' + c.id_conteudo"
-                                                            :item="c" :ativo="ctx.conteudoAtivo.value?.id_conteudo === c.id_conteudo"
-                                                            @select="ctx.selecionarConteudo(c)" />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ── DIREITA: conteúdo selecionado ───── -->
-                    <div class="flex-1 flex flex-col bg-white/[0.015] border border-white/5 rounded-2xl overflow-hidden shadow-sm relative">
-                        <div v-if="!ctx.conteudoAtivo.value" class="flex-1 flex flex-col items-center justify-center gap-2 empty-state">
-                            <p class="text-sm font-bold text-white/30">Selecione um conteúdo</p>
-                            <p class="text-[10px] font-bold text-white/15 uppercase tracking-widest mt-1">Escolha na árvore ao lado</p>
-                        </div>
-
-                        <template v-else>
                             <!-- Material -->
                             <ConteudoMaterial v-if="ctx.conteudoAtivo.value.tipo === 'material'"
                                 :item="ctx.conteudoAtivo.value"
@@ -213,51 +173,90 @@
                                 :tempo-restante-seg="ctx.tempoRestanteSeg.value"
                                 :timer-ativo="ctx.timerAtivo.value"
                                 :abrir-arquivo="ctx.abrirArquivo"
+                                :get-entidade-id="getEntidadeId"
+                                :flags-avaliacao="ctx.flagsAvaliacao.value"
                                 @iniciar="ctx.iniciarAvaliacao()"
                                 @marcar-alternativa="ctx.marcarAlternativa($event.id_pergunta, $event.id_resposta)"
                                 @marcar-texto="ctx.marcarTexto($event.id_pergunta, $event.texto)"
+                                @marcar-arquivo="ctx.marcarArquivo($event.id_pergunta, $event.id_arquivo)"
+                                @saida="toast.showToast('Você saiu da avaliação! Sua resposta continua salva.', { type: 'error' })"
                                 @finalizar="ctx.finalizarAvaliacao()" />
-                        </template>
-                    </div>
+                        </div>
+                    </template>
                 </div>
             </div>
         </Transition>
     </div>
+
+    <!-- Drawer mobile: filtros e resumo (mesmo componente do sidebar) -->
+    <Teleport to="body">
+        <div v-if="filtrosAbertos" class="drawer-overlay" @click="filtrosAbertos = false">
+            <div class="drawer-panel" @click.stop>
+                <div class="drawer-header">
+                    <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">Filtros e resumo</span>
+                    <button @click="filtrosAbertos = false" class="drawer-close" title="Fechar">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+                <div class="drawer-content">
+                    <MinhasAtividadesSidebar :ctx="ctx" />
+                </div>
+            </div>
+        </div>
+    </Teleport>
+
+    <!-- Drawer mobile: visão (menu/árvore ou resumo) abrindo da direita -->
+    <Teleport to="body">
+        <div v-if="visaoAbertos" class="drawer-overlay" @click="visaoAbertos = false">
+            <div class="drawer-panel" @click.stop>
+                <div class="drawer-header">
+                    <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">
+                        {{ ctx.visaoCentral.value === 'menu' ? 'Menu de conteúdos' : 'Resumo' }}
+                    </span>
+                    <button @click="visaoAbertos = false" class="drawer-close" title="Fechar">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+                <div class="drawer-content">
+                    <ConteudoArvore v-if="ctx.visaoCentral.value === 'menu'" :ctx="ctx" class="h-full" />
+                    <template v-else>
+                        <ConteudoLista
+                            :secoes="ctx.secoesLista.value"
+                            :ativo-id="ctx.conteudoAtivo.value?.id_conteudo || null"
+                            @abrir="ctx.selecionarConteudo($event)" />
+                    </template>
+                </div>
+            </div>
+        </div>
+    </Teleport>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
-import { useProgAtividadesCore } from "~/composables/programacao_atividades/useProgAtividadesCore";
+import { ref, onMounted } from "vue";
 import { useMinhasAtividades } from "~/composables/programacao_atividades/useMinhasAtividades";
 import { useToast } from "~/composables/useToast";
-import ConteudoLinha from "~/components/minhas_atividades/ConteudoLinha.vue";
+import ConteudoArvore from "~/components/minhas_atividades/ConteudoArvore.vue";
+import ConteudoLista from "~/components/minhas_atividades/ConteudoLista.vue";
+import VisaoToggle from "~/components/minhas_atividades/VisaoToggle.vue";
 import ConteudoMaterial from "~/components/minhas_atividades/ConteudoMaterial.vue";
 import ConteudoAtividade from "~/components/minhas_atividades/ConteudoAtividade.vue";
 import ConteudoAvaliacao from "~/components/minhas_atividades/ConteudoAvaliacao.vue";
+import MinhasAtividadesSidebar from "~/components/minhas_atividades/MinhasAtividadesSidebar.vue";
 
-const core = useProgAtividadesCore();
+const props = defineProps<{
+    ctx: ReturnType<typeof useMinhasAtividades>;
+    getEntidadeId?: () => string | null;
+}>();
+
 const toast = useToast();
-
-const ctx = useMinhasAtividades({
-    getEntidadeAtivaId: () => core.getEntidadeAtivaId(),
-    garantirEntidade: () => core.garantirEntidade(),
-    toast,
-});
-
-const pastaAberta = reactive({
-    componentes: false,
-    modulos: false,
-});
-
-function togglePasta(pasta: "componentes" | "modulos") {
-    pastaAberta[pasta] = !pastaAberta[pasta];
-}
+const filtrosAbertos = ref(false);
+const visaoAbertos = ref(false);
 
 function entrarNoCurso(p: any) {
-    ctx.selecionarPrograma(p);
+    props.ctx.selecionarPrograma(p);
 }
 
-onMounted(() => ctx.fetchProgramas());
+onMounted(() => props.ctx.fetchProgramas());
 </script>
 
 <style scoped>
@@ -290,6 +289,21 @@ onMounted(() => ctx.fetchProgramas());
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 4px; }
+
+/* ── Header do painel / botões ─────────────────── */
+.filtros-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(139,92,246,0.2); background: rgba(139,92,246,0.06); color: #a78bfa; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; transition: all 0.15s; }
+.filtros-btn:hover { background: rgba(139,92,246,0.12); }
+.voltar-lista-btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.02); color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s; }
+.voltar-lista-btn:hover { color: #c4b5fd; border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.05); }
+
+/* ── Drawer mobile ─────────────────────────────── */
+.drawer-overlay { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,0.7); backdrop-filter: blur(3px); }
+.drawer-panel { position: absolute; right: 0; top: 0; bottom: 0; width: min(340px, 85vw); background: #13131a; border-left: 1px solid rgba(139,92,246,0.2); display: flex; flex-direction: column; animation: drawerSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes drawerSlide { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.drawer-close { width: 28px; height: 28px; border-radius: 8px; border: none; background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.drawer-close:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); }
+.drawer-content { flex: 1; overflow-y: auto; padding: 14px 16px; }
 
 /* ── Transição cards → contexto ────────────────── */
 .card-enter-enter-active, .card-enter-leave-active { transition: all 0.25s ease; }

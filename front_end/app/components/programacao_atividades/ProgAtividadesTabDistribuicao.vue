@@ -13,8 +13,11 @@
         </div>
 
         <div class="flex gap-5" style="height: calc(100vh - 200px); min-height: 500px;">
-            <!-- Painel esquerdo: itens do escopo -->
-            <div class="w-80 flex-shrink-0 flex flex-col bg-white/[0.015] border border-white/5 rounded-2xl overflow-hidden shadow-sm relative">
+            <!-- Painel esquerdo: itens do escopo (recolhe ao selecionar) -->
+            <div
+                :class="ctx.escopoSelecionado.value ? 'w-80 flex-shrink-0' : 'flex-1'"
+                class="flex flex-col bg-white/[0.015] border border-white/5 rounded-2xl overflow-hidden shadow-sm relative transition-all duration-300"
+            >
                 <div class="px-5 py-4 border-b border-white/5 bg-white/[0.01] flex items-center justify-between">
                     <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">Selecionar {{ escopoLabel }}</span>
                     <span class="text-[9px] font-black text-secondary/20 bg-white/5 px-2 py-0.5 rounded-full">{{ ctx.escopos.value.length }}</span>
@@ -47,18 +50,13 @@
                 </div>
             </div>
 
-            <!-- Painel direito: todos os conteúdos com toggle -->
-            <div class="flex-1 flex flex-col bg-white/[0.015] border border-white/5 rounded-2xl overflow-hidden shadow-sm relative">
-                <div v-if="!ctx.escopoSelecionado.value" class="flex-1 flex flex-col items-center justify-center gap-2 empty-state">
-                    <div class="empty-icon-wrap">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 16 16 12 12 8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                    </div>
-                    <p class="text-sm font-bold text-white/30">Selecione um item ao lado</p>
-                    <p class="text-[10px] font-bold text-white/15 uppercase tracking-widest mt-1">Para atribuir conteúdos a ele</p>
-                </div>
-
-                <template v-else>
-                    <!-- Header do painel direito: Controles e busca -->
+            <!-- Painel direito: todos os conteúdos com toggle (só com item selecionado) -->
+            <div
+                v-if="ctx.escopoSelecionado.value"
+                class="flex-1 flex flex-col bg-white/[0.015] border border-white/5 rounded-2xl overflow-hidden shadow-sm relative"
+                style="animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);"
+            >
+                <!-- Header do painel direito: Controles e busca -->
                     <div class="px-5 py-4 border-b border-white/5 bg-white/[0.01] flex flex-col gap-3">
                         <div class="flex items-center gap-3">
                             <div class="flex-1 flex items-center gap-2 text-sm font-bold text-white/80">
@@ -158,7 +156,6 @@
                             </div>
                         </div>
                     </div>
-                </template>
             </div>
         </div>
     </div>
@@ -318,4 +315,9 @@ onMounted(() => ctx.fetchEscopos());
 
 .assoc-blocos { display: flex; gap: 4px; flex-wrap: wrap; }
 .assoc-bloco-tag { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: rgba(139,92,246,0.06); color: rgba(139,92,246,0.5); border: 1px solid rgba(139,92,246,0.1); } .assoc-autor { font-size: 10px; font-weight: 600; color: rgba(139,92,246,0.5); margin-left: 8px; flex-shrink: 0; } .assoc-data { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.2); flex-shrink: 0; margin-left: 4px; }
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
 </style>

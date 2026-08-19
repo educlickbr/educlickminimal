@@ -47,7 +47,14 @@
                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
                 <span class="text-sm font-black text-white/80">Avaliação entregue!</span>
-                <span class="text-[11px] font-semibold text-white/30">Aguardando correção</span>
+                <span v-if="item.avaliacao_nota !== null && item.avaliacao_nota !== undefined" class="nota-destaque">
+                    🎉 Sua nota: {{ item.avaliacao_nota }}
+                </span>
+                <span v-else class="text-[11px] font-semibold text-white/30">Aguardando correção</span>
+                <button v-if="podeIniciar" @click="$emit('iniciar')" class="btn-iniciar" :disabled="loading">
+                    <div v-if="loading" class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Tentar novamente
+                </button>
             </div>
 
             <!-- Iniciar -->
@@ -132,13 +139,24 @@
                 </div>
 
                 <!-- Dissertativa -->
-                <textarea v-else
-                    :value="respostaDe(p.id_pergunta)?.texto_resposta || ''"
-                    @input="$emit('marcar-texto', { id_pergunta: p.id_pergunta, texto: ($event.target as HTMLTextAreaElement).value })"
-                    rows="3"
-                    placeholder="Digite sua resposta..."
-                    class="dissertativa-input"
-                />
+                <div v-else class="flex flex-col gap-2 mt-3">
+                    <textarea
+                        :value="respostaDe(p.id_pergunta)?.texto_resposta || ''"
+                        @input="$emit('marcar-texto', { id_pergunta: p.id_pergunta, texto: ($event.target as HTMLTextAreaElement).value })"
+                        rows="3"
+                        placeholder="Digite sua resposta..."
+                        class="dissertativa-input"
+                    />
+                    <div class="flex items-center gap-2">
+                        <UploadMini
+                            :model-value="respostaDe(p.id_pergunta)?.id_arquivo_envio || null"
+                            :getUserExpandidoId="() => (useAppStore() as any).user_expandido_id"
+                            :getIdEntidade="getEntidadeId"
+                            @update:model-value="(v: string | null) => $emit('marcar-arquivo', { id_pergunta: p.id_pergunta, id_arquivo: v })"
+                        />
+                        <span class="text-[9px] font-bold text-white/25">Anexar arquivo (opcional)</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Finalizar -->
@@ -154,6 +172,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch, onUnmounted } from "vue";
+import { useAppStore } from "~~/stores/app";
+import UploadMini from "~/components/programacao_atividades/UploadMini.vue";
+
 const props = defineProps<{
     item: any;
     submissao: any;
@@ -166,14 +188,58 @@ const props = defineProps<{
     tempoRestanteSeg: number;
     timerAtivo: boolean;
     abrirArquivo: (id: string) => void;
+    getEntidadeId?: () => string | null;
+    flagsAvaliacao?: { ambiente_seguro: boolean; autoavaliacao: boolean } | null;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
     iniciar: [];
     finalizar: [];
+    saida: [];
     "marcar-alternativa": [payload: { id_pergunta: string; id_resposta: string }];
     "marcar-texto": [payload: { id_pergunta: string; texto: string }];
+    "marcar-arquivo": [payload: { id_pergunta: string; id_arquivo: string | null }];
 }>();
+
+// ── Modo prova (ambiente seguro) ───────────────────
+const modoProva = ref(false);
+
+function ativarModoProva() {
+    if (!props.submissao || !props.flagsAvaliacao?.ambiente_seguro) return;
+    modoProva.value = true;
+    document.documentElement.requestFullscreen?.().catch(() => {
+        // Fullscreen pode ser bloqueado pelo browser — segue sem ele
+    });
+}
+
+function desativarModoProva() {
+    if (!modoProva.value) return;
+    modoProva.value = false;
+    if (document.fullscreenElement) {
+        document.exitFullscreen?.().catch(() => {});
+    }
+}
+
+function onVisibilidade() {
+    if (modoProva.value && document.hidden) {
+        emit("saida");
+    }
+}
+
+watch(
+    () => props.submissao,
+    (s) => {
+        if (s) ativarModoProva();
+        else desativarModoProva();
+    },
+    { immediate: true },
+);
+
+document.addEventListener("visibilitychange", onVisibilidade);
+onUnmounted(() => {
+    document.removeEventListener("visibilitychange", onVisibilidade);
+    desativarModoProva();
+});
 
 function respostaDe(idPergunta: string) {
     return props.respostas.find((r: any) => r.id_pergunta === idPergunta);
@@ -203,8 +269,9 @@ function formatData(d: string | null): string {
 .btn-iniciar:hover:not(:disabled) { transform: translateY(-1px); }
 .btn-iniciar:disabled { opacity: 0.6; cursor: wait; }
 
-.entregue-card, .bloqueado-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 48px 24px; border-radius: 14px; border: 1px solid rgba(52,211,153,0.15); background: rgba(52,211,153,0.03); color: #6ee7b7; }
+.entregue-card, .bloqueado-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 48px 24px; border-radius: 14px; border: 1px solid rgba(52,211,153,0.15); background: rgba(52,211,153,0.03); color: #6ee7b7; }
 .bloqueado-card { border-color: rgba(148,163,184,0.12); background: rgba(148,163,184,0.02); color: #94a3b8; }
+.nota-destaque { font-size: 15px; font-weight: 900; color: #c4b5fd; background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25); padding: 6px 18px; border-radius: 10px; }
 
 /* Timer */
 .timer-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-radius: 10px; border: 1px solid rgba(139,92,246,0.2); background: rgba(139,92,246,0.05); color: #c4b5fd; position: sticky; top: 0; z-index: 5; backdrop-filter: blur(6px); }

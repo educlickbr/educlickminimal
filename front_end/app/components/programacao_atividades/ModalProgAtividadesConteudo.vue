@@ -40,7 +40,7 @@
             </div>
 
             <!-- Passo 1: Dados Gerais -->
-            <div v-if="abaAtiva === 'geral'" class="p-6 flex flex-col gap-5">
+            <div v-if="abaAtiva === 'geral'" class="modal-body p-6 flex flex-col gap-5">
                 <div class="flex flex-col gap-2">
                     <label class="field-label">Tipo de Conteúdo</label>
                     <div class="flex gap-2">
@@ -92,21 +92,44 @@
             </div>
 
             <!-- Passo 2: Perguntas (só para avaliação) -->
-            <div v-if="abaAtiva === 'perguntas'" class="p-6 flex flex-col gap-5">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">{{ perguntas.length }} pergunta(s)</span>
-                        <!-- Ordem das perguntas -->
-                        <div class="flex items-center gap-1">
-                            <span class="text-[9px] font-bold text-white/25 uppercase tracking-widest">Ordem:</span>
-                            <button @click="ordemPerguntas = 'fixa'"
-                                class="tipo-btn small" :class="{ 'tipo-btn--active': ordemPerguntas === 'fixa' }">Fixa</button>
-                            <button @click="ordemPerguntas = 'aleatoria'"
-                                class="tipo-btn small" :class="{ 'tipo-btn--active': ordemPerguntas === 'aleatoria' }">Aleatória</button>
+            <div v-if="abaAtiva === 'perguntas'" class="modal-body modal-body--col">
+                <!-- Config fixa (não rola) -->
+                <div class="perguntas-config">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">{{ perguntas.length }} pergunta(s)</span>
+                            <!-- Ordem das perguntas -->
+                            <div class="flex items-center gap-1">
+                                <span class="text-[9px] font-bold text-white/25 uppercase tracking-widest">Ordem:</span>
+                                <button @click="ordemPerguntas = 'fixa'"
+                                    class="tipo-btn small" :class="{ 'tipo-btn--active': ordemPerguntas === 'fixa' }">Fixa</button>
+                                <button @click="ordemPerguntas = 'aleatoria'"
+                                    class="tipo-btn small" :class="{ 'tipo-btn--active': ordemPerguntas === 'aleatoria' }">Aleatória</button>
+                            </div>
                         </div>
+                        <button @click="addPergunta" class="add-btn small">+ Pergunta</button>
                     </div>
-                    <button @click="addPergunta" class="add-btn small">+ Pergunta</button>
+
+                    <!-- Modo da avaliação -->
+                    <div class="flex items-center gap-4 flex-wrap">
+                        <label class="flex items-center gap-2 text-[10px] font-bold text-white/40 cursor-pointer select-none">
+                            <input type="checkbox" v-model="ambienteSeguro" class="toggle-check" />
+                            🔒 Ambiente seguro
+                            <span class="text-white/20 font-semibold">(trava a tela do aluno)</span>
+                        </label>
+                        <label class="flex items-center gap-2 text-[10px] font-bold text-white/40 cursor-pointer select-none">
+                            <input type="checkbox" v-model="autoavaliacao" class="toggle-check" />
+                            🧮 Autoavaliação
+                            <span class="text-white/20 font-semibold">(nota na hora — sem dissertativas)</span>
+                        </label>
+                    </div>
+                    <div v-if="autoavaliacao" class="text-[10px] font-bold text-amber-400/70 bg-amber-400/5 border border-amber-400/15 rounded-lg px-3 py-2">
+                        ⚠️ Em autoavaliação as perguntas dissertativas são bloqueadas — só múltipla escolha.
+                    </div>
                 </div>
+
+                <!-- Lista de perguntas (rola) -->
+                <div class="perguntas-lista">
 
                 <div v-for="(p, idx) in perguntas" :key="idx" class="pergunta-card">
                     <div class="flex items-center justify-between mb-2">
@@ -128,7 +151,8 @@
                             v-for="t in ['dissertativa', 'multipla_escolha']"
                             :key="t"
                             @click="p.tipo = t"
-                            :class="['tipo-btn small', p.tipo === t ? 'tipo-btn--active' : '']"
+                            :disabled="autoavaliacao && t === 'dissertativa'"
+                            :class="['tipo-btn small', p.tipo === t ? 'tipo-btn--active' : '', autoavaliacao && t === 'dissertativa' ? 'tipo-btn--disabled' : '']"
                         >{{ t === 'dissertativa' ? 'Dissertativa' : 'Múltipla Escolha' }}</button>
                     </div>
 
@@ -174,10 +198,11 @@
                         </button>
                     </div>
                 </div>
+                </div>
             </div>
 
             <!-- Passo 3: Blocos -->
-            <div v-if="abaAtiva === 'blocos'" class="p-6 flex flex-col gap-4">
+            <div v-if="abaAtiva === 'blocos'" class="modal-body p-6 flex flex-col gap-4">
                 <p class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">Associar a blocos (opcional)</p>
 
                 <div v-if="blocosDisponiveis.length === 0" class="flex flex-col items-center py-12 gap-2">
@@ -308,6 +333,8 @@ interface Pergunta {
 
 const perguntas = ref<Pergunta[]>([]);
 const ordemPerguntas = ref<"fixa" | "aleatoria">("fixa");
+const ambienteSeguro = ref(false);
+const autoavaliacao = ref(false);
 
 async function carregarPerguntas(idConteudo: string) {
     try {
@@ -317,6 +344,8 @@ async function carregarPerguntas(idConteudo: string) {
         if (res?.avaliacao?.ordem_perguntas) {
             ordemPerguntas.value = res.avaliacao.ordem_perguntas === "aleatoria" ? "aleatoria" : "fixa";
         }
+        ambienteSeguro.value = !!res?.avaliacao?.ambiente_seguro;
+        autoavaliacao.value = !!res?.avaliacao?.autoavaliacao;
         if (Array.isArray(res?.perguntas)) {
             perguntas.value = res.perguntas.map((p: any) => ({
                 id: p.id,
@@ -380,11 +409,11 @@ watch(
 
 function addPergunta() {
     perguntas.value.push({
-        tipo: "dissertativa",
+        tipo: autoavaliacao.value ? "multipla_escolha" : "dissertativa",
         enunciado: "",
         pontuacao: 0,
         obrigatoria: true,
-        alternativas: [],
+        alternativas: autoavaliacao.value ? [{ texto: "", correta: false, id_arquivo: null }] : [],
         id_arquivo: null,
     });
 }
@@ -451,6 +480,8 @@ async function handleSave() {
         ...form,
         perguntas: form.tipo === "avaliacao" ? perguntas.value : undefined,
         ordem_perguntas: form.tipo === "avaliacao" ? ordemPerguntas.value : undefined,
+        ambiente_seguro: form.tipo === "avaliacao" ? ambienteSeguro.value : undefined,
+        autoavaliacao: form.tipo === "avaliacao" ? autoavaliacao.value : undefined,
         usuario_id: (useAppStore() as any).user_expandido_id,
     };
 
@@ -474,7 +505,7 @@ async function handleSave() {
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-.modal-panel--wide { max-width: 640px; }
+.modal-panel--wide { max-width: 720px; }
 
 .modal-panel {
     position: relative;
@@ -482,11 +513,41 @@ async function handleSave() {
     border: 1px solid rgba(139, 92, 246, 0.18);
     border-radius: 16px;
     width: 100%;
+    max-height: calc(100vh - 32px);
     overflow: hidden;
     display: flex; flex-direction: column;
     box-shadow: 0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(139,92,246,0.1);
     animation: slideUp 0.2s cubic-bezier(0.34,1.2,0.64,1);
 }
+
+/* Área de conteúdo da aba: rola internamente, footer sempre visível */
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+.modal-body::-webkit-scrollbar { width: 4px; }
+.modal-body::-webkit-scrollbar-track { background: transparent; }
+.modal-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+/* Aba perguntas: config fixa no topo + lista rolável */
+.modal-body--col { overflow: hidden; display: flex; flex-direction: column; }
+.perguntas-config {
+    flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 20px 24px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.15);
+}
+.perguntas-lista {
+    flex: 1; min-height: 0;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 12px;
+    padding: 16px 24px 24px;
+}
+.perguntas-lista::-webkit-scrollbar { width: 4px; }
+.perguntas-lista::-webkit-scrollbar-track { background: transparent; }
+.perguntas-lista::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
 @keyframes slideUp {
     from { opacity: 0; transform: translateY(16px) scale(0.98); }
     to { opacity: 1; transform: translateY(0) scale(1); }
@@ -566,9 +627,11 @@ async function handleSave() {
 .tipo-btn:hover { color: rgba(255,255,255,0.7); }
 .tipo-btn--active { border-color: rgba(139,92,246,0.3); }
 .tipo-btn.small { padding: 5px 12px; font-size: 10px; }
+.tipo-btn--disabled { opacity: 0.35; cursor: not-allowed; }
 .tipo--material.tipo-btn--active { background: rgba(59,130,246,0.1); color: #93c5fd; border-color: rgba(59,130,246,0.3); }
 .tipo--atividade.tipo-btn--active { background: rgba(245,158,11,0.1); color: #fcd34d; border-color: rgba(245,158,11,0.3); }
 .tipo--avaliacao.tipo-btn--active { background: rgba(139,92,246,0.1); color: #c4b5fd; border-color: rgba(139,92,246,0.3); }
+.toggle-check { width: 14px; height: 14px; accent-color: #8b5cf6; cursor: pointer; }
 
 /* ── Pergunta card ───────────────────────── */
 .pergunta-card {
@@ -601,6 +664,7 @@ async function handleSave() {
     padding: 16px 24px;
     border-top: 1px solid rgba(255,255,255,0.06);
     background: rgba(0,0,0,0.2);
+    flex-shrink: 0;
 }
 .btn-cancelar { color: rgba(255,255,255,0.7); }
 .btn-cancelar:hover { background: rgba(239,68,68,0.15); color: #fca5a5; border-color: rgba(239,68,68,0.2); }

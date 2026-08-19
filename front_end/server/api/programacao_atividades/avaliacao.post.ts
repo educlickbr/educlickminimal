@@ -10,6 +10,8 @@ export default defineEventHandler(async (event) => {
     p_nome: body.nome || null,
     p_descricao: body.descricao || null,
     p_ordem_perguntas: body.ordem_perguntas || 'fixa',
+    p_ambiente_seguro: !!body.ambiente_seguro,
+    p_autoavaliacao: !!body.autoavaliacao,
     p_perguntas: body.perguntas || [],
     p_usuario_id: body.usuario_id || null,
   })

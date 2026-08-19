@@ -79,13 +79,13 @@
 
                     <!-- ── Componentes ──────────────────── -->
                     <div v-if="(ctx.estrutura.value?.componentes || []).length > 0" class="flex flex-col">
-                        <button @click="togglePasta('componentes')" class="accordion-trigger">
-                            <svg :class="{ 'rotated': pastaAberta.componentes }" class="accordion-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 5l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <button @click="ctx.togglePasta('componentes')" class="accordion-trigger">
+                            <svg :class="{ 'rotated': ctx.pastaAberta.componentes }" class="accordion-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 5l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                             <svg class="text-violet-400 mr-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
                             Componentes
                             <span class="accordion-count">{{ ctx.estrutura.value.componentes.length }}</span>
                         </button>
-                        <div v-if="pastaAberta.componentes" class="accordion-content">
+                        <div v-if="ctx.pastaAberta.componentes" class="accordion-content">
                             <div v-for="comp in ctx.estrutura.value.componentes" :key="'comp_' + comp.id" class="flex flex-col">
                                 <button @click="ctx.toggleSection('componente:' + comp.id)" class="accordion-trigger sub">
                                     <svg :class="{ 'rotated': ctx.isExpanded('componente:' + comp.id) }" class="accordion-arrow" width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M4 5l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -112,13 +112,13 @@
 
                     <!-- ── Módulos/Ciclos ───────────────── -->
                     <div v-if="(ctx.estrutura.value?.modulos || []).length > 0" class="flex flex-col">
-                        <button @click="togglePasta('modulos')" class="accordion-trigger">
-                            <svg :class="{ 'rotated': pastaAberta.modulos }" class="accordion-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 5l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <button @click="ctx.togglePasta('modulos')" class="accordion-trigger">
+                            <svg :class="{ 'rotated': ctx.pastaAberta.modulos }" class="accordion-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 5l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                             <svg class="text-violet-400 mr-1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
                             Módulos/Ciclos
                             <span class="accordion-count">{{ ctx.estrutura.value.modulos.length }}</span>
                         </button>
-                        <div v-if="pastaAberta.modulos" class="accordion-content">
+                        <div v-if="ctx.pastaAberta.modulos" class="accordion-content">
                             <div v-for="mod in ctx.estrutura.value.modulos" :key="'mod_' + mod.id" class="flex flex-col">
                                 <button @click="ctx.toggleSection('modulo:' + mod.id)" class="accordion-trigger sub">
                                     <svg :class="{ 'rotated': ctx.isExpanded('modulo:' + mod.id) }" class="accordion-arrow" width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M4 5l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -175,10 +175,10 @@
                 </div>
             </div>
 
-            <!-- ── COLUNA DIREITA: Navegador de conteúdos ──── -->
+            <!-- ── COLUNA DIREITA: Navegador de conteúdos (só com escopo alvo) ──── -->
             <div 
                 v-if="ctx.selectedScopeKey.value"
-                class="flex-1 flex flex-col bg-white/[0.015] border border-white/5 rounded-2xl overflow-hidden shadow-sm relative animate-in fade-in slide-in-from-right-4 duration-300"
+                class="flex-1 flex flex-col bg-white/[0.015] border border-white/5 rounded-2xl overflow-hidden shadow-sm relative navegador--alvo"
                 style="animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);"
             >
                 <div class="px-5 py-4 border-b border-white/5 bg-white/[0.01] flex flex-col gap-3">
@@ -252,7 +252,9 @@
                         <div class="assoc-accent" v-if="c.ativo" />
 
                         <!-- Radio: associação (cria/remove linha no currículo) -->
-                        <button @click="ctx.toggleAssociacaoPainel(c)" class="assoc-toggle" :title="c.op_id ? 'Desassociar' : 'Associar ao currículo'">
+                        <button @click="ctx.toggleAssociacaoPainel(c)" class="assoc-toggle"
+                            :disabled="!ctx.selectedScopeKey.value"
+                            :title="ctx.selectedScopeKey.value ? (c.op_id ? 'Desassociar' : 'Associar ao escopo') : 'Selecione o escopo primeiro (Adicionar na árvore)'">
                             <svg v-if="c.op_id" width="14" height="14" viewBox="0 0 12 12" fill="none">
                                 <rect width="12" height="12" rx="3" fill="#8b5cf6"/>
                                 <path d="M3.5 6l2 2 3-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -287,7 +289,9 @@
                         </div>
 
                         <!-- Toggle: ativo (aluno vê ou não) -->
-                        <button @click="ctx.toggleAtivoPainel(c)" class="toggle-switch-btn" :class="c.ativo ? 'on' : 'off'" :title="c.ativo ? 'Ocultar do aluno' : 'Mostrar ao aluno'">
+                        <button @click="ctx.toggleAtivoPainel(c)" class="toggle-switch-btn" :class="c.ativo ? 'on' : 'off'"
+                            :disabled="!ctx.selectedScopeKey.value"
+                            :title="ctx.selectedScopeKey.value ? (c.ativo ? 'Ocultar do aluno' : 'Mostrar ao aluno') : 'Selecione o escopo primeiro (Adicionar na árvore)'">
                             <span class="toggle-label">{{ c.ativo ? 'Visível' : 'Oculto' }}</span>
                             <div class="toggle-track">
                                 <div class="toggle-thumb" />
@@ -365,31 +369,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
-import { useProgAtividadesCore } from "~/composables/programacao_atividades/useProgAtividadesCore";
+import { ref, onMounted } from "vue";
 import { useProgAtividadesCurriculo } from "~/composables/programacao_atividades/useProgAtividadesCurriculo";
-import { useToast } from "~/composables/useToast";
 import ConteudoRow from "~/components/programacao_atividades/ConteudoRow.vue";
 
-const core = useProgAtividadesCore();
-const toast = useToast();
-
-const ctx = useProgAtividadesCurriculo({
-    getEntidadeAtivaId: () => core.getEntidadeAtivaId(),
-    garantirEntidade: () => core.garantirEntidade(),
-    toast,
-});
+const props = defineProps<{
+    ctx: ReturnType<typeof useProgAtividadesCurriculo>;
+}>();
 
 const aberto = ref(false);
-
-const pastaAberta = reactive({
-    componentes: false,
-    modulos: false,
-});
-
-function togglePasta(pasta: "componentes" | "modulos") {
-    pastaAberta[pasta] = !pastaAberta[pasta];
-}
 
 const tiposFiltro = [
     { value: "", label: "Todos" },
@@ -399,12 +387,12 @@ const tiposFiltro = [
 ];
 
 function selecionar(p: any) {
-    ctx.selecionarPrograma(p);
+    props.ctx.selecionarPrograma(p);
     aberto.value = false;
 }
 
 function filtrarPorTipo(tipo: string) {
-    ctx.filtroTipo.value = ctx.filtroTipo.value === tipo ? null : tipo;
+    props.ctx.filtroTipo.value = props.ctx.filtroTipo.value === tipo ? null : tipo;
 }
 
 function formatDate(d: string): string {
@@ -422,7 +410,7 @@ async function abrirArquivo(id: string) {
     }
 }
 
-onMounted(() => ctx.fetchProgramas());
+onMounted(() => props.ctx.fetchProgramas());
 </script>
 
 <style scoped>
@@ -485,10 +473,14 @@ onMounted(() => ctx.fetchProgramas());
 .assoc-row--on { background: rgba(139,92,246,0.03); border-color: rgba(139,92,246,0.15); }
 .assoc-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #8b5cf6; }
 
+/* Navegador com escopo alvo ativo */
+.navegador--alvo { border-color: rgba(139,92,246,0.3); box-shadow: 0 0 0 1px rgba(139,92,246,0.08); }
+
 .info-container { display: flex; flex-direction: column; flex: 1; overflow: hidden; gap: 3px; justify-content: center; margin-left: 2px; }
 .tags-container { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .file-placeholder { width: 22px; height: 22px; flex-shrink: 0; }
 .assoc-toggle { flex-shrink: 0; cursor: pointer; background: none; border: none; padding: 0; }
+.assoc-toggle:disabled { opacity: 0.3; cursor: not-allowed; }
 .assoc-titulo--off { opacity: 0.4; text-decoration: line-through; }
 
 .assoc-tipo { font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 5px; border-radius: 4px; flex-shrink: 0; }
@@ -499,6 +491,7 @@ onMounted(() => ctx.fetchProgramas());
 
 /* Switch Toggle */
 .toggle-switch-btn { display: flex; align-items: center; gap: 6px; border: none; background: transparent; cursor: pointer; padding: 0; }
+.toggle-switch-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .toggle-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.25); transition: color 0.15s; }
 .toggle-switch-btn.on .toggle-label { color: #8b5cf6; }
 .toggle-track { width: 24px; height: 14px; border-radius: 7px; background: rgba(255,255,255,0.1); position: relative; transition: all 0.2s; }

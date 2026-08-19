@@ -190,6 +190,21 @@ export function useProgAtividadesCurriculo(deps: {
   const busca = ref("");
   const filtroTipo = ref<string | null>(null);
   const filtroMeus = ref(false);
+  const filtroEstado = ref<string | null>(null); // associados | ocultos | livres
+
+  // Pastas da árvore (compartilhadas entre página e sidebar)
+  const pastaAberta = reactive({
+    componentes: false,
+    modulos: false,
+  });
+
+  function togglePasta(pasta: "componentes" | "modulos") {
+    pastaAberta[pasta] = !pastaAberta[pasta];
+  }
+
+  function irParaPasta(pasta: "componentes" | "modulos") {
+    if (!pastaAberta[pasta]) pastaAberta[pasta] = true;
+  }
 
   const conteudosDisponiveis = ref<ConteudoPanel[]>([]);
   const loadingConteudos = ref(false);
@@ -315,6 +330,7 @@ export function useProgAtividadesCurriculo(deps: {
     programaSelecionado.value = prog;
     expandedSections.value = new Set();
     conteudosMap.value = new Map();
+    filtroEstado.value = null;
     loadingEstrutura.value = true;
 
     try {
@@ -453,6 +469,11 @@ export function useProgAtividadesCurriculo(deps: {
   // ── Radio: associa/desassocia (cria/remove linha no operacional) ──
   async function toggleAssociacaoPainel(conteudo: ConteudoPanel) {
     if (!programaSelecionado.value) return;
+    // Regra: associação exige escopo alvo — sem escopo não há "com o quê" associar
+    if (!selectedScopeKey.value) {
+      deps.toast.showToast("Selecione primeiro o escopo — botão 'Adicionar' na árvore", { type: "error" });
+      return;
+    }
     try {
       const id_entidade = await deps.garantirEntidade();
 
@@ -489,6 +510,11 @@ export function useProgAtividadesCurriculo(deps: {
   // ── Toggle: só muda visibilidade (ativo) — aluno vê ou não ──
   async function toggleAtivoPainel(conteudo: ConteudoPanel) {
     if (!programaSelecionado.value) return;
+    // Sem escopo alvo não há onde aplicar a linha (evita fallback silencioso p/ programa)
+    if (!selectedScopeKey.value) {
+      deps.toast.showToast("Selecione primeiro o escopo — botão 'Adicionar' na árvore", { type: "error" });
+      return;
+    }
     try {
       const id_entidade = await deps.garantirEntidade();
 
@@ -551,8 +577,40 @@ export function useProgAtividadesCurriculo(deps: {
         const q = busca.value.toLowerCase();
         if (!c.titulo.toLowerCase().includes(q) && !(c.descricao || "").toLowerCase().includes(q)) return false;
       }
+      if (filtroEstado.value) {
+        const associado = !!c.op_id;
+        if (filtroEstado.value === "associados" && !associado) return false;
+        if (filtroEstado.value === "livres" && associado) return false;
+        if (filtroEstado.value === "ocultos" && !(associado && !c.ativo)) return false;
+      }
       return true;
     });
+  });
+
+  function toggleFiltroEstado(estado: string) {
+    filtroEstado.value = filtroEstado.value === estado ? null : estado;
+  }
+
+  // ── Resumo do programa (dashboard) ─────────────────────
+  const resumoCurriculo = computed(() => {
+    const e = estrutura.value;
+    const repos = conteudosDisponiveis.value;
+    const associados = repos.filter((c) => !!c.op_id).length;
+    const ocultos = repos.filter((c) => !!c.op_id && !c.ativo).length;
+    return {
+      escopos: {
+        componentes: (e?.componentes || []).length,
+        modulos: (e?.modulos || []).length,
+        ciclos: (e?.ciclos || []).length,
+        aulas: (e?.aulas || []).length,
+      },
+      repositorio: {
+        total: repos.length,
+        associados,
+        ocultos,
+        livres: repos.length - associados,
+      },
+    };
   });
 
   // ── Helpers para o template ────────────────────────────
@@ -593,9 +651,10 @@ export function useProgAtividadesCurriculo(deps: {
     selectedScopeKey, definirEscopoAlvo,
 
     // Painel direito
-    busca, filtroTipo, filtroMeus,
+    busca, filtroTipo, filtroMeus, filtroEstado, toggleFiltroEstado,
     conteudosDisponiveis, conteudosExibidos, loadingConteudos,
     fetchConteudosRepositorio, toggleAtivoPainel, toggleAssociacaoPainel,
+    resumoCurriculo,
 
     // Modal de timing
     showModalTiming, timingAlvo, formTiming, savingTiming,
@@ -603,5 +662,6 @@ export function useProgAtividadesCurriculo(deps: {
 
     // Helpers
     aulasDoCiclo, aulasDoModulo, ciclosDoModulo,
+    pastaAberta, togglePasta, irParaPasta,
   };
 }
