@@ -17,7 +17,7 @@ const loading = ref(false)
 onMounted(async () => {
     const { aplicarTemaDaEntidadePublica } = useTemaEntidade();
     const aplicouEntidade = await aplicarTemaDaEntidadePublica();
-    if (!aplicouEntidade) store.initTheme()
+    if (!aplicouEntidade?.success) store.initTheme()
 })
 
 const handleUpdate = async () => {

@@ -137,49 +137,63 @@ function formatValor(centavos: number): string {
     return `R$ ${(centavos / 100).toFixed(2).replace(".", ",")}`;
 }
 
+// Instância única do tema da entidade (refs compartilhadas: entidadePublica/isDark)
+const { aplicarTemaDaEntidadePublica, entidadePublica, isDark } =
+    useTemaEntidade();
+
 onMounted(() => {
+    // Aplica tema + branding (cores/logo). Alinha com o login: resolve pelo
+    // domínio (host) por padrão; só usa ?id_entidade= da URL quando presente.
+    const idQuery = (route.query.id_entidade as string) || undefined;
+    aplicarTemaDaEntidadePublica(idQuery).catch((e) =>
+        console.warn("[oferta] falha ao aplicar tema/logo da entidade:", e),
+    );
     fetchData();
 });
+
+// Logo da entidade (URL). Alterna aberto (claro) / fechado (escuro) pelo tema.
+// `isDark` é reativo (observa data-theme), então o logo reage a trocas de tema.
+const logoUrl = computed(() => {
+    const b = entidadePublica.value?.branding;
+    if (!b?.logo_aberto) return "/educlick_logo.png";
+    return isDark.value ? b.logo_fechado || b.logo_aberto : b.logo_aberto;
+});
+const nomeEntidade = computed(() => entidadePublica.value?.nome || "EduClick");
 </script>
 
 <template>
     <div
-        class="min-h-screen bg-[#0a0a0c] text-white font-sans overflow-x-hidden"
+        class="min-h-screen bg-background text-text font-sans overflow-x-hidden"
     >
         <header
-            class="sticky top-0 z-50 bg-[#0a0a0c]/80 backdrop-blur-xl border-b border-white/5"
+            class="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-divider"
         >
             <div
                 class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between"
             >
                 <div class="flex items-center gap-3">
-                    <div
-                        class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"
-                    >
+                    <img
+                        v-if="logoUrl"
+                        :src="logoUrl"
+                        :alt="nomeEntidade"
+                        class="h-8 w-auto rounded"
+                    />
+                    <div v-else class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                         <span class="text-white text-xs font-black">EC</span>
-                    </div>
-                    <div class="flex flex-col leading-tight">
-                        <span class="text-sm font-black text-white"
-                            >EduClick</span
-                        >
-                        <span
-                            class="text-[8px] font-bold text-secondary/40 uppercase tracking-widest"
-                            >Ensino que Transforma</span
-                        >
                     </div>
                 </div>
                 <nav class="hidden md:flex items-center gap-8">
                     <NuxtLink
                         to="/"
-                        class="text-xs font-bold text-secondary/50 hover:text-white transition-colors"
+                        class="text-xs font-bold text-secondary/50 hover:text-primary transition-colors"
                         >Início</NuxtLink
                     >
-                    <NuxtLink to="/oferta" class="text-xs font-bold text-white"
+                    <NuxtLink to="/oferta" class="text-xs font-bold text-text"
                         >Cursos</NuxtLink
                     >
                     <a
                         href="#sobre"
-                        class="text-xs font-bold text-secondary/50 hover:text-white transition-colors"
+                        class="text-xs font-bold text-secondary/50 hover:text-primary transition-colors"
                         >Sobre</a
                     >
                 </nav>
@@ -234,7 +248,7 @@ onMounted(() => {
                             'px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border',
                             !activeArea
                                 ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
-                                : 'bg-white/[0.04] text-secondary/50 border-white/5 hover:text-white hover:border-white/10',
+                                : 'bg-div-15 text-secondary/50 border-divider hover:text-text hover:border-primary/20',
                         ]"
                     >
                         Todas
@@ -247,7 +261,7 @@ onMounted(() => {
                             'px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border',
                             activeArea === a.id
                                 ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
-                                : 'bg-white/[0.04] text-secondary/50 border-white/5 hover:text-white hover:border-white/10',
+                                : 'bg-div-15 text-secondary/50 border-divider hover:text-text hover:border-primary/20',
                         ]"
                     >
                         {{ a.nome_area }}
@@ -266,7 +280,7 @@ onMounted(() => {
                 <div
                     v-for="i in 6"
                     :key="i"
-                    class="bg-[#0f0f17] border border-white/5 rounded-xl h-[380px] animate-pulse"
+                    class="bg-div-15 border border-divider rounded-xl h-[380px] animate-pulse"
                 />
             </div>
 
@@ -290,7 +304,7 @@ onMounted(() => {
                 <div
                     v-for="prog in filteredProgramas"
                     :key="prog.id_processo_seletivo || prog.id"
-                    class="group relative bg-[#0f0f17] border border-white/5 rounded-xl overflow-hidden hover:border-primary/30 transition-all hover:translate-y-[-4px] shadow-xl hover:shadow-primary/5 flex flex-col"
+                    class="group relative bg-div-15 border border-divider rounded-xl overflow-hidden hover:border-primary/30 transition-all hover:translate-y-[-4px] shadow-xl hover:shadow-primary/5 flex flex-col"
                 >
                     <div
                         class="h-1 bg-primary opacity-30 group-hover:opacity-100 transition-opacity"
@@ -362,7 +376,7 @@ onMounted(() => {
                                     class="text-[9px] font-black text-secondary/40 uppercase tracking-widest"
                                     >Início das Aulas</span
                                 >
-                                <span class="text-xs font-bold text-white/90">{{
+                                <span class="text-xs font-bold text-text">{{
                                     formatDate(prog.data_inicio_aula)
                                 }}</span>
                             </div>
@@ -381,7 +395,7 @@ onMounted(() => {
                         </div>
 
                         <div
-                            class="mt-auto p-4 rounded-xl bg-white/[0.03] border border-white/5 flex items-center gap-3"
+                            class="mt-auto p-4 rounded-xl bg-div-30 border border-divider flex items-center gap-3"
                         >
                             <div
                                 class="w-8 h-8 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center shrink-0"
@@ -407,7 +421,7 @@ onMounted(() => {
                         </div>
                     </div>
 
-                    <div class="p-6 bg-white/[0.02] border-t border-white/5">
+                    <div class="p-6 bg-div-15 border-t border-divider">
                         <NuxtLink
                             v-if="!inscritos[prog.id_processo_seletivo]"
                             :to="getFormUrl(prog)"
@@ -427,17 +441,21 @@ onMounted(() => {
             </div>
         </main>
 
-        <footer class="py-12 border-t border-white/5 text-center bg-[#0a0a0c]">
+        <footer class="py-12 border-t border-divider text-center bg-background">
             <div class="flex items-center justify-center gap-3 mb-6">
-                <div
-                    class="w-6 h-6 rounded-md bg-primary flex items-center justify-center"
-                >
+                <img
+                    v-if="logoUrl"
+                    :src="logoUrl"
+                    :alt="nomeEntidade"
+                    class="h-6 w-auto rounded"
+                />
+                <div v-else class="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
                     <span class="text-white text-[8px] font-black">EC</span>
                 </div>
-                <span class="text-sm font-bold text-white">EduClick</span>
+                <span class="text-sm font-bold text-text">{{ nomeEntidade }}</span>
             </div>
-            <p class="text-[10px] text-secondary/30">
-                &copy; 2026 EduClick. Todos os direitos reservados.
+            <p class="text-[10px] text-secondary/40">
+                &copy; 2026 {{ nomeEntidade }}. Todos os direitos reservados.
             </p>
         </footer>
     </div>

@@ -4,19 +4,28 @@ definePageMeta({
 });
 
 import { useAppStore } from "../../stores/app";
-
-// Import explícito para garantir que o Nuxt inclua no bundle
-import LandingInstitucionalLandingFormulario from "~/components/landing/institucional/LandingFormulario.vue";
+import LandingEnsiEnsiLanding from "~/components/landing/ensi/EnsiLanding.vue";
 
 const store = useAppStore();
 const user = useSupabaseUser();
 
 const ready = ref(false);
 const showLanding = ref(false);
+const isEnsi = ref(false);
 
 onMounted(async () => {
     try {
-        store.initTheme();
+        const { aplicarTemaDaEntidadePublica } = useTemaEntidade();
+        const temaRes = await aplicarTemaDaEntidadePublica();
+        if (temaRes.success && temaRes.entidade) {
+            const nome = (temaRes.entidade.nome || "").toLowerCase();
+            if (nome.includes("ensi")) {
+                isEnsi.value = true;
+            }
+        } else {
+            store.initTheme();
+        }
+
         await store.initSession();
 
         // Gate de produto (Fase F): sem acesso -> desloga e volta à landing
@@ -56,16 +65,19 @@ onMounted(async () => {
         <FullPageMenu v-else-if="!showLanding" :isOpen="true" :isStatic="true" />
 
         <div v-else>
-            <LandingInstitucionalLandingHeader />
-            <main>
-                <LandingInstitucionalLandingHero />
-                <LandingInstitucionalLandingDor />
-                <LandingInstitucionalLandingCore />
-                <LandingInstitucionalLandingFuncionalidades />
-                <LandingInstitucionalLandingDiferencial />
-                <LandingInstitucionalLandingFormulario />
-            </main>
-            <LandingInstitucionalLandingFooter />
+            <LandingEnsiEnsiLanding v-if="isEnsi" />
+            <template v-else>
+                <LandingInstitucionalLandingHeader />
+                <main>
+                    <LandingInstitucionalLandingHero />
+                    <LandingInstitucionalLandingDor />
+                    <LandingInstitucionalLandingCore />
+                    <LandingInstitucionalLandingFuncionalidades />
+                    <LandingInstitucionalLandingDiferencial />
+                    <LandingInstitucionalLandingFormulario />
+                </main>
+                <LandingInstitucionalLandingFooter />
+            </template>
         </div>
     </div>
 </template>

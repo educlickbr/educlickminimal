@@ -35,7 +35,7 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null
 onMounted(async () => {
     const { aplicarTemaDaEntidadePublica } = useTemaEntidade();
     const aplicouEntidade = await aplicarTemaDaEntidadePublica();
-    if (!aplicouEntidade) store.initTheme();
+    if (!aplicouEntidade?.success) store.initTheme();
 })
 
 async function verificarEmail() {

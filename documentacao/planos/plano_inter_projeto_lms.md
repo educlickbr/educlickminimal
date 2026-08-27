@@ -158,6 +158,7 @@ lms_status_submissao       -- 'em_andamento' | 'entregue' (avaliação: + 'final
 - `lms_upsert_curriculo(p_id_programa, p_id_entidade, p_escopo_tipo, p_escopo_id, p_id_conteudo, p_ativar, p_destaque, p_usuario_id)` — injeta/desativa/destaca conteúdo no programa (cria linha operacional).
 - `lms_toggle_ativo_curriculo(...)`, `lms_toggle_destaque_curriculo(...)`.
 - **Dinâmica de acordeons + escopo alvo detalhada em `padrao_curriculo_admin.md`** (o Currículo NÃO usa abas — usa dropdown de programa + pastas + navegador com radio/toggle).
+- **Dropdown rico de seleção de programa detalhado em `padrao_selecao_programa_curriculo.md`** (botão customizado de 2 linhas + resets ao trocar + carregamento em paralelo).
 
 ### Aluno
 - `lms_get_programas_do_aluno(p_id_entidade, p_id_usuario)` → matrículas ativas com curso/qtd ciclos.

@@ -12,7 +12,44 @@
  *   const { aplicarTemaDaEntidadePublica } = useTemaEntidade();
  *   onMounted(async () => { await aplicarTemaDaEntidadePublica(); });
  */
+export interface EntidadePublicaInfo {
+    id: string;
+    nome: string;
+    tema: string;
+    branding: any;
+    url?: string;
+}
+
+export interface AplicarTemaPublicoResult {
+    success: boolean;
+    entidade?: EntidadePublicaInfo;
+}
+
 export function useTemaEntidade() {
+    // Estado reativo da entidade resolvida (ex.: p/ acessar logo_aberto/fechado na UI)
+    const entidadePublica = ref<EntidadePublicaInfo | null>(null);
+    // Reativo ao tema atual aplicado no <html> (para o logo alternar automaticamente)
+    const isDark = ref(false);
+    let observerInstalled = false;
+
+    function readDataTheme() {
+        if (!import.meta.client) return;
+        const t = document.documentElement.getAttribute("data-theme");
+        isDark.value = t === "dark";
+    }
+
+    /** Observa data-theme no <html> para que mudanças de tema re-renderizem a UI (logo). */
+    function installTemaObserver() {
+        if (!import.meta.client || observerInstalled) return;
+        observerInstalled = true;
+        readDataTheme();
+        const mo = new MutationObserver(() => readDataTheme());
+        mo.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["data-theme"],
+        });
+    }
+
     /**
      * Converte "#RRGGBB" em "R, G, B" para o token --color-primary-rgb.
      */
@@ -25,22 +62,26 @@ export function useTemaEntidade() {
     }
 
     /**
-     * Busca a entidade pelo host e aplica tema + branding.
-     * No retorno: true se aplicou, false se não encontrou.
+     * Busca a entidade e aplica tema + branding.
+     * - `id?`: passa `?id=` ao BFF (quando a página já sabe a entidade, ex.: oferta).
+     * - Sem `id`: resolve pelo domínio (white label).
+     * No retorno: { success: true, entidade } se aplicou, { success: false } se não encontrou.
      */
-    async function aplicarTemaDaEntidadePublica(): Promise<boolean> {
-        if (!import.meta.client) return false;
+    async function aplicarTemaDaEntidadePublica(id?: string): Promise<AplicarTemaPublicoResult> {
+        if (!import.meta.client) return { success: false };
+
+        installTemaObserver();
 
         let entidade: any = null;
         try {
-            const res = await $fetch<{ success: boolean; tema?: string; branding?: any; nome?: string }>(
-                "/api/entidade/dominio",
+            const res = await $fetch<{ success: boolean; id?: string; tema?: string; branding?: any; nome?: string; url?: string }>(
+                `/api/entidade/dominio${id ? `?id=${encodeURIComponent(id)}` : ""}`,
             );
             if (res?.success) entidade = res;
         } catch (e) {
             console.warn("[useTemaEntidade] falha ao resolver entidade:", e);
         }
-        if (!entidade) return false;
+        if (!entidade) return { success: false };
 
         const doc = document.documentElement;
 
@@ -64,9 +105,21 @@ export function useTemaEntidade() {
             const t = entidade.tema === "light" ? "light" : "dark";
             doc.setAttribute("data-theme", t);
         }
+        readDataTheme();
 
-        return true;
+        entidadePublica.value = {
+            id: entidade.id,
+            nome: entidade.nome,
+            tema: entidade.tema,
+            branding: entidade.branding,
+            url: entidade.url,
+        };
+
+        return {
+            success: true,
+            entidade: entidadePublica.value,
+        };
     }
 
-    return { aplicarTemaDaEntidadePublica };
+    return { aplicarTemaDaEntidadePublica, entidadePublica, isDark };
 }

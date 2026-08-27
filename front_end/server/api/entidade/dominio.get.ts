@@ -13,6 +13,10 @@ import { getRequestHost, getRequestURL } from "h3";
  * service_role) e expõe apenas o necessário para a página pública.
  */
 export default defineEventHandler(async (event) => {
+    // 0. Query params — página pode já saber a entidade (ex.: oferta?ID=entidade)
+    const query = getQuery(event);
+    const p_id = (query.id as string) || (query.id_entidade as string) || "".trim();
+
     // 1. Resolve o host (remove a porta)
     const url = getRequestURL(event);
     const host = (getRequestHost(event) || url.hostname || "").replace(
@@ -35,7 +39,14 @@ export default defineEventHandler(async (event) => {
     let entidade: any = null;
     let error: any = null;
 
-    if (isLocalhost && fallbackId) {
+    // prioridade: query id > fallback de dev > domínio
+    if (p_id) {
+        const rpc = await (client.rpc as any)("app_resolver_entidade_por_id", {
+            p_id,
+        });
+        entidade = (rpc.data as any) || null;
+        error = rpc.error;
+    } else if (isLocalhost && fallbackId) {
         // dev: força a entidade do .env (ex.: ensi) p/ visualizar deslogado
         const rpc = await (client.rpc as any)("app_resolver_entidade_por_id", {
             p_id: fallbackId,

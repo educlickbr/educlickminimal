@@ -12,7 +12,7 @@
  */
 import { defineAsyncComponent, type Component } from "vue";
 
-type TenantName = "Institucional";
+type TenantName = "Institucional" | "Ensi";
 type ComponentName =
     | "LandingHeader"
     | "LandingHero"
@@ -23,8 +23,8 @@ type ComponentName =
     | "LandingFormulario"
     | "LandingFooter";
 
-const registry: Record<TenantName, Record<ComponentName, Component>> = {
-    Institutional: {
+const registry: Record<TenantName, Partial<Record<ComponentName, Component>>> = {
+    Institucional: {
         LandingHeader: defineAsyncComponent(
             () =>
                 import(
@@ -74,6 +74,17 @@ const registry: Record<TenantName, Record<ComponentName, Component>> = {
                 ),
         ),
     },
+    Ensi: {
+        LandingHeader: defineAsyncComponent(
+            () => import("~/components/landing/ensi/LandingHeader.vue"),
+        ),
+        LandingHero: defineAsyncComponent(
+            () => import("~/components/landing/ensi/LandingHero.vue"),
+        ),
+        LandingFooter: defineAsyncComponent(
+            () => import("~/components/landing/ensi/LandingFooter.vue"),
+        ),
+    },
 };
 
 /** Retorna o componente registrado para o tenant atual, ou fallback */
@@ -83,9 +94,9 @@ export function getLandingComponent(
 ): Component {
     const tenantEntry = registry[tenant as TenantName];
     if (tenantEntry && tenantEntry[name]) {
-        return tenantEntry[name];
+        return tenantEntry[name]!;
     }
 
     // Fallback para institucional
-    return registry["Institucional"][name];
+    return registry["Institucional"][name]!;
 }

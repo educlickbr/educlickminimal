@@ -16,6 +16,7 @@ Abas Área → Curso → Módulo → Componente (como na Distribuição) com cas
 **É** (correto):
 ```
 1. Escolhe o PROGRAMA (dropdown rico no topo)  ← a "turma" que vamos gerir
+   ▶ detalhe completo do dropdown em `padrao_selecao_programa_curriculo.md`
 2. Carrega a ÁRVORE de acordeons daquele programa:
      📚 Programa (conteúdos soltos)
      📁 Componentes (pasta) → cada componente
@@ -84,7 +85,7 @@ ativosMap             // Map<id_conteudo, { ativo, op_id, timing }> — linhas o
 
 | Ação | Função | Chamada BFF |
 |---|---|---|
-| Selecionar programa | `selecionarPrograma(prog)` | `Promise.all([ GET /api/programacao_atividades/curriculo?id_programa=X&id_entidade=E , GET .../curriculo/ativos?id_programa=X&id_entidade=E ])` → `estrutura` + `ativosMap`; depois `GET .../conteudos` (navegador) |
+| Selecionar programa | `selecionarPrograma(prog)` | `Promise.all([ GET /api/programacao_atividades/curriculo?id_programa=X&id_entidade=E , GET .../curriculo/ativos?id_programa=X&id_entidade=E ])` → `estrutura` + `ativosMap`; depois `GET .../conteudos` (navegador). **Dropdown rico detalhado em `padrao_selecao_programa_curriculo.md`** |
 | Abrir acordeon (lazy) | `toggleSection(key)` | `GET /api/programacao_atividades/curriculo/conteudos?id_programa=X&id_entidade=E&escopo_tipo=<tipo>&escopo_id=<id>` → `{ conteudos: ConteudoItem[] }` (só na primeira vez por chave) |
 | "Adicionar" numa pasta | `definirEscopoAlvo(key)` | (front) seta `selectedScopeKey`; árvore recolhe `w-96`; navegador surge |
 | **Associar** (radio) | `toggleAssociacaoPainel(c)` | **exige escopo alvo** (toast se não) — `POST /api/programacao_atividades/curriculo` com body do operacional → cria linha; ou `DELETE` com `{id: op_id}` → remove linha (volta à herança) |

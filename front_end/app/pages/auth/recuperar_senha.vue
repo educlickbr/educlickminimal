@@ -11,7 +11,7 @@ const { showToast } = useToast();
 onMounted(async () => {
     const { aplicarTemaDaEntidadePublica } = useTemaEntidade();
     const aplicouEntidade = await aplicarTemaDaEntidadePublica();
-    if (!aplicouEntidade) store.initTheme();
+    if (!aplicouEntidade?.success) store.initTheme();
 });
 const email = ref("");
 const loading = ref(false);

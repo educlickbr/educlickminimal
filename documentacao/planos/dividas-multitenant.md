@@ -25,7 +25,7 @@
 
 ## 🧩 Na medida do uso — portais/páginas por cliente (multitenant)
 
-4. **Página de início / landing da ensi** — **PRÓXIMO passo grande.** O usuário definirá como será (landing pode ser hardcoded/escura de marca). Base: usar o padrão de landing institucional ou criar landing dedicada; aplicar tema/branding da ensi (laranja + claro) via BFF público já pronto. Delegável para outro agente.
+4. **Página de início / landing da ensi** — **PRÓXIMO passo grande.** O usuário definirá como será (landing pode ser hardcoded/escura de marca). Base: usar o padrão de landing institucional ou criar landing dedicada; aplicar tema/branding da ensi (laranja + claro) via BFF público já pronto. `useTemaEntidade` expõe `entidadePublica` (branding com **logo_aberto/logo_fechado** como URL) para a landing usar. Delegável para outro agente.
 5. **Rota/portal inicial por entidade** — como tudo é desacoplado, todos começam na mesma página; quando um cliente pedir alteração, usar um `if` por entidade para mostrar componentes diferentes (componente A para entidade X, B para Y). **Não urgente — na medida do uso.**
 6. **Admin de páginas** — lugar onde o cliente monta o seu portal escolhendo módulos/blocos e configurações. A base pronta + customização por cliente (anti-SaaS).
 7. **Módulo de eventos** — espetáculos, filmes, palestras, encontros, congressos, etc. Entra no **admin da página**, escolhendo o **formato** do evento. (Casa com a arquitetura de permissões por ilha.)
