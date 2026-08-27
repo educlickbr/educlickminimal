@@ -138,6 +138,7 @@ const props = defineProps<{
     eventoId?: string | null;
     initialData?: any | null;
     idEntidade?: string | null;
+    onSave?: (payload: any) => Promise<boolean>;
 }>();
 
 const emit = defineEmits<{
@@ -227,25 +228,35 @@ async function handleSave() {
             (store as any).entidades?.[0]?.id ||
             (store as any).company?.id;
 
-        const res = (await $fetch("/api/calendario/eventos", {
-            method: "POST",
-            body: {
-                ...formEvento,
-                data_fim: calculatedDataFim.value,
-                id_entidade,
-                usuario_id: store.user_expandido_id,
-            },
-        })) as any;
+        const payload = {
+            ...formEvento,
+            data_fim: calculatedDataFim.value,
+            id_entidade,
+            usuario_id: store.user_expandido_id,
+        };
 
-        if (res?.success) {
-            toast.showToast(
-                formEvento.id
-                    ? "Evento atualizado!"
-                    : "Evento criado com sucesso!",
-                { type: "success" },
-            );
-            emit("saved");
-            emit("update:modelValue", false);
+        if (props.onSave) {
+            const success = await props.onSave(payload);
+            if (success) {
+                emit("saved");
+                emit("update:modelValue", false);
+            }
+        } else {
+            const res = (await $fetch("/api/calendario/eventos", {
+                method: "POST",
+                body: payload,
+            })) as any;
+
+            if (res?.success) {
+                toast.showToast(
+                    formEvento.id
+                        ? "Evento atualizado!"
+                        : "Evento criado com sucesso!",
+                    { type: "success" },
+                );
+                emit("saved");
+                emit("update:modelValue", false);
+            }
         }
     } catch (e: any) {
         toast.showToast(e.message || "Erro ao salvar evento", {

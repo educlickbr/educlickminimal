@@ -108,6 +108,71 @@ A RPC `aca_get_programas_publicos` agora retorna `exige_processo_seletivo` e `gr
 
 ---
 
+## Incidente: erro 42803 no filtro de áreas (2026-08-27)
+
+### Sintoma
+
+- Log do servidor:
+  ```
+  ERROR  Erro ao buscar áreas públicas: { code: '42803', message: 'column "aca_area.nome_area" must appear in the GROUP BY clause or be used in an aggregate function' }
+  ```
+- Na página, o filtro de áreas simplesmente **some** (sem erro visível para o usuário): o endpoint `areas.get.ts` captura o erro e retorna `{ success: false, message }`, e a página trata isso silenciosamente (`areaData?.success` → lista vazia).
+
+### Causa raiz
+
+A RPC `aca_get_areas_publicas` tinha o `ORDER BY nome_area ASC` **fora** do agregado:
+
+```sql
+-- ❌ QUEBRADO — erro 42803
+SELECT jsonb_agg(
+    jsonb_build_object('id', id, 'nome_area', nome_area)
+)
+FROM public.aca_area
+WHERE id_entidade = p_id_entidade
+ORDER BY nome_area ASC;  -- coluna fora do agregado e sem GROUP BY
+```
+
+Em consulta com função agregada **sem `GROUP BY`**, o PostgreSQL exige que a coluna do `ORDER BY` esteja no `GROUP BY` ou **dentro** de um agregado. Por isso o erro `42803`.
+
+> ⚠️ Armadilha: a migration `20260507141000` (original) já continha esse bug; uma correção intermediária (`20260827120000`) restaurou a função mas manteve o mesmo `ORDER BY` fora do agregado — o erro persistiu mesmo após o deploy. Sempre teste a query da RPC **isolada** antes de subir.
+
+### Correção
+
+Mover o `ORDER BY` para **dentro** do `jsonb_agg(...)` (aggregate ORDER BY):
+
+```sql
+-- ✅ CORRETO
+SELECT jsonb_agg(
+    jsonb_build_object('id', id, 'nome_area', nome_area)
+    ORDER BY nome_area ASC
+)
+FROM public.aca_area
+WHERE id_entidade = p_id_entidade;
+```
+
+### Migrations
+
+| Migration | Papel |
+|---|---|
+| `20260507141000_aca_public_programs_rpc.sql` | Criação original (já continha o bug do `ORDER BY` fora do agregado) |
+| `20260827120000_fix_aca_get_areas_publicas.sql` | Restaurou a função, mas **manteve** o bug (não resolveu) |
+| `20260827130000_fix_aca_get_areas_publicas_orderby.sql` | ✅ Correção definitiva — `ORDER BY` dentro do `jsonb_agg` |
+
+### Verificação
+
+```sql
+SELECT public.aca_get_areas_publicas('00ca60ea-6667-482d-8a96-09b877707b08');
+-- deve retornar: [{"id": "uuid...", "nome_area": "..."}, ...]
+```
+
+### Regras para evitar recorrência
+
+1. **`ORDER BY` + agregado:** se a query usa `jsonb_agg`/`array_agg` (ou qualquer agregado) sem `GROUP BY`, a ordenação vai **dentro** do agregado: `jsonb_agg(... ORDER BY coluna)`.
+2. **Migrations aplicadas não se editam:** correção sempre em **nova migration** (a versão já registrada em `supabase_migrations.schema_migrations` não é reaplicada pelo `db push`).
+3. **Teste a RPC no SQL Editor** com um `SELECT` direto antes de declarar resolvido.
+
+---
+
 ## Limitações Atuais
 
 | Limitação | Impacto |
@@ -119,6 +184,12 @@ A RPC `aca_get_programas_publicos` agora retorna `exige_processo_seletivo` e `gr
 ---
 
 ## Histórico de Mudanças
+
+### 2026-08-27 — Correção do filtro de áreas (erro 42803)
+- Causa: `ORDER BY nome_area` fora do agregado em `aca_get_areas_publicas` (coluna precisa estar no `GROUP BY` ou dentro de agregado)
+- Migration definitiva: `20260827130000_fix_aca_get_areas_publicas_orderby.sql`
+- A migration `20260827120000` (mesmo dia) não resolveu por manter o `ORDER BY` no escopo errado
+- Detalhes na seção [Incidente: erro 42803 no filtro de áreas](#incidente-erro-42803-no-filtro-de-áreas-2026-08-27)
 
 ### 2026-07-09 — Roteamento inteligente + badge de preço
 - `getFormUrl` agora verifica `exige_processo_seletivo`: se false, redireciona ao checkout

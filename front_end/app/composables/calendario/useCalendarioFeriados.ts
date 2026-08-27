@@ -113,9 +113,9 @@ export function useCalendarioFeriados(deps: {
   }
 
   // ── CRUD ──
-  function openNovo() {
+  function openNovo(initialDate?: string) {
     isEdit.value = false;
-    editData.value = null;
+    editData.value = initialDate ? { data: initialDate } : null;
     showModal.value = true;
   }
   function openEditar(item: any) {
@@ -127,6 +127,35 @@ export function useCalendarioFeriados(deps: {
     fetchFeriados();
     showModal.value = false;
   }
+
+  async function saveFeriado(payload: any) {
+    try {
+      const id_entidade = payload.id_entidade || deps.getEntidadeAtivaId();
+      const res = (await $fetch("/api/calendario/feriados", {
+        method: "POST",
+        body: {
+          ...payload,
+          id_entidade,
+        },
+      })) as any;
+      if (res?.success) {
+        deps.toast.showToast(
+          payload.id ? "Feriado atualizado!" : "Feriado criado com sucesso!",
+          { type: "success" },
+        );
+        await fetchFeriados();
+        showModal.value = false;
+        return true;
+      }
+      return false;
+    } catch (e: any) {
+      deps.toast.showToast(e.message || "Erro ao salvar feriado", {
+        type: "error",
+      });
+      return false;
+    }
+  }
+
   function confirmDelete(item: any) {
     confirmTarget.value = item;
     showConfirm.value = true;
@@ -165,6 +194,7 @@ export function useCalendarioFeriados(deps: {
     openNovo,
     openEditar,
     handleSaved,
+    saveFeriado,
     confirmDelete,
     deleteFeriado,
     toggleMonth,

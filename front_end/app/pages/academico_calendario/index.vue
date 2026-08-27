@@ -129,6 +129,7 @@ async function loadTab(tab: string) {
             <CalendarioTabCalendario
                 v-if="activeTab === 'calendario'"
                 :ctx="calendarioCtx"
+                :idEntidade="idEntidade"
             />
         </div>
     </div>

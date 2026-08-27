@@ -223,7 +223,8 @@
                                 draggable="true"
                                 @dragstart="ctx.onDragStart(item)"
                                 @dragend="ctx.onDragEnd"
-                                class="px-2 py-1.5 rounded-lg flex flex-col gap-1 cursor-grab active:cursor-grabbing transition-opacity select-none"
+                                @click="ctx.openAulaModal(item)"
+                                class="px-2 py-1.5 rounded-lg flex flex-col gap-1 cursor-pointer hover:border-primary/50 transition-all select-none"
                                 :class="[
                                     ctx.draggingItem.value?.id === item.id
                                         ? 'opacity-40 scale-95'
@@ -261,6 +262,11 @@
                                         {{ item.hora_fim }}
                                     </p>
                                     <span
+                                        v-if="item.sub_turma"
+                                        class="px-1 py-0.5 rounded bg-primary/20 text-[7px] font-black text-primary border border-primary/30"
+                                        >T.{{ item.sub_turma }}</span
+                                    >
+                                    <span
                                         v-if="item.status === 'cancelada'"
                                         class="px-1 py-0.5 rounded bg-secondary/10 text-[7px] font-black uppercase text-secondary/60 tracking-wider"
                                         >Canc.</span
@@ -274,7 +280,13 @@
                                             : 'text-text'
                                     "
                                 >
-                                    {{ item.ciclo_desc }}
+                                    {{ item.nome_componente || item.ciclo_desc }}
+                                </p>
+                                <p
+                                    v-if="item.nome_docente"
+                                    class="text-[8px] font-semibold text-secondary/60 truncate"
+                                >
+                                    👨‍🏫 {{ item.nome_docente }}
                                 </p>
                                 <div class="mt-0.5 flex items-center gap-1">
                                     <button
@@ -408,7 +420,8 @@
                                 draggable="true"
                                 @dragstart="ctx.onDragStart(item)"
                                 @dragend="ctx.onDragEnd"
-                                class="p-3 rounded-lg flex flex-col gap-1.5 cursor-grab active:cursor-grabbing transition-opacity select-none"
+                                @click="ctx.openAulaModal(item)"
+                                class="p-3 rounded-lg flex flex-col gap-1.5 cursor-pointer hover:border-primary/50 transition-all select-none"
                                 :class="[
                                     ctx.draggingItem.value?.id === item.id
                                         ? 'opacity-40 scale-95'
@@ -445,6 +458,11 @@
                                         {{ item.hora_fim }}</span
                                     >
                                     <span
+                                        v-if="item.sub_turma"
+                                        class="ml-auto px-1.5 py-0.5 rounded bg-primary/20 text-[8px] font-black text-primary border border-primary/30"
+                                        >Turma {{ item.sub_turma }}</span
+                                    >
+                                    <span
                                         v-if="item.status === 'cancelada'"
                                         class="ml-auto px-1.5 py-0.5 rounded bg-secondary/10 text-[8px] font-black uppercase text-secondary/60 tracking-wider"
                                         >Canc.</span
@@ -458,7 +476,13 @@
                                             : 'text-text'
                                     "
                                 >
-                                    {{ item.ciclo_desc }}
+                                    {{ item.nome_componente || item.ciclo_desc }}
+                                </p>
+                                <p
+                                    v-if="item.nome_docente"
+                                    class="text-[9px] font-semibold text-secondary/60 truncate"
+                                >
+                                    👨‍🏫 {{ item.nome_docente }}
                                 </p>
                                 <div class="mt-1 flex items-center gap-1.5">
                                     <button
@@ -504,6 +528,16 @@
             </div>
         </div>
 
+        <CalendarioModalAula
+            v-if="ctx.showAulaModal.value"
+            v-model="ctx.showAulaModal.value"
+            :aulaData="ctx.selectedAulaData.value"
+            :idEntidade="idEntidade"
+            :onSaveDetails="ctx.atualizarDetalhesAula"
+            :onDividirAula="ctx.dividirAula"
+            @saved="ctx.fetchCalendarEvents"
+        />
+
         <GlobalModalConfirmacao
             v-model="ctx.showConfirm.value"
             :title="ctx.confirmConfig.value.title"
@@ -516,7 +550,7 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ ctx: any }>();
+const props = defineProps<{ ctx: any; idEntidade?: any }>();
 </script>
 
 <style scoped>

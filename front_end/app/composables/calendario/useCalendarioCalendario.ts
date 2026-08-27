@@ -88,6 +88,63 @@ export function useCalendarioCalendario(deps: {
     calendarEvents.value = [];
   }
 
+  // Filters
+  const selectedCicloId = ref<string | null>(null);
+  const selectedComponenteId = ref<string | null>(null);
+  const selectedDocenteId = ref<string | null>(null);
+
+  // Aula Modal
+  const showAulaModal = ref(false);
+  const selectedAulaData = ref<any>(null);
+
+  function openAulaModal(item: any) {
+    if (item._tipo !== "aula") return;
+    selectedAulaData.value = item;
+    showAulaModal.value = true;
+  }
+
+  async function atualizarDetalhesAula(payload: any) {
+    try {
+      const res = (await $fetch("/api/programas/aula", {
+        method: "PATCH",
+        body: payload,
+      })) as any;
+      if (res?.success) {
+        deps.toast.showToast("Detalhes da aula atualizados", {
+          type: "success",
+        });
+        await fetchCalendarEvents();
+        showAulaModal.value = false;
+        return true;
+      }
+      return false;
+    } catch (e: any) {
+      deps.toast.showToast("Erro: " + e.message, { type: "error" });
+      return false;
+    }
+  }
+
+  async function dividirAula(payload: any) {
+    try {
+      const res = (await $fetch("/api/programas/aula", {
+        method: "PATCH",
+        body: payload,
+      })) as any;
+      if (res?.success) {
+        deps.toast.showToast("Aula dividida em Turma A e Turma B!", {
+          type: "success",
+        });
+        await fetchCalendarEvents();
+        showAulaModal.value = false;
+        return true;
+      }
+      return false;
+    } catch (e: any) {
+      deps.toast.showToast("Erro: " + e.message, { type: "error" });
+      return false;
+    }
+  }
+
   // ── Drag & Drop ──
   function onDragStart(item: any) {
     draggingItem.value = item;
@@ -113,9 +170,45 @@ export function useCalendarioCalendario(deps: {
       onDragEnd();
       return;
     }
+
+    const existingClassInTargetDate = (eventsMap.value[newDate] || []).find(
+      (e: any) => e._tipo === "aula" && e.id !== draggingItem.value.id,
+    );
+
+    if (
+      existingClassInTargetDate &&
+      draggingItem.value.status !== "cancelada"
+    ) {
+      await swapAulas(draggingItem.value.id, existingClassInTargetDate.id);
+      return;
+    }
+
     if (draggingItem.value.status === "cancelada")
       await reagendarAulaCancelada(draggingItem.value, newDate);
     else await moveAula(draggingItem.value.id, newDate);
+  }
+
+  async function swapAulas(idAula1: string, idAula2: string) {
+    try {
+      const res = (await $fetch("/api/programas/aula", {
+        method: "PATCH",
+        body: {
+          id: idAula1,
+          id_aula_2: idAula2,
+          id_entidade: deps.getEntidadeAtivaId(),
+          action: "swap",
+        },
+      })) as any;
+      if (!res?.success) throw new Error(res?.message || "Erro");
+      deps.toast.showToast("Permuta de aulas realizada com sucesso!", {
+        type: "success",
+      });
+      await fetchCalendarEvents();
+    } catch (e: any) {
+      deps.toast.showToast("Erro na permuta: " + e.message, { type: "error" });
+    } finally {
+      onDragEnd();
+    }
   }
 
   async function moveAula(idAula: string, newDate: string) {
@@ -205,14 +298,43 @@ export function useCalendarioCalendario(deps: {
     return o?.data ? o.data.split("-").reverse().join("/") : "";
   }
 
+  // ── Helper Multi-day ──
+  function expandMultiDayItem(item: any): any[] {
+    if (item._tipo === "evento" && item.data_inicio && item.data_fim) {
+      const start = new Date(item.data_inicio + "T12:00:00");
+      const end = new Date(item.data_fim + "T12:00:00");
+      const result: any[] = [];
+      let curr = new Date(start);
+      let safeCounter = 0;
+      while (curr <= end && safeCounter < 366) {
+        const ds = curr.toISOString().slice(0, 10);
+        result.push({
+          ...item,
+          id: `${item.id}_api_${ds}`,
+          data: ds,
+        });
+        curr.setDate(curr.getDate() + 1);
+        safeCounter++;
+      }
+      return result;
+    }
+    if (item.data) return [item];
+    if (item.data_inicio)
+      return [{ ...item, data: item.data_inicio.slice(0, 10) }];
+    return [item];
+  }
+
   // ── Computed ──
   const eventsMap = computed(() => {
     const map: Record<string, any[]> = {};
-    calendarEvents.value.forEach((item) => {
-      if (item.data) {
-        if (!map[item.data]) map[item.data] = [];
-        map[item.data]!.push(item);
-      }
+    calendarEvents.value.forEach((rawItem) => {
+      const items = expandMultiDayItem(rawItem);
+      items.forEach((item) => {
+        if (item.data) {
+          if (!map[item.data]) map[item.data] = [];
+          map[item.data]!.push(item);
+        }
+      });
     });
     return map;
   });
@@ -325,6 +447,11 @@ export function useCalendarioCalendario(deps: {
     loadingProgramas,
     selectedProgramaId,
     selectedPrograma,
+    selectedCicloId,
+    selectedComponenteId,
+    selectedDocenteId,
+    showAulaModal,
+    selectedAulaData,
     calendarEvents,
     loading,
     viewMode,
@@ -346,6 +473,10 @@ export function useCalendarioCalendario(deps: {
     onDragStart,
     onDragEnd,
     onDrop,
+    openAulaModal,
+    atualizarDetalhesAula,
+    dividirAula,
+    swapAulas,
     handleCancelarAula,
     getOrigemDataText,
     prevMonth,

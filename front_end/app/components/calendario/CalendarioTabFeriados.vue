@@ -57,7 +57,8 @@
                 >
                     <!-- Timeline Node -->
                     <div
-                        @click.stop="ctx.toggleMonth(month.key)"
+                        @click.stop="ctx.openNovo(`${month.key}-01`)"
+                        title="Adicionar Feriado neste mês"
                         class="absolute left-[-9.5px] md:left-1/2 md:-ml-[10px] top-5 w-5 h-5 rounded-full transition-all duration-300 z-20 flex items-center justify-center cursor-pointer hover:scale-125 hover:bg-primary hover:border-primary hover:text-white group/node"
                         :class="[
                             month.events.length > 0
@@ -228,6 +229,7 @@
             :isEdit="ctx.isEdit.value"
             :initialData="ctx.editData.value"
             :idEntidade="idEntidade"
+            :onSave="ctx.saveFeriado"
             @saved="ctx.handleSaved"
         />
         <GlobalModalConfirmacao

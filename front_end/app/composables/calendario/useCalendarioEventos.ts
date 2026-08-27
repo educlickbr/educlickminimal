@@ -111,9 +111,9 @@ export function useCalendarioEventos(deps: {
   });
 
   // ── CRUD ──
-  function openNovo() {
+  function openNovo(initialDate?: string) {
     isEdit.value = false;
-    editData.value = null;
+    editData.value = initialDate ? { data_inicio: initialDate } : null;
     showModal.value = true;
   }
   function openEditar(item: any) {
@@ -124,6 +124,34 @@ export function useCalendarioEventos(deps: {
   function handleSaved() {
     fetchEventos();
     showModal.value = false;
+  }
+
+  async function saveEvento(payload: any) {
+    try {
+      const id_entidade = payload.id_entidade || deps.getEntidadeAtivaId();
+      const res = (await $fetch("/api/calendario/eventos", {
+        method: "POST",
+        body: {
+          ...payload,
+          id_entidade,
+        },
+      })) as any;
+      if (res?.success) {
+        deps.toast.showToast(
+          payload.id ? "Evento atualizado!" : "Evento criado com sucesso!",
+          { type: "success" },
+        );
+        await fetchEventos();
+        showModal.value = false;
+        return true;
+      }
+      return false;
+    } catch (e: any) {
+      deps.toast.showToast(e.message || "Erro ao salvar evento", {
+        type: "error",
+      });
+      return false;
+    }
   }
 
   function confirmDelete(item: any) {
@@ -174,6 +202,7 @@ export function useCalendarioEventos(deps: {
     openNovo,
     openEditar,
     handleSaved,
+    saveEvento,
     confirmDelete,
     deleteEvento,
     toggleMonth,

@@ -25,7 +25,7 @@
 
 ## 🧩 Na medida do uso — portais/páginas por cliente (multitenant)
 
-4. **Página de início / landing da ensi** — **PRÓXIMO passo grande.** O usuário definirá como será (landing pode ser hardcoded/escura de marca). Base: usar o padrão de landing institucional ou criar landing dedicada; aplicar tema/branding da ensi (laranja + claro) via BFF público já pronto. `useTemaEntidade` expõe `entidadePublica` (branding com **logo_aberto/logo_fechado** como URL) para a landing usar. Delegável para outro agente.
+4. ~~**Página de início / landing da ensi**~~ — **✅ FEITO (2026-08-27).** Estrutura criada em `components/landing/ensi/` e roteada em `index.vue`. Integrada com o BFF público, cores da marca ENSI (laranja `#DF8B35` + claro), logos dinâmicos, FAQ acordeão, contatos reais e vitrine dinâmica de ofertas consumindo `/api/public/*`. Documentado em `documentacao/paginas/landing_page_ensi.md`.
 5. **Rota/portal inicial por entidade** — como tudo é desacoplado, todos começam na mesma página; quando um cliente pedir alteração, usar um `if` por entidade para mostrar componentes diferentes (componente A para entidade X, B para Y). **Não urgente — na medida do uso.**
 6. **Admin de páginas** — lugar onde o cliente monta o seu portal escolhendo módulos/blocos e configurações. A base pronta + customização por cliente (anti-SaaS).
 7. **Módulo de eventos** — espetáculos, filmes, palestras, encontros, congressos, etc. Entra no **admin da página**, escolhendo o **formato** do evento. (Casa com a arquitetura de permissões por ilha.)
@@ -75,3 +75,4 @@ ADIADO:   tela de permissões Fase D (10) · RLS Fase E (11)
 | 2026-08-26 | Glow (item 1) marcado ✅ feito; tema por entidade (item 2) com código pronto, falta validar; numeração/ordem atualizada |
 | 2026-08-26 | Tema por entidade ✅ FEITO + auth segue tema da entidade (BFF `/api/entidade/dominio` + `useTemaEntidade`); RPCs DEFINER via BFF; botões/barras sólidos. Próximo: **landing da ensi** (item 4) |
 | 2026-08-26 | `BaseField` select ganhou `emptyLabel` (placeholder de opção vazia); aplicado em `academico_oferta`/`formularios`/modais. Item 2 ✅ FEITO. Próximo: landing da ensi |
+| 2026-08-27 | Landing Page ENSI ✅ FEITA (Item 4). Estrutura modular em `components/landing/ensi/`, integração BFF, tema claro/laranja, logos dinâmicos, FAQ acordeão, contatos reais e vitrine dinâmica de cursos integrada com `/api/public/*`. Documentada em `documentacao/paginas/landing_page_ensi.md`. |
