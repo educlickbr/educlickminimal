@@ -153,7 +153,7 @@ onMounted(() => {
             <div class="max-w-7xl mx-auto flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shadow-lg shadow-primary/20"
+                        class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20"
                     >
                         <Icon
                             name="ph:graduation-cap-fill"
@@ -243,7 +243,7 @@ onMounted(() => {
                             class="group relative bg-[#0f0f17] border border-white/5 rounded-xl overflow-hidden hover:border-primary/30 transition-all hover:translate-y-[-4px] shadow-xl hover:shadow-primary/5 flex flex-col p-6"
                         >
                             <div
-                                class="h-1 bg-gradient-to-r from-primary to-purple-500 opacity-30 group-hover:opacity-100 absolute top-0 left-0 right-0 transition-opacity"
+                                class="h-1 bg-primary opacity-30 group-hover:opacity-100 absolute top-0 left-0 right-0 transition-opacity"
                             />
                             <div class="flex flex-col gap-3">
                                 <div class="flex items-start justify-between gap-4">

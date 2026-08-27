@@ -1,27 +1,27 @@
 <template>
     <div
         v-if="modelValue"
-        class="modal-overlay"
+        class="ds-modal-overlay"
         @click.self="$emit('update:modelValue', false)"
     >
-        <div class="modal-panel modal-panel--lg">
-            <div class="modal-accent-bar"></div>
-            <div class="modal-header">
-                <div class="modal-header-icon">
+        <div class="ds-modal-panel ds-modal-panel--lg">
+            <div class="ds-modal-accent-bar"></div>
+            <div class="ds-modal-header">
+                <div class="ds-modal-header-icon">
                     <Icon name="ph:books-bold" class="w-5 h-5" />
                 </div>
-                <div class="modal-header-text">
-                    <h3 class="modal-title">
+                <div class="flex flex-col gap-0.5 flex-1">
+                    <h3 class="ds-modal-title">
                         {{ isEdit ? "Editar" : "Nova" }} Oferta Acadêmica
                         (Programa)
                     </h3>
-                    <p class="modal-subtitle">
+                    <p class="ds-modal-subtitle">
                         Agrupamento de Ciclos para Oferta
                     </p>
                 </div>
                 <button
                     @click="$emit('update:modelValue', false)"
-                    class="modal-close-btn"
+                    class="ds-modal-close-btn"
                 >
                     &times;
                 </button>
@@ -133,18 +133,18 @@
                 />
             </div>
             <!-- Footer -->
-            <div class="modal-footer" style="justify-content: space-between">
+            <div class="ds-modal-footer" style="justify-content: space-between">
                 <button
                     v-if="activeStep > (isEdit ? 1 : 0)"
                     @click="activeStep--"
-                    class="modal-btn-cancel"
+                    class="ds-btn-cancel"
                 >
                     Voltar
                 </button>
                 <button
                     v-else
                     @click="$emit('update:modelValue', false)"
-                    class="modal-btn-cancel"
+                    class="ds-btn-cancel"
                 >
                     Cancelar
                 </button>
@@ -152,7 +152,7 @@
                     v-if="activeStep < steps.length - 1"
                     @click="nextStep"
                     :disabled="!canProceed"
-                    class="modal-btn-save"
+                    class="ds-btn-save"
                 >
                     Avançar Etapa
                 </button>
@@ -160,7 +160,7 @@
                     v-else
                     @click="handleSave"
                     :disabled="loading || !canSave"
-                    class="modal-btn-save"
+                    class="ds-btn-save"
                 >
                     <Icon
                         v-if="loading"
@@ -495,8 +495,8 @@ watch(
     display: flex;
     align-items: center;
     padding: 16px 24px;
-    background: rgba(0, 0, 0, 0.15);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--color-secondary-surface);
+    border-bottom: 1px solid var(--field-border);
     gap: 0;
     flex-shrink: 0;
 }
@@ -521,8 +521,8 @@ watch(
 }
 .step-item--active .step-bubble {
     background: rgba(139, 92, 246, 0.15);
-    border-color: #8b5cf6;
-    color: #c4b5fd;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
 }
 .step-item--done .step-bubble {
     background: rgba(34, 197, 94, 0.12);
@@ -530,9 +530,9 @@ watch(
     color: #4ade80;
 }
 .step-item--future .step-bubble {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.25);
+    background: var(--color-secondary-surface);
+    border-color: var(--field-border);
+    color: var(--color-secondary);
 }
 .step-label {
     font-size: 10px;
@@ -542,13 +542,13 @@ watch(
     transition: color 0.2s ease;
 }
 .step-item--active .step-label {
-    color: #c4b5fd;
+    color: var(--color-primary);
 }
 .step-item--done .step-label {
     color: rgba(74, 222, 128, 0.8);
 }
 .step-item--future .step-label {
-    color: rgba(255, 255, 255, 0.2);
+    color: var(--color-secondary);
 }
 
 .step-connector {
@@ -559,12 +559,17 @@ watch(
 }
 .step-connector-line {
     height: 1px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--field-border);
     border-radius: 1px;
     transition: background 0.3s ease;
 }
 .step-connector-line--done {
     background: rgba(34, 197, 94, 0.3);
+}
+
+.ds-modal-panel--lg {
+    max-width: 900px;
+    max-height: 92vh;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -605,165 +610,5 @@ select {
 select option {
     background: var(--field-bg-option) !important;
     color: var(--field-text) !important;
-}
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.85);
-    padding: 16px;
-    animation: fadeIn 0.15s ease;
-}
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-.modal-panel {
-    position: relative;
-    background: #0f0f17;
-    border: 1px solid rgba(139, 92, 246, 0.18);
-    border-radius: 16px;
-    width: 100%;
-    max-width: 680px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow:
-        0 24px 80px rgba(0, 0, 0, 0.7),
-        0 0 0 1px rgba(139, 92, 246, 0.1);
-    animation: slideUp 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
-}
-.modal-panel--lg {
-    max-width: 900px;
-    max-height: 92vh;
-}
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(16px) scale(0.98);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-.modal-accent-bar {
-    height: 3px;
-    background: linear-gradient(90deg, #7c3aed, #a78bfa, #7c3aed);
-    flex-shrink: 0;
-}
-.modal-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    flex-shrink: 0;
-}
-.modal-header-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: rgba(139, 92, 246, 0.12);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    color: #a78bfa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.modal-header-text {
-    flex: 1;
-}
-.modal-title {
-    font-size: 13px;
-    font-weight: 800;
-    color: #e8e6f0;
-    letter-spacing: 0.01em;
-}
-.modal-subtitle {
-    font-size: 10px;
-    font-weight: 700;
-    color: rgba(139, 92, 246, 0.55);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-top: 2px;
-}
-.modal-close-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: none;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 18px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-.modal-close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
-.modal-footer {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(0, 0, 0, 0.2);
-    flex-shrink: 0;
-}
-.modal-btn-cancel {
-    padding: 10px 22px;
-    border-radius: 9px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.45);
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-.modal-btn-cancel:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.7);
-}
-.modal-btn-save {
-    padding: 10px 28px;
-    border-radius: 9px;
-    border: none;
-    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.modal-btn-save:hover {
-    background: linear-gradient(135deg, #6d28d9, #7c3aed);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-}
-.modal-btn-save:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 </style>

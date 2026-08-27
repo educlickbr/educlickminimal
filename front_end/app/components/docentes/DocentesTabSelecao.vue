@@ -86,11 +86,11 @@ onMounted(() => {
                 v-else-if="!ctx.editalSelecionado.value"
                 class="empty-state"
             >
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="mb-3 text-white/20">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="mb-3 text-secondary/40">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
-                <p class="text-sm font-bold text-white/30">Selecione um edital</p>
-                <p class="text-[10px] font-bold text-white/15 mt-1 uppercase tracking-widest">Escolha um edital no filtro acima para ver os candidatos</p>
+                <p class="text-sm font-bold text-secondary/60">Selecione um edital</p>
+                <p class="text-[10px] font-bold text-secondary/40 mt-1 uppercase tracking-widest">Escolha um edital no filtro acima para ver os candidatos</p>
             </div>
 
             <!-- Empty -->
@@ -98,11 +98,11 @@ onMounted(() => {
                 v-else-if="ctx.inscricoes.value.length === 0"
                 class="empty-state"
             >
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="mb-3 text-white/20">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="mb-3 text-secondary/40">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
-                <p class="text-sm font-bold text-white/30">Nenhuma inscrição</p>
-                <p class="text-[10px] font-bold text-white/15 mt-1 uppercase tracking-widest">Nenhum candidato se inscreveu neste edital ainda</p>
+                <p class="text-sm font-bold text-secondary/60">Nenhuma inscrição</p>
+                <p class="text-[10px] font-bold text-secondary/40 mt-1 uppercase tracking-widest">Nenhum candidato se inscreveu neste edital ainda</p>
             </div>
 
             <!-- Cards -->
@@ -124,7 +124,7 @@ onMounted(() => {
                                 <span class="text-[10px] text-secondary/60 truncate">
                                     {{ insc.email || "—" }}
                                 </span>
-                                <span class="text-[9px] text-secondary/40">
+                                <span class="text-[9px] text-secondary/50">
                                     Inscrito em {{ formatDate(insc.criado_em) }}
                                 </span>
                             </div>
@@ -152,7 +152,7 @@ onMounted(() => {
         <!-- Paginação -->
         <div
             v-if="ctx.totalPaginas.value > 1"
-            class="flex items-center justify-center gap-2 shrink-0 pt-3 pb-1 border-t border-white/5 mt-3"
+            class="flex items-center justify-center gap-2 shrink-0 pt-3 pb-1 border-t border-divider mt-3"
         >
             <button
                 :disabled="ctx.pagina.value <= 1"
@@ -161,7 +161,7 @@ onMounted(() => {
             >
                 Anterior
             </button>
-            <span class="text-[10px] text-secondary/40 font-bold px-2">
+            <span class="text-[10px] text-secondary/50 font-bold px-2">
                 {{ ctx.pagina.value }} / {{ ctx.totalPaginas.value }}
             </span>
             <button
@@ -184,8 +184,8 @@ onMounted(() => {
     gap: 8px;
     margin-bottom: 14px;
     padding: 10px 14px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--color-divider);
     border-radius: 12px;
     flex-shrink: 0;
 }
@@ -197,9 +197,9 @@ onMounted(() => {
     padding: 8px 12px;
     padding-right: 28px;
     border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.07);
-    background: rgba(255,255,255,0.04);
-    color: rgba(255,255,255,0.8);
+    border: 1px solid var(--field-border);
+    background: var(--field-bg);
+    color: var(--field-text);
     outline: none;
     transition: border-color 0.15s;
     cursor: pointer;
@@ -217,7 +217,8 @@ onMounted(() => {
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.25);
+    color: var(--color-secondary);
+    opacity: 0.5;
     white-space: nowrap;
     margin-left: auto;
 }
@@ -229,23 +230,23 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     padding: 5rem 2rem;
-    background: rgba(255,255,255,0.015);
-    border: 2px dashed rgba(255,255,255,0.08);
+    background: var(--color-secondary-surface);
+    border: 2px dashed var(--color-divider);
     border-radius: 1rem;
     text-align: center;
 }
 
 /* ── Card ──────────────────────────────────────────── */
 .card-item {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--color-divider);
     border-radius: 14px;
     padding: 14px 16px;
     transition: all 0.15s ease;
 }
 .card-item:hover {
     border-color: rgba(139,92,246,0.3);
-    background: rgba(139,92,246,0.03);
+    background: var(--color-secondary-surface-hover);
     transform: translateX(2px);
 }
 .card-avatar {
@@ -254,7 +255,7 @@ onMounted(() => {
     border-radius: 11px;
     background: rgba(139,92,246,0.1);
     border: 1px solid rgba(139,92,246,0.2);
-    color: #a78bfa;
+    color: var(--color-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -269,15 +270,15 @@ onMounted(() => {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07);
-    color: rgba(255,255,255,0.45);
+    background: var(--color-secondary-surface-hover);
+    border: 1px solid var(--color-divider);
+    color: var(--color-secondary);
     cursor: pointer;
     transition: all 0.15s;
 }
 .card-btn-card:hover {
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.7);
+    background: rgba(139,92,246,0.14);
+    color: var(--color-primary);
 }
 
 /* ── Paginação ────────────────────────────────────── */
@@ -288,15 +289,15 @@ onMounted(() => {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07);
-    color: rgba(255,255,255,0.45);
+    background: transparent;
+    border: 1px solid var(--color-divider);
+    color: var(--color-secondary);
     cursor: pointer;
     transition: all 0.15s;
 }
 .paginate-btn:hover:not(:disabled) {
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.7);
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-text);
 }
 .paginate-btn:disabled {
     opacity: 0.25;
@@ -305,5 +306,5 @@ onMounted(() => {
 
 /* ── Scrollbar ────────────────────────────────────── */
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.12); border-radius: 4px; }
 </style>

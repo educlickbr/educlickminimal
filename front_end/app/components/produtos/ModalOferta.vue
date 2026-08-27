@@ -1,14 +1,18 @@
 <template>
-    <div class="modal-overlay" @click.self="$emit('close')">
-        <div class="modal-panel">
-            <div class="modal-accent-bar" />
-            <div class="modal-header">
-                <div class="modal-header-icon">💰</div>
-                <div class="modal-header-text">
-                    <h3 class="modal-title">
+    <div class="ds-modal-overlay" @click.self="$emit('close')">
+        <div class="ds-modal-panel max-w-xl">
+            <div class="ds-modal-accent-bar" />
+
+            <!-- Header -->
+            <div class="ds-modal-header">
+                <div class="ds-modal-header-icon text-primary">
+                    <Icon name="ph:currency-dollar-bold" class="w-5 h-5" />
+                </div>
+                <div class="flex flex-col gap-0.5 flex-1">
+                    <h3 class="ds-modal-title">
                         {{ oferta ? "Editar Oferta" : "Nova Oferta" }}
                     </h3>
-                    <p class="modal-subtitle">
+                    <p class="ds-modal-subtitle">
                         {{
                             oferta
                                 ? "Altere os dados da oferta"
@@ -16,55 +20,44 @@
                         }}
                     </p>
                 </div>
-                <button class="modal-close-btn" @click="$emit('close')">
-                    ✕
+                <button class="ds-modal-close-btn" @click="$emit('close')">
+                    &times;
                 </button>
             </div>
 
-            <div class="modal-body">
-                <div v-if="errorMessage" class="modal-error">
+            <!-- Form Body -->
+            <div class="p-6 flex flex-col gap-5 overflow-y-auto max-h-[75vh]">
+                <div v-if="errorMessage" class="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-bold">
                     {{ errorMessage }}
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="form-field">
-                        <label class="form-label"
-                            >Slug <span class="text-red-400">*</span></label
-                        >
-                        <input
-                            v-model="form.slug"
-                            type="text"
-                            class="form-input"
-                            placeholder="promocao-relampago"
-                        />
-                    </div>
-                    <div class="form-field">
-                        <label class="form-label">Nome Curto</label>
-                        <input
-                            v-model="form.nome_curto"
-                            type="text"
-                            class="form-input"
-                            placeholder="Black Friday 2026"
-                            @input="autoSlug"
-                        />
-                    </div>
-                </div>
-
-                <div class="form-field">
-                    <label class="form-label"
-                        >Valor (R$) <span class="text-red-400">*</span></label
-                    >
-                    <input
-                        v-model="valorReais"
-                        type="text"
-                        class="form-input"
-                        placeholder="0 = Grátis | 399,00 = R$ 399,00"
-                        @input="onValorInput"
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <BaseField
+                        v-model="form.slug"
+                        label="Slug"
+                        required
+                        placeholder="promocao-relampago"
+                    />
+                    <BaseField
+                        v-model="form.nome_curto"
+                        label="Nome Curto"
+                        placeholder="Black Friday 2026"
+                        @input="autoSlug"
                     />
                 </div>
 
-                <div class="form-field">
-                    <label class="form-label">Tipo de Pagamento</label>
+                <BaseField
+                    v-model="valorReais"
+                    label="Valor (R$)"
+                    required
+                    placeholder="0 = Grátis | 399,00 = R$ 399,00"
+                    @input="onValorInput"
+                />
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-[10px] font-black text-secondary/60 uppercase tracking-widest px-1">
+                        Tipo de Pagamento
+                    </label>
                     <div class="grid grid-cols-2 gap-3">
                         <button
                             type="button"
@@ -77,10 +70,8 @@
                             ]"
                             @click="form.tipo_pagamento = 'unico'"
                         >
-                            <span>💳</span>
-                            <span class="text-[10px] font-bold uppercase"
-                                >Pagamento Único</span
-                            >
+                            <Icon name="ph:credit-card-bold" class="w-4 h-4 text-primary" />
+                            <span class="text-[10px] font-black uppercase tracking-wider text-text">Pagamento Único</span>
                         </button>
                         <button
                             type="button"
@@ -93,112 +84,107 @@
                             ]"
                             @click="form.tipo_pagamento = 'recorrente'"
                         >
-                            <span>🔄</span>
-                            <span class="text-[10px] font-bold uppercase"
-                                >Recorrente</span
-                            >
+                            <Icon name="ph:arrows-clockwise-bold" class="w-4 h-4 text-primary" />
+                            <span class="text-[10px] font-black uppercase tracking-wider text-text">Recorrente</span>
                         </button>
                     </div>
                 </div>
 
-                <div v-if="form.tipo_pagamento === 'unico'" class="form-field">
-                    <label class="form-label">Parcelamento Máximo</label>
-                    <select
-                        v-model.number="form.parcelamento_maximo"
-                        class="form-input"
-                    >
-                        <option :value="1">À vista</option>
-                        <option :value="2">2x</option>
-                        <option :value="3">3x</option>
-                        <option :value="4">4x</option>
-                        <option :value="6">6x</option>
-                        <option :value="12">12x</option>
-                    </select>
+                <div v-if="form.tipo_pagamento === 'unico'">
+                    <BaseSelect
+                        v-model="form.parcelamento_maximo"
+                        label="Parcelamento Máximo"
+                        :options="[
+                            { id: 1, nome: 'À vista' },
+                            { id: 2, nome: '2x' },
+                            { id: 3, nome: '3x' },
+                            { id: 4, nome: '4x' },
+                            { id: 6, nome: '6x' },
+                            { id: 12, nome: '12x' },
+                        ]"
+                    />
                 </div>
 
                 <div
                     v-if="form.tipo_pagamento === 'recorrente'"
-                    class="grid grid-cols-2 gap-4"
+                    class="grid grid-cols-1 md:grid-cols-2 gap-4"
                 >
-                    <div class="form-field">
-                        <label class="form-label">Período</label>
-                        <select
-                            v-model="form.recorrencia_periodo"
-                            class="form-input"
-                        >
-                            <option value="mensal">Mensal</option>
-                            <option value="anual">Anual</option>
-                        </select>
-                    </div>
-                    <div class="form-field">
-                        <label class="form-label">Intervalo</label>
-                        <select
-                            v-model.number="form.recorrencia_intervalo"
-                            class="form-input"
-                        >
-                            <option :value="1">A cada 1</option>
-                            <option :value="3">A cada 3</option>
-                            <option :value="6">A cada 6</option>
-                            <option :value="12">A cada 12</option>
-                        </select>
-                    </div>
+                    <BaseSelect
+                        v-model="form.recorrencia_periodo"
+                        label="Período"
+                        :options="[
+                            { id: 'mensal', nome: 'Mensal' },
+                            { id: 'anual', nome: 'Anual' },
+                        ]"
+                    />
+                    <BaseSelect
+                        v-model="form.recorrencia_intervalo"
+                        label="Intervalo"
+                        :options="[
+                            { id: 1, nome: 'A cada 1' },
+                            { id: 3, nome: 'A cada 3' },
+                            { id: 6, nome: 'A cada 6' },
+                            { id: 12, nome: 'A cada 12' },
+                        ]"
+                    />
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="form-field">
-                        <label class="form-label">Disponível a partir de</label>
-                        <input
-                            v-model="form.disponivel_a_partir_de"
-                            type="datetime-local"
-                            class="form-input"
-                        />
-                    </div>
-                    <div class="form-field">
-                        <label class="form-label">Disponível até</label>
-                        <input
-                            v-model="form.disponivel_ate"
-                            type="datetime-local"
-                            class="form-input"
-                        />
-                    </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <BaseField
+                        v-model="form.disponivel_a_partir_de"
+                        label="Disponível a partir de"
+                        type="datetime-local"
+                    />
+                    <BaseField
+                        v-model="form.disponivel_ate"
+                        label="Disponível até"
+                        type="datetime-local"
+                    />
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="form-field">
-                        <label class="form-label">Visibilidade</label>
-                        <select v-model="form.visibilidade" class="form-input">
-                            <option value="publica">Pública</option>
-                            <option value="oculta">Oculta (link direto)</option>
-                        </select>
-                    </div>
-                    <div class="form-field pt-6">
-                        <label class="form-checkbox">
-                            <input v-model="form.is_ativa" type="checkbox" />
-                            <span>Oferta ativa</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <BaseSelect
+                        v-model="form.visibilidade"
+                        label="Visibilidade"
+                        :options="[
+                            { id: 'publica', nome: 'Pública' },
+                            { id: 'oculta', nome: 'Oculta (link direto)' },
+                        ]"
+                    />
+                    <div class="flex items-center gap-3 p-3 bg-div-15 border border-divider rounded-xl mt-4">
+                        <input
+                            v-model="form.is_ativa"
+                            type="checkbox"
+                            id="chk-oferta-ativa"
+                            class="accent-primary w-4 h-4 cursor-pointer"
+                        />
+                        <label for="chk-oferta-ativa" class="text-xs font-bold text-text cursor-pointer select-none">
+                            Oferta ativa
                         </label>
                     </div>
                 </div>
 
-                <div class="form-field">
-                    <label class="form-checkbox">
-                        <input
-                            v-model="form.exige_elegibilidade"
-                            type="checkbox"
-                            @change="carregarElegiveis"
-                        />
-                        <span>Exige elegibilidade (só CPFs autorizados)</span>
+                <div class="flex items-center gap-3 p-3 bg-div-15 border border-divider rounded-xl">
+                    <input
+                        v-model="form.exige_elegibilidade"
+                        type="checkbox"
+                        id="chk-elegivel"
+                        class="accent-primary w-4 h-4 cursor-pointer"
+                        @change="carregarElegiveis"
+                    />
+                    <label for="chk-elegivel" class="text-xs font-bold text-text cursor-pointer select-none">
+                        Exige elegibilidade (só CPFs autorizados)
                     </label>
                 </div>
 
-                <div v-if="form.exige_elegibilidade" class="elegiveis-section">
-                    <div class="flex items-center justify-between mb-2">
-                        <span
-                            class="text-[9px] font-bold uppercase text-white/35"
-                            >Autorizados ({{ elegiveis.length }})</span
-                        >
+                <div v-if="form.exige_elegibilidade" class="p-4 bg-div-15 border border-divider rounded-xl flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-secondary/60">
+                            Autorizados ({{ elegiveis.length }})
+                        </span>
                         <button
                             v-if="!showAddElegivel"
-                            class="text-[10px] font-bold text-primary hover:text-primary/80"
+                            class="text-[10px] font-black uppercase tracking-wider text-primary hover:underline"
                             @click="showAddElegivel = true"
                         >
                             + Adicionar
@@ -207,30 +193,28 @@
 
                     <div
                         v-if="showAddElegivel"
-                        class="flex flex-col gap-2 mb-3 p-3 bg-white/[0.02] rounded-lg border border-white/[0.06]"
+                        class="flex flex-col gap-2 p-3 bg-secondary-surface rounded-xl border border-divider"
                     >
-                        <input
+                        <BaseField
                             v-model="novoCpf"
-                            type="text"
-                            class="form-input"
                             placeholder="CPF * (só números)"
                         />
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 justify-end">
                             <button
-                                class="text-[10px] font-bold text-primary bg-primary/10 px-4 py-1.5 rounded-lg hover:bg-primary/20"
-                                :disabled="!novoCpf.trim()"
-                                @click="adicionarElegivel"
-                            >
-                                Salvar
-                            </button>
-                            <button
-                                class="text-[10px] font-bold text-white/30 hover:text-white/60"
+                                class="text-[10px] font-bold text-secondary/60 hover:text-text px-3 py-1.5"
                                 @click="
                                     showAddElegivel = false;
                                     novoCpf = '';
                                 "
                             >
                                 Cancelar
+                            </button>
+                            <button
+                                class="ds-btn-save !px-3 !py-1.5 !text-[10px]"
+                                :disabled="!novoCpf.trim()"
+                                @click="adicionarElegivel"
+                            >
+                                Salvar
                             </button>
                         </div>
                     </div>
@@ -247,51 +231,53 @@
                     <div
                         v-for="eleg in elegiveis"
                         :key="eleg.id"
-                        class="flex items-center justify-between py-1.5 px-3 rounded-lg bg-white/[0.02] border border-white/[0.04] mt-1"
+                        class="flex items-center justify-between py-2 px-3 rounded-lg bg-secondary-surface border border-divider"
                     >
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-white/70">{{
+                            <span class="text-xs font-mono font-bold text-text">{{
                                 eleg.cpf
                             }}</span>
                             <span
                                 v-if="eleg.utilizado_em"
-                                class="badge badge--inativo"
+                                class="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-div-30 border border-divider text-secondary"
                                 >Usado</span
                             >
                         </div>
                         <button
-                            class="text-[10px] text-red-400/50 hover:text-red-400"
+                            class="text-[10px] text-red-500/60 hover:text-red-500 font-bold"
                             @click="removerElegivel(eleg.id)"
                         >
-                            ✕
+                            &times;
                         </button>
                     </div>
 
                     <div
                         v-if="elegiveis.length === 0 && !carregandoElegiveis"
-                        class="text-[10px] text-white/20 text-center py-3"
+                        class="text-[10px] font-bold text-secondary/40 text-center py-2"
                     >
                         Nenhum CPF autorizado.
                     </div>
                 </div>
             </div>
 
-            <div class="modal-footer">
-                <button class="modal-btn-cancel" @click="$emit('close')">
+            <!-- Footer -->
+            <div class="ds-modal-footer">
+                <button class="ds-btn-cancel" @click="$emit('close')">
                     Cancelar
                 </button>
                 <button
-                    class="modal-btn-save"
+                    class="ds-btn-save"
                     :disabled="!canSave || saving"
                     @click="handleSave"
                 >
-                    {{
+                    <div v-if="saving" class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>{{
                         saving
                             ? "Salvando..."
                             : oferta
                               ? "Salvar"
                               : "Criar Oferta"
-                    }}
+                    }}</span>
                 </button>
             </div>
         </div>
@@ -482,230 +468,23 @@ async function handleSave() {
 </script>
 
 <style scoped>
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: rgba(0, 0, 0, 0.85);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-.modal-panel {
-    background: #13131a;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    width: 100%;
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    max-height: 90vh;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
-}
-.modal-accent-bar {
-    height: 3px;
-    border-radius: 20px 20px 0 0;
-    background: linear-gradient(90deg, #7c3aed, #a78bfa);
-    flex-shrink: 0;
-}
-.modal-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 20px 24px 0;
-    flex-shrink: 0;
-}
-.modal-header-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    flex-shrink: 0;
-    background: rgba(139, 92, 246, 0.12);
-    color: #a78bfa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-}
-.modal-header-text {
-    flex: 1;
-}
-.modal-title {
-    font-size: 15px;
-    font-weight: 900;
-    color: rgba(255, 255, 255, 0.92);
-}
-.modal-subtitle {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.3);
-    margin-top: 2px;
-}
-.modal-close-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    border: none;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.3);
-    font-size: 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-    flex-shrink: 0;
-}
-.modal-close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
-.modal-body {
-    padding: 20px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    overflow-y: auto;
-}
-.modal-error {
-    padding: 10px 14px;
-    border-radius: 10px;
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    color: #f87171;
-    font-size: 11px;
-    font-weight: 700;
-}
-.form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.form-label {
-    font-size: 9px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: rgba(255, 255, 255, 0.35);
-}
-.form-input {
-    width: 100%;
-    padding: 11px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(232, 230, 240, 0.9);
-    font-size: 13px;
-    font-weight: 700;
-    outline: none;
-    transition: border-color 0.15s ease;
-    font-family: inherit;
-    box-sizing: border-box;
-}
-.form-input:focus {
-    border-color: rgba(139, 92, 246, 0.45);
-}
-.form-input::placeholder {
-    color: rgba(255, 255, 255, 0.15);
-    font-weight: 600;
-}
-.form-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.6);
-    cursor: pointer;
-}
-.form-checkbox input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-    accent-color: #8b5cf6;
-}
 .toggle-card {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 12px 14px;
-    border-radius: 10px;
-    border: 2px solid rgba(255, 255, 255, 0.07);
-    background: rgba(255, 255, 255, 0.025);
+    border-radius: 12px;
+    border: 1px solid var(--color-divider);
+    background: var(--color-secondary-surface);
     cursor: pointer;
     transition: all 0.15s ease;
 }
 .toggle-card:hover {
     border-color: rgba(139, 92, 246, 0.3);
+    background: var(--color-secondary-surface-hover);
 }
 .toggle-card--active {
-    border-color: rgba(139, 92, 246, 0.4);
-    background: rgba(139, 92, 246, 0.06);
-}
-.grid.grid-cols-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 16px 24px 20px;
-    flex-shrink: 0;
-}
-.modal-btn-cancel {
-    padding: 10px 20px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: transparent;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-.modal-btn-cancel:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.8);
-}
-.modal-btn-save {
-    padding: 10px 24px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-    border: 1px solid rgba(139, 92, 246, 0.4);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-    transition: all 0.15s;
-    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
-}
-.modal-btn-save:hover {
-    background: linear-gradient(135deg, #6d28d9, #7c3aed);
-}
-.modal-btn-save:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-.badge {
-    display: inline-flex;
-    align-items: center;
-    font-size: 8px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 2px 6px;
-    border-radius: 20px;
-}
-.badge--inativo {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.3);
+    border-color: var(--color-primary);
+    background: rgba(139, 92, 246, 0.08);
 }
 </style>

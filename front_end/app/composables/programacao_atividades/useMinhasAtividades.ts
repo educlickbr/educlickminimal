@@ -35,9 +35,15 @@ export interface ConteudoAluno {
   atividade_tentativa?: number | null;
   atividade_texto?: string | null;
   atividade_arquivo?: string | null;
+  atividade_comentario?: string | null;
+  atividade_corrigido_em?: string | null;
+  atividade_corrigido_por_nome?: string | null;
   avaliacao_status?: string | null;
   avaliacao_nota?: number | null;
   avaliacao_tentativa?: number | null;
+  avaliacao_comentario?: string | null;
+  avaliacao_corrigido_em?: string | null;
+  avaliacao_corrigido_por_nome?: string | null;
   concluido: boolean;
 }
 

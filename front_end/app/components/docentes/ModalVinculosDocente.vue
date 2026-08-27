@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, watch } from "vue";
+
 const props = defineProps<{
     modelValue: boolean;
     docente: any;
@@ -64,31 +66,31 @@ async function handleSave() {
 <template>
     <div
         v-if="modelValue"
-        class="modal-overlay"
+        class="ds-modal-overlay"
         @click.self="emit('update:modelValue', false)"
     >
-        <div class="modal-panel">
-            <div class="modal-accent-bar" />
+        <div class="ds-modal-panel max-w-lg">
+            <div class="ds-modal-accent-bar" />
 
-            <div class="modal-header">
-                <div class="modal-header-icon">
+            <div class="ds-modal-header">
+                <div class="ds-modal-header-icon">
                     <Icon name="ph:link-light" class="w-5 h-5" />
                 </div>
-                <div class="modal-header-text flex-1">
-                    <h3 class="modal-title">Vínculos do Docente</h3>
-                    <p class="modal-subtitle">
+                <div class="flex flex-col gap-0.5 flex-1">
+                    <h3 class="ds-modal-title">Vínculos do Docente</h3>
+                    <p class="ds-modal-subtitle">
                         {{ docente?.nome_completo || "—" }}
                     </p>
                 </div>
-                <button @click="emit('update:modelValue', false)" class="modal-close-btn">
+                <button @click="emit('update:modelValue', false)" class="ds-modal-close-btn">
                     &times;
                 </button>
             </div>
 
-            <div class="modal-body flex flex-col gap-3 max-h-[400px] overflow-y-auto custom-scrollbar">
+            <div class="p-6 flex flex-col gap-3 max-h-[400px] overflow-y-auto custom-scrollbar">
                 <div
                     v-if="componentesDisponiveis.length === 0"
-                    class="text-center py-6 text-xs text-secondary/40"
+                    class="text-center py-6 text-xs text-secondary/50"
                 >
                     Nenhum componente disponível. Crie componentes em Oferta de Cursos primeiro.
                 </div>
@@ -101,7 +103,7 @@ async function handleSave() {
                     :class="
                         v.elegivel
                             ? 'border-primary/30 bg-primary/5'
-                            : 'border-white/5 bg-white/[0.02] hover:border-white/10'
+                            : 'border-divider bg-div-15 hover:border-primary/20'
                     "
                 >
                     <div class="flex items-center gap-3">
@@ -110,7 +112,7 @@ async function handleSave() {
                             :class="
                                 v.elegivel
                                     ? 'bg-primary border-primary'
-                                    : 'border-white/10'
+                                    : 'border-divider'
                             "
                         >
                             <Icon
@@ -121,7 +123,7 @@ async function handleSave() {
                         </div>
                         <span
                             class="text-xs font-bold"
-                            :class="v.elegivel ? 'text-text' : 'text-secondary/40'"
+                            :class="v.elegivel ? 'text-text' : 'text-secondary/50'"
                         >
                             {{ v.componente_nome }}
                         </span>
@@ -143,10 +145,10 @@ async function handleSave() {
                 {{ error }}
             </div>
 
-            <div class="modal-footer">
+            <div class="ds-modal-footer">
                 <button
                     @click="emit('update:modelValue', false)"
-                    class="modal-btn-cancel"
+                    class="ds-btn-cancel"
                     :disabled="saving"
                 >
                     Cancelar
@@ -154,7 +156,7 @@ async function handleSave() {
                 <button
                     @click="handleSave"
                     :disabled="saving"
-                    class="px-4 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all disabled:opacity-50 flex items-center gap-2"
+                    class="ds-btn-save"
                 >
                     <div
                         v-if="saving"
@@ -168,12 +170,11 @@ async function handleSave() {
 </template>
 
 <style scoped>
-@import "~/assets/modal-styles.css";
 .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(139, 92, 246, 0.12);
     border-radius: 4px;
 }
 </style>

@@ -58,7 +58,7 @@ const paginasVisiveis = computed(() => {
         <!-- Cabeçalho -->
         <div class="flex items-center justify-between mb-6 shrink-0">
             <div>
-                <h2 class="text-xl font-black tracking-tight text-white">
+                <h2 class="text-xl font-black tracking-tight text-text">
                     Minhas Inscrições
                 </h2>
                 <p class="text-[11px] text-secondary/60 font-bold mt-1 uppercase tracking-wider">
@@ -79,7 +79,7 @@ const paginasVisiveis = computed(() => {
             class="flex-1 flex flex-col items-center justify-center gap-3"
         >
             <div class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin" />
-            <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">Carregando inscrições...</span>
+            <span class="text-[10px] font-black text-secondary/50 uppercase tracking-widest">Carregando inscrições...</span>
         </div>
 
         <!-- Empty -->
@@ -88,11 +88,11 @@ const paginasVisiveis = computed(() => {
             class="flex-1 flex items-center justify-center"
         >
             <div class="empty-state max-w-md mx-auto w-full">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" class="mb-3 text-white/25">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" class="mb-3 text-secondary/50">
                     <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m10 0V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2m10 0H7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <p class="text-sm font-bold text-white/30">Nenhuma inscrição encontrada</p>
-                <p class="text-[10px] font-bold text-white/15 mt-1 uppercase tracking-widest">Você ainda não se inscreveu em nenhum processo seletivo</p>
+                <p class="text-sm font-bold text-secondary/60">Nenhuma inscrição encontrada</p>
+                <p class="text-[10px] font-bold text-secondary/40 mt-1 uppercase tracking-widest">Você ainda não se inscreveu em nenhum processo seletivo</p>
                 <NuxtLink
                     to="/oferta"
                     class="empty-cta mt-4"
@@ -236,12 +236,12 @@ const paginasVisiveis = computed(() => {
             <!-- Paginação -->
             <div
                 v-if="ctx.total.value > 20"
-                class="shrink-0 flex items-center justify-center gap-1 pt-4 border-t border-white/5 mt-4"
+                class="shrink-0 flex items-center justify-center gap-1 pt-4 border-t border-divider mt-4"
             >
                 <button
                     :disabled="ctx.pagina.value === 1"
                     @click="ctx.irParaPagina(ctx.pagina.value - 1)"
-                    class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black text-secondary hover:text-white hover:bg-white/5 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+                    class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black text-secondary hover:text-text hover:bg-div-15 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
                 >
                     ‹
                 </button>
@@ -258,7 +258,7 @@ const paginasVisiveis = computed(() => {
                         :class="
                             p === ctx.pagina.value
                                 ? 'bg-primary text-white'
-                                : 'text-secondary hover:text-white hover:bg-white/5'
+                                : 'text-secondary hover:text-text hover:bg-div-15'
                         "
                     >
                         {{ p }}
@@ -267,7 +267,7 @@ const paginasVisiveis = computed(() => {
                 <button
                     :disabled="ctx.pagina.value >= ctx.totalPaginas.value"
                     @click="ctx.irParaPagina(ctx.pagina.value + 1)"
-                    class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black text-secondary hover:text-white hover:bg-white/5 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+                    class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black text-secondary hover:text-text hover:bg-div-15 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
                 >
                     ›
                 </button>
@@ -298,22 +298,22 @@ const paginasVisiveis = computed(() => {
 /* ── Card ──────────────────────────────────────── */
 .insc-card {
     position: relative;
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--field-border);
     border-radius: 14px;
     overflow: hidden;
     cursor: pointer;
     transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 .insc-card:hover {
-    border-color: rgba(139, 92, 246, 0.28);
+    border-color: rgba(139, 92, 246, 0.4);
     transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(139,92,246,0.12);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 0 0 1px rgba(139,92,246,0.12);
 }
 
 .insc-accent-bar {
     position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-    background: linear-gradient(180deg, #7c3aed, #a78bfa);
+    background: var(--color-primary);
     opacity: 0; transition: opacity 0.2s ease;
 }
 .insc-card:hover .insc-accent-bar { opacity: 1; }
@@ -338,7 +338,7 @@ const paginasVisiveis = computed(() => {
     flex-shrink: 0;
     background: rgba(139, 92, 246, 0.1);
     border: 1px solid rgba(139, 92, 246, 0.2);
-    color: #a78bfa;
+    color: var(--color-primary);
     font-size: 14px;
     font-weight: 900;
     display: flex;
@@ -361,7 +361,7 @@ const paginasVisiveis = computed(() => {
     border-radius: 6px;
     background: rgba(139, 92, 246, 0.12);
     border: 1px solid rgba(139, 92, 246, 0.2);
-    color: #c4b5fd;
+    color: var(--color-primary);
 }
 
 .insc-badge-semestre {
@@ -371,9 +371,9 @@ const paginasVisiveis = computed(() => {
     letter-spacing: 0.08em;
     padding: 3px 8px;
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.6);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--field-border);
+    color: var(--color-secondary);
 }
 
 .insc-badge-turno {
@@ -392,13 +392,13 @@ const paginasVisiveis = computed(() => {
 .insc-name {
     font-size: 13px;
     font-weight: 900;
-    color: rgba(232,230,240,0.95);
+    color: var(--color-text);
     line-height: 1.3;
 }
 .insc-date {
     font-size: 10px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--color-secondary);
     margin-top: 2px;
 }
 
@@ -452,7 +452,7 @@ const paginasVisiveis = computed(() => {
 /* ── Actions / Divider ───────────────────────────── */
 .insc-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--field-border);
     margin: 4px 0;
 }
 
@@ -466,9 +466,9 @@ const paginasVisiveis = computed(() => {
 .action-btn-secondary {
     padding: 7px 14px;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.03);
-    color: rgba(255, 255, 255, 0.55);
+    border: 1px solid var(--field-border);
+    background: var(--color-secondary-surface);
+    color: var(--color-secondary);
     font-size: 9px;
     font-weight: 900;
     text-transform: uppercase;
@@ -477,24 +477,22 @@ const paginasVisiveis = computed(() => {
     transition: all 0.15s ease;
 }
 .action-btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.15);
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-text);
+    border-color: var(--color-primary);
 }
 
 .action-btn-primary {
     padding: 7px 16px;
     border-radius: 8px;
     border: none;
-    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    background: var(--color-primary);
     color: #fff;
     font-size: 9px;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     cursor: pointer;
-    transition: all 0.15s ease;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
 }
 .action-btn-primary:hover:not(:disabled) {
     background: linear-gradient(135deg, #6d28d9, #7c3aed);
@@ -511,9 +509,9 @@ const paginasVisiveis = computed(() => {
     flex-direction: column;
     align-items: center;
     padding: 52px 24px;
-    background: rgba(255,255,255,0.015);
+    background: var(--color-secondary-surface);
     border-radius: 14px;
-    border: 1px dashed rgba(255,255,255,0.07);
+    border: 1px dashed var(--field-border);
     text-align: center;
 }
 .empty-cta {
@@ -523,7 +521,7 @@ const paginasVisiveis = computed(() => {
     border-radius: 10px;
     background: rgba(139,92,246,0.12);
     border: 1px solid rgba(139,92,246,0.25);
-    color: #c4b5fd;
+    color: var(--color-primary);
     font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;
@@ -541,8 +539,8 @@ const paginasVisiveis = computed(() => {
     gap: 7px;
     padding: 9px 18px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-    border: 1px solid rgba(139,92,246,0.4);
+    background: var(--color-primary);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
     color: #fff;
     font-size: 11px;
     font-weight: 800;
@@ -550,11 +548,11 @@ const paginasVisiveis = computed(() => {
     letter-spacing: 0.08em;
     cursor: pointer;
     transition: all 0.15s ease;
-    box-shadow: 0 4px 14px rgba(139,92,246,0.3);
+    box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.3);
 }
 .add-btn:hover {
-    background: linear-gradient(135deg,#6d28d9,#7c3aed);
-    box-shadow: 0 6px 20px rgba(139,92,246,0.45);
+    background: var(--color-primary-hover);
+    box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.45);
     transform: translateY(-1px);
 }
 </style>

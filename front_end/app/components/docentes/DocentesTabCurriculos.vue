@@ -15,8 +15,8 @@ const FILTROS = [
 function getStatusInfo(proposta: any) {
     if (!proposta.visto) return { label: "Novo", cls: "bg-sky-500/10 border-sky-500/20 text-sky-400" };
     if (proposta.considerado === true) return { label: "Chamar", cls: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" };
-    if (proposta.considerado === false) return { label: "Dispensado", cls: "bg-white/[0.04] border-white/10 text-white/40" };
-    return { label: "Visto", cls: "bg-white/[0.04] border-white/10 text-white/40" };
+    if (proposta.considerado === false) return { label: "Dispensado", cls: "bg-div-15 border border-divider text-secondary" };
+    return { label: "Visto", cls: "bg-div-15 border border-divider text-secondary" };
 }
 
 function formatDate(d: string) {
@@ -69,11 +69,11 @@ onMounted(() => {
                 v-else-if="ctx.propostas.value.length === 0"
                 class="empty-state"
             >
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="mb-3 text-white/20">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="mb-3 text-secondary/40">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
-                <p class="text-sm font-bold text-white/30">Nenhum currículo recebido</p>
-                <p class="text-[10px] font-bold text-white/15 mt-1 uppercase tracking-widest">Os currículos enviados pela página pública aparecerão aqui</p>
+                <p class="text-sm font-bold text-secondary/60">Nenhum currículo recebido</p>
+                <p class="text-[10px] font-bold text-secondary/40 mt-1 uppercase tracking-widest">Os currículos enviados pela página pública aparecerão aqui</p>
             </div>
 
             <!-- Cards -->
@@ -108,11 +108,11 @@ onMounted(() => {
                                 </span>
                             </div>
 
-                            <p v-if="p.minibio" class="text-xs text-white/50 line-clamp-2 mt-1">
+                            <p v-if="p.minibio" class="text-xs text-secondary line-clamp-2 mt-1">
                                 {{ p.minibio }}
                             </p>
 
-                            <div class="flex items-center gap-3 mt-1 text-[9px] text-secondary/40">
+                            <div class="flex items-center gap-3 mt-1 text-[9px] text-secondary/50">
                                 <span>Enviado: {{ formatDate(p.criado_em) }}</span>
                                 <span v-if="p.edital_nome">Edital: {{ p.edital_nome }}</span>
                             </div>
@@ -172,7 +172,7 @@ onMounted(() => {
         <!-- Paginação -->
         <div
             v-if="ctx.totalPaginas.value > 1"
-            class="flex items-center justify-center gap-2 shrink-0 pt-3 pb-1 border-t border-white/5 mt-3"
+            class="flex items-center justify-center gap-2 shrink-0 pt-3 pb-1 border-t border-divider mt-3"
         >
             <button
                 :disabled="ctx.pagina.value <= 1"
@@ -181,7 +181,7 @@ onMounted(() => {
             >
                 Anterior
             </button>
-            <span class="text-[10px] text-secondary/40 font-bold px-2">
+            <span class="text-[10px] text-secondary/50 font-bold px-2">
                 {{ ctx.pagina.value }} / {{ ctx.totalPaginas.value }}
             </span>
             <button
@@ -204,8 +204,8 @@ onMounted(() => {
     gap: 8px;
     margin-bottom: 14px;
     padding: 10px 14px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--color-divider);
     border-radius: 12px;
     flex-shrink: 0;
 }
@@ -218,24 +218,25 @@ onMounted(() => {
     border-radius: 8px;
     border: none;
     background: transparent;
-    color: rgba(255,255,255,0.3);
+    color: var(--color-secondary);
     cursor: pointer;
     transition: all 0.15s;
 }
 .filter-tag:hover {
-    color: rgba(255,255,255,0.6);
+    color: var(--color-text);
 }
 .filter-tag--active {
     background: rgba(139,92,246,0.14);
-    color: #c4b5fd;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    color: var(--color-primary);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
 }
 .filter-count {
     font-size: 9px;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.25);
+    color: var(--color-secondary);
+    opacity: 0.5;
     white-space: nowrap;
     margin-left: auto;
 }
@@ -247,23 +248,23 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     padding: 5rem 2rem;
-    background: rgba(255,255,255,0.015);
-    border: 2px dashed rgba(255,255,255,0.08);
+    background: var(--color-secondary-surface);
+    border: 2px dashed var(--color-divider);
     border-radius: 1rem;
     text-align: center;
 }
 
 /* ── Card ──────────────────────────────────────────── */
 .card-item {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--color-divider);
     border-radius: 14px;
     padding: 14px 16px;
     transition: all 0.15s ease;
 }
 .card-item:hover {
     border-color: rgba(139,92,246,0.3);
-    background: rgba(139,92,246,0.03);
+    background: var(--color-secondary-surface-hover);
     transform: translateX(2px);
 }
 .card-btn-icon {
@@ -272,7 +273,7 @@ onMounted(() => {
     border-radius: 8px;
     border: none;
     background: transparent;
-    color: rgba(255,255,255,0.25);
+    color: var(--color-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -280,8 +281,8 @@ onMounted(() => {
     transition: all 0.15s;
 }
 .card-btn-icon:hover {
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.6);
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-text);
 }
 
 /* ── Paginação ────────────────────────────────────── */
@@ -292,15 +293,15 @@ onMounted(() => {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07);
-    color: rgba(255,255,255,0.45);
+    background: transparent;
+    border: 1px solid var(--color-divider);
+    color: var(--color-secondary);
     cursor: pointer;
     transition: all 0.15s;
 }
 .paginate-btn:hover:not(:disabled) {
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.7);
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-text);
 }
 .paginate-btn:disabled {
     opacity: 0.25;
@@ -309,5 +310,5 @@ onMounted(() => {
 
 /* ── Scrollbar ────────────────────────────────────── */
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.12); border-radius: 4px; }
 </style>

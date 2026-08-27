@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-[#0a0a0c] text-white font-sans">
+    <div data-theme="dark" class="min-h-screen bg-[#0a0a0c] text-white font-sans">
         <header class="border-b border-white/5">
             <div class="max-w-3xl mx-auto px-6 h-16 flex items-center gap-3">
                 <NuxtLink
@@ -8,7 +8,7 @@
                     >← Voltar</NuxtLink
                 >
                 <div
-                    class="w-6 h-6 rounded-md bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center ml-auto"
+                    class="w-6 h-6 rounded-md bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center ml-auto"
                 >
                     <span class="text-white text-[8px] font-black">EC</span>
                 </div>
@@ -137,3 +137,7 @@ onMounted(async () => {
     fetchOferta();
 });
 </script>
+
+<style scoped>
+/* SFC Style */
+</style>

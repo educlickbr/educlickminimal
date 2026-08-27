@@ -90,7 +90,7 @@ onMounted(async () => {
                 class="w-8 h-8 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"
             />
             <span
-                class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
+                class="text-[10px] font-black text-secondary/50 uppercase tracking-widest"
             >
                 Carregando áreas...
             </span>
@@ -100,12 +100,12 @@ onMounted(async () => {
         <div v-else-if="core.areas.value.length === 0" class="empty-state">
             <Icon
                 name="ph:book-open-light"
-                class="w-16 h-16 text-secondary/20 mb-4"
+                class="w-16 h-16 text-secondary/40 mb-4"
             />
-            <p class="text-sm font-bold text-white/40 mb-2">
+            <p class="text-sm font-bold text-secondary/60 mb-2">
                 Nenhuma área cadastrada
             </p>
-            <p class="text-xs text-secondary/40">
+            <p class="text-xs text-secondary/50">
                 Cadastre áreas acadêmicas para gerenciar matrículas.
             </p>
         </div>
@@ -180,21 +180,21 @@ onMounted(async () => {
                             Atenção
                         </span>
                         <span
-                            class="text-[10px] text-white/60 font-bold leading-relaxed"
+                            class="text-[10px] text-secondary font-bold leading-relaxed"
                         >
                             Deseja realmente inativar a matrícula de
-                            <strong class="text-white/90">{{
+                            <strong class="text-text">{{
                                 inativarMatriculaData?.nome_completo || "—"
                             }}</strong>
                             no programa
-                            <strong class="text-white/90">{{
+                            <strong class="text-text">{{
                                 inativarMatriculaData?.programa_descricao ||
                                 "—"
                             }}</strong
                             >?
                         </span>
                         <span
-                            class="text-[9px] text-secondary/40 mt-1"
+                            class="text-[9px] text-secondary/50 mt-1"
                         >
                             O aluno não terá mais acesso ao curso. Esta ação
                             pode ser revertida.
@@ -255,12 +255,12 @@ onMounted(async () => {
     align-items: center;
     justify-content: center;
     padding: 5rem 2rem;
-    background: rgba(255, 255, 255, 0.015);
-    border: 2px dashed rgba(255, 255, 255, 0.08);
+    background: var(--color-secondary-surface);
+    border: 2px dashed var(--color-divider);
     border-radius: 1rem;
 }
 
-/* Modal styles (replicadas do padrão de processos) */
+/* Modal styles */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -268,7 +268,7 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.75);
     padding: 16px;
     animation: fadeIn 0.15s ease;
 }
@@ -283,8 +283,8 @@ onMounted(async () => {
 
 .modal-panel {
     position: relative;
-    background: #13131a;
-    border: 1px solid rgba(139, 92, 246, 0.18);
+    background: var(--color-background);
+    border: 1px solid var(--color-divider);
     border-radius: 16px;
     width: 100%;
     max-width: 520px;
@@ -292,7 +292,7 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     box-shadow:
-        0 24px 80px rgba(0, 0, 0, 0.7),
+        0 24px 80px rgba(0, 0, 0, 0.3),
         0 0 0 1px rgba(139, 92, 246, 0.1);
     animation: slideUp 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
@@ -318,7 +318,7 @@ onMounted(async () => {
     align-items: center;
     gap: 14px;
     padding: 20px 24px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--color-divider);
     flex-shrink: 0;
 }
 
@@ -328,7 +328,7 @@ onMounted(async () => {
     border-radius: 10px;
     background: rgba(139, 92, 246, 0.12);
     border: 1px solid rgba(139, 92, 246, 0.2);
-    color: #a78bfa;
+    color: var(--color-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -338,7 +338,7 @@ onMounted(async () => {
 .modal-title {
     font-size: 14px;
     font-weight: 900;
-    color: #c4b5fd;
+    color: var(--color-primary);
     text-transform: uppercase;
     letter-spacing: 0.15em;
 }
@@ -346,7 +346,7 @@ onMounted(async () => {
 .modal-subtitle {
     font-size: 10px;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--color-secondary);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-top: 2px;
@@ -357,8 +357,8 @@ onMounted(async () => {
     height: 32px;
     border-radius: 8px;
     border: none;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.4);
+    background: var(--color-secondary-surface);
+    color: var(--color-secondary);
     font-size: 18px;
     font-weight: 700;
     display: flex;
@@ -368,8 +368,8 @@ onMounted(async () => {
     transition: all 0.15s ease;
 }
 .modal-close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-text);
 }
 
 .modal-body {
@@ -382,17 +382,17 @@ onMounted(async () => {
     justify-content: flex-end;
     gap: 10px;
     padding: 16px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(0, 0, 0, 0.15);
+    border-top: 1px solid var(--color-divider);
+    background: var(--color-secondary-surface);
     flex-shrink: 0;
 }
 
 .modal-btn-cancel {
     padding: 10px 22px;
     border-radius: 9px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.45);
+    border: 1px solid var(--color-divider);
+    background: var(--color-secondary-surface);
+    color: var(--color-secondary);
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
@@ -401,8 +401,8 @@ onMounted(async () => {
     transition: all 0.15s ease;
 }
 .modal-btn-cancel:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.7);
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-text);
 }
 .modal-btn-cancel:disabled {
     opacity: 0.5;

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useToast } from '~/composables/useToast'
+import { useAppStore } from '~~/stores/app'
 
+const store = useAppStore()
 const supabase = useSupabaseClient()
 const router = useRouter()
 const { showToast } = useToast()
@@ -14,6 +16,14 @@ const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const loading = ref(false)
 const errorMsg = ref('')
+
+// Aplica o tema/branding da entidade (via BFF) quando deslogado;
+// se não houver entidade resolvida, respeita a preferência manual.
+onMounted(async () => {
+    const { aplicarTemaDaEntidadePublica } = useTemaEntidade();
+    const aplicouEntidade = await aplicarTemaDaEntidadePublica();
+    if (!aplicouEntidade) store.initTheme()
+})
 
 const validatePassword = () => {
     if (password.value.length < 6) {
@@ -97,7 +107,7 @@ const handleSignup = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[#0a0a0c] p-6 font-sans relative overflow-hidden">
+  <div class="min-h-screen flex items-center justify-center bg-background p-6 font-sans relative overflow-hidden">
     
     <!-- Background Accents (Blurred Patches) -->
     <div class="absolute inset-0 pointer-events-none">
@@ -109,11 +119,11 @@ const handleSignup = async () => {
     <div class="w-full max-w-md relative z-10">
         
         <!-- Signup Card -->
-        <div class="bg-div-15 backdrop-blur-2xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl">
+        <div class="bg-div-15 backdrop-blur-2xl border border-divider rounded-[2.5rem] p-8 md:p-12 shadow-2xl">
             
             <!-- Logo Inside Card -->
             <div class="flex flex-col items-center mb-4">
-                <h1 class="text-3xl font-black text-white uppercase tracking-[0.3em] text-center">
+                <h1 class="text-3xl font-black text-text uppercase tracking-[0.3em] text-center">
                     CADASTRO
                 </h1>
                 <p class="text-xs font-bold text-secondary/60 uppercase tracking-widest mt-2">
@@ -133,7 +143,7 @@ const handleSignup = async () => {
                             id="nome"
                             required
                             placeholder="Seu nome"
-                            class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-white/10 group-hover:border-white/20"
+                            class="w-full bg-field border border-field-border rounded-2xl px-5 py-4 text-sm font-bold text-field-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:field-placeholder group-hover:border-field-border"
                         />
                     </div>
                 </div>
@@ -148,7 +158,7 @@ const handleSignup = async () => {
                             id="sobrenome"
                             required
                             placeholder="Seu sobrenome"
-                            class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-white/10 group-hover:border-white/20"
+                            class="w-full bg-field border border-field-border rounded-2xl px-5 py-4 text-sm font-bold text-field-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:field-placeholder group-hover:border-field-border"
                         />
                     </div>
                 </div>
@@ -163,9 +173,9 @@ const handleSignup = async () => {
                             id="email"
                             required
                             placeholder="seu@email.com"
-                            class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-white/10 group-hover:border-white/20"
+                            class="w-full bg-field border border-field-border rounded-2xl px-5 py-4 text-sm font-bold text-field-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:field-placeholder group-hover:border-field-border"
                         />
-                        <div class="absolute right-5 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-primary transition-colors">
+                        <div class="absolute right-5 top-1/2 -translate-y-1/2 text-field-placeholder group-focus-within:text-primary transition-colors">
                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                         </div>
                     </div>
@@ -181,12 +191,12 @@ const handleSignup = async () => {
                             id="password"
                             required
                             placeholder="••••••••"
-                            class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-white/10 group-hover:border-white/20"
+                            class="w-full bg-field border border-field-border rounded-2xl px-5 py-4 text-sm font-bold text-field-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:field-placeholder group-hover:border-field-border"
                         />
                         <button 
                             type="button"
                             @click="showPassword = !showPassword"
-                            class="absolute right-5 top-1/2 -translate-y-1/2 text-white/10 hover:text-primary transition-colors focus:outline-none"
+                            class="absolute right-5 top-1/2 -translate-y-1/2 text-field-placeholder hover:text-primary transition-colors focus:outline-none"
                         >
                             <svg v-if="!showPassword" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <svg v-else class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
@@ -204,12 +214,12 @@ const handleSignup = async () => {
                             id="confirmPassword"
                             required
                             placeholder="••••••••"
-                            class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-white/10 group-hover:border-white/20"
+                            class="w-full bg-field border border-field-border rounded-2xl px-5 py-4 text-sm font-bold text-field-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:field-placeholder group-hover:border-field-border"
                         />
                         <button 
                             type="button"
                             @click="showConfirmPassword = !showConfirmPassword"
-                            class="absolute right-5 top-1/2 -translate-y-1/2 text-white/10 hover:text-primary transition-colors focus:outline-none"
+                            class="absolute right-5 top-1/2 -translate-y-1/2 text-field-placeholder hover:text-primary transition-colors focus:outline-none"
                         >
                             <svg v-if="!showConfirmPassword" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <svg v-else class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
@@ -244,7 +254,7 @@ const handleSignup = async () => {
                 <p class="text-[10px] font-bold text-secondary/40 uppercase tracking-widest">
                     Já tem uma conta?
                 </p>
-                <NuxtLink to="/auth/login" class="inline-block text-[10px] font-black uppercase tracking-widest text-white/80 bg-white/5 border border-white/10 px-8 py-4 rounded-full hover:bg-white/10 hover:text-white transition-all">
+                <NuxtLink to="/auth/login" class="inline-block text-[10px] font-black uppercase tracking-widest text-text/80 bg-div-30 border border-divider px-8 py-4 rounded-full hover:bg-div-30 hover:text-text transition-all">
                     Entrar
                 </NuxtLink>
             </div>

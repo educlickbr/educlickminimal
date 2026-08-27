@@ -35,3 +35,7 @@
 defineProps<{ origem: string | null }>();
 defineEmits<{ selectOrigem: [val: "curso" | "ciclo"] }>();
 </script>
+
+<style scoped>
+/* SFC Style */
+</style>

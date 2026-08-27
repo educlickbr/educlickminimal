@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, computed, watch } from "vue";
+
 const props = defineProps<{
     modelValue: boolean;
     idEntidade: string;
@@ -217,187 +219,169 @@ watch(
 <template>
     <div
         v-if="modelValue"
-        class="modal-overlay"
+        class="ds-modal-overlay"
         @click.self="emit('update:modelValue', false)"
     >
-        <div class="modal-panel">
-            <div class="modal-accent-bar" />
+        <div class="ds-modal-panel max-w-2xl">
+            <div class="ds-modal-accent-bar" />
 
-            <div class="modal-header">
-                <div class="modal-header-icon">
+            <div class="ds-modal-header">
+                <div class="ds-modal-header-icon">
                     <Icon name="ph:user-plus-light" class="w-5 h-5" />
                 </div>
-                <div class="modal-header-text flex-1">
-                    <h3 class="modal-title">{{ editando ? 'Editar Docente' : 'Cadastrar Docente' }}</h3>
-                    <p class="modal-subtitle">{{ editando ? 'Altere os dados cadastrais' : 'Preencha os dados do novo docente' }}</p>
+                <div class="flex flex-col gap-0.5 flex-1">
+                    <h3 class="ds-modal-title">{{ editando ? 'Editar Docente' : 'Cadastrar Docente' }}</h3>
+                    <p class="ds-modal-subtitle">{{ editando ? 'Altere os dados cadastrais' : 'Preencha os dados do novo docente' }}</p>
                 </div>
-                <button @click="emit('update:modelValue', false)" class="modal-close-btn">
+                <button @click="emit('update:modelValue', false)" class="ds-modal-close-btn">
                     &times;
                 </button>
             </div>
 
-            <div class="modal-body flex flex-col gap-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                <!-- Nome + Email -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="field-label">Nome completo *</label>
-                        <input
+            <div class="p-6 flex flex-col gap-4 max-h-[65vh] overflow-y-auto custom-scrollbar">
+                <!-- Loading dados no edit -->
+                <div v-if="loadingDados" class="py-12 flex flex-col items-center gap-3">
+                    <div class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin" />
+                    <span class="text-[10px] font-black text-secondary/50 uppercase tracking-widest">Carregando dados...</span>
+                </div>
+
+                <template v-else>
+                    <!-- Nome + Email -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <BaseField
                             v-model="form.nome"
-                            type="text"
+                            label="Nome completo"
+                            required
                             placeholder="Nome do docente"
-                            class="field-input"
                         />
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="field-label">Email *</label>
-                        <input
+                        <BaseField
                             v-model="form.email"
+                            label="Email"
                             type="email"
+                            required
                             placeholder="docente@email.com"
-                            class="field-input"
                         />
                     </div>
-                </div>
 
-                <!-- Valor Hora/Aula -->
-                <div class="flex flex-col gap-1.5">
-                    <label class="field-label">Valor Hora/Aula (R$)</label>
-                    <input v-model="form.valor_hora_aula" type="text" placeholder="Ex: 50,00" class="field-input" />
-                </div>
+                    <!-- Valor Hora/Aula -->
+                    <BaseField
+                        v-model="form.valor_hora_aula"
+                        label="Valor Hora/Aula (R$)"
+                        optional
+                        placeholder="Ex: 50,00"
+                    />
 
-                <!-- CPF + Data Nascimento -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="field-label">CPF</label>
-                        <input
-                            :value="mascaraCpf(form.cpf)"
-                            @input="form.cpf = mascaraCpf(($event.target as HTMLInputElement).value)"
-                            type="text"
+                    <!-- CPF + Data Nascimento -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <BaseField
+                            :modelValue="mascaraCpf(form.cpf)"
+                            @update:modelValue="(v) => form.cpf = mascaraCpf(v)"
+                            label="CPF"
+                            optional
                             placeholder="000.000.000-00"
-                            maxlength="14"
-                            class="field-input"
                         />
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="field-label">Data de Nascimento</label>
-                        <input
+                        <BaseField
                             v-model="form.data_nascimento"
+                            label="Data de Nascimento"
                             type="date"
-                            class="field-input"
+                            optional
                         />
                     </div>
-                </div>
 
-                <!-- CEP + buscar -->
-                <div class="flex flex-col gap-1.5">
-                    <label class="field-label">CEP</label>
-                    <div class="flex gap-2">
-                        <input
-                            :value="mascaraCep(form.cep)"
-                            @input="form.cep = mascaraCep(($event.target as HTMLInputElement).value); if (form.cep.length === 9) buscarCep()"
-                            type="text"
-                            placeholder="00000-000"
-                            maxlength="9"
-                            class="field-input flex-1"
-                        />
-                        <button
-                            @click="buscarCep"
-                            type="button"
-                            class="px-3 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all"
-                        >
-                            Buscar
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Endereço + Número -->
-                <div class="grid grid-cols-3 gap-4">
-                    <div class="col-span-2 flex flex-col gap-1.5">
-                        <label class="field-label">Endereço</label>
-                        <input
-                            v-model="form.endereco"
-                            type="text"
-                            placeholder="Rua / Avenida..."
-                            class="field-input"
-                        />
-                    </div>
+                    <!-- CEP + buscar -->
                     <div class="flex flex-col gap-1.5">
-                        <label class="field-label">Número</label>
-                        <input
+                        <div class="flex items-end gap-2">
+                            <div class="flex-1">
+                                <BaseField
+                                    :modelValue="mascaraCep(form.cep)"
+                                    @update:modelValue="(v) => { form.cep = mascaraCep(v); if (form.cep.length === 9) buscarCep(); }"
+                                    label="CEP"
+                                    optional
+                                    placeholder="00000-000"
+                                />
+                            </div>
+                            <button
+                                @click="buscarCep"
+                                type="button"
+                                class="px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all h-[42px]"
+                            >
+                                Buscar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Endereço + Número -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2">
+                            <BaseField
+                                v-model="form.endereco"
+                                label="Endereço"
+                                optional
+                                placeholder="Rua / Avenida..."
+                            />
+                        </div>
+                        <BaseField
                             v-model="form.numero"
-                            type="text"
+                            label="Número"
+                            optional
                             placeholder="Ex: 123"
-                            class="field-input"
                         />
                     </div>
-                </div>
 
-                <!-- Complemento + Bairro -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="field-label">Complemento</label>
-                        <input
+                    <!-- Complemento + Bairro -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <BaseField
                             v-model="form.complemento"
-                            type="text"
+                            label="Complemento"
+                            optional
                             placeholder="Apto, Bloco, Casa..."
-                            class="field-input"
                         />
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="field-label">Bairro</label>
-                        <input
+                        <BaseField
                             v-model="form.bairro"
-                            type="text"
+                            label="Bairro"
+                            optional
                             placeholder="Nome do bairro"
-                            class="field-input"
                         />
                     </div>
-                </div>
 
-                <!-- Cidade + Estado -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="flex flex-col gap-1.5">
-                        <label class="field-label">Cidade</label>
-                        <input
+                    <!-- Cidade + Estado -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <BaseField
                             v-model="form.cidade"
-                            type="text"
+                            label="Cidade"
+                            optional
                             placeholder="Nome da cidade"
-                            class="field-input"
                         />
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="field-label">Estado (UF)</label>
-                        <input
+                        <BaseField
                             v-model="form.estado"
-                            type="text"
+                            label="Estado (UF)"
+                            optional
                             placeholder="Ex: SP"
-                            maxlength="2"
-                            class="field-input"
                         />
                     </div>
-                </div>
 
-                <!-- Erro -->
-                <div
-                    v-if="error"
-                    class="text-[10px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2"
-                >
-                    {{ error }}
-                </div>
+                    <!-- Erro -->
+                    <div
+                        v-if="error"
+                        class="text-[10px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2"
+                    >
+                        {{ error }}
+                    </div>
 
-                <!-- Sucesso -->
-                <div
-                    v-if="successMsg"
-                    class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-4 py-2 text-center"
-                >
-                    {{ successMsg }}
-                </div>
+                    <!-- Sucesso -->
+                    <div
+                        v-if="successMsg"
+                        class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-4 py-2 text-center"
+                    >
+                        {{ successMsg }}
+                    </div>
+                </template>
             </div>
 
-            <div class="modal-footer">
+            <div class="ds-modal-footer">
                 <button
                     @click="emit('update:modelValue', false)"
-                    class="modal-btn-cancel"
+                    class="ds-btn-cancel"
                     :disabled="saving"
                 >
                     Cancelar
@@ -405,13 +389,13 @@ watch(
                 <button
                     @click="handleSave"
                     :disabled="saving"
-                    class="px-4 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all disabled:opacity-50 flex items-center gap-2"
+                    class="ds-btn-save"
                 >
                     <div
                         v-if="saving"
                         class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"
                     />
-                    <span>Cadastrar Docente</span>
+                    <span>{{ editando ? 'Salvar Docente' : 'Cadastrar Docente' }}</span>
                 </button>
             </div>
         </div>
@@ -419,35 +403,6 @@ watch(
 </template>
 
 <style scoped>
-@import "~/assets/modal-styles.css";
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
-
-.field-label {
-    font-size: 10px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: rgba(140, 135, 141, 0.6);
-}
-
-.field-input {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 9px;
-    padding: 10px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(232, 230, 240, 0.9);
-    outline: none;
-    transition: all 0.15s ease;
-}
-.field-input:focus {
-    border-color: rgba(139, 92, 246, 0.45);
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-}
-.field-input::placeholder {
-    color: rgba(255, 255, 255, 0.22);
-}
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.12); border-radius: 4px; }
 </style>

@@ -5,3 +5,7 @@
     </NuxtLayout>
   </div>
 </template>
+
+<style scoped>
+/* SFC Style */
+</style>

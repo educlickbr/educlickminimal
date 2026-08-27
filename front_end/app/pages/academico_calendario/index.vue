@@ -72,17 +72,15 @@ async function loadTab(tab: string) {
 </script>
 
 <template>
-    <div class="page-wrap">
-        <div class="page-top-row">
-            <nav class="tabs-nav">
+    <div class="page-wrap flex flex-col">
+        <div class="page-top-row shrink-0">
+            <nav class="ds-tabs-nav">
                 <button
                     v-for="tab in tabs"
                     :key="tab.key"
                     @click="setActiveTab(tab.key)"
-                    :class="[
-                        'tab-btn',
-                        activeTab === tab.key ? 'tab-btn--active' : '',
-                    ]"
+                    class="ds-tab-btn"
+                    :class="{ 'ds-tab-btn--active': activeTab === tab.key }"
                 >
                     {{ tab.label }}
                 </button>
@@ -92,7 +90,7 @@ async function loadTab(tab: string) {
                 <select
                     v-if="activeTab !== 'calendario'"
                     v-model="selectedYear"
-                    class="year-select"
+                    class="px-3 py-2 rounded-xl text-xs font-bold bg-field-bg border border-field-border text-field-text outline-none focus:border-primary/40"
                 >
                     <option v-for="y in availableYears" :key="y" :value="y">
                         {{ y }}
@@ -101,102 +99,54 @@ async function loadTab(tab: string) {
                 <button
                     v-if="activeTab === 'feriados'"
                     @click="feriadosCtx.openNovo()"
-                    class="add-btn"
+                    class="ds-btn-primary"
                 >
-                    + Novo Feriado
+                    <Icon name="ph:plus-bold" class="w-3.5 h-3.5" />
+                    <span>Novo Feriado</span>
                 </button>
                 <button
                     v-if="activeTab === 'eventos'"
                     @click="eventosCtx.openNovo()"
-                    class="add-btn"
+                    class="ds-btn-primary"
                 >
-                    + Novo Evento
+                    <Icon name="ph:plus-bold" class="w-3.5 h-3.5" />
+                    <span>Novo Evento</span>
                 </button>
             </div>
         </div>
 
-        <CalendarioTabFeriados
-            v-if="activeTab === 'feriados'"
-            :ctx="feriadosCtx"
-            :idEntidade="idEntidade"
-        />
-        <CalendarioTabEventos
-            v-if="activeTab === 'eventos'"
-            :ctx="eventosCtx"
-            :idEntidade="idEntidade"
-        />
-        <CalendarioTabCalendario
-            v-if="activeTab === 'calendario'"
-            :ctx="calendarioCtx"
-        />
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+            <CalendarioTabFeriados
+                v-if="activeTab === 'feriados'"
+                :ctx="feriadosCtx"
+                :idEntidade="idEntidade"
+            />
+            <CalendarioTabEventos
+                v-if="activeTab === 'eventos'"
+                :ctx="eventosCtx"
+                :idEntidade="idEntidade"
+            />
+            <CalendarioTabCalendario
+                v-if="activeTab === 'calendario'"
+                :ctx="calendarioCtx"
+            />
+        </div>
     </div>
 </template>
 
 <style scoped>
 .page-wrap {
-    padding: 1rem 1.5rem;
+    padding: 0.25rem 1.5rem 1rem;
+    height: 100%;
 }
 .page-top-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 2rem;
+    margin-bottom: 0.75rem;
     flex-wrap: wrap;
     gap: 1rem;
 }
-.tabs-nav {
-    display: flex;
-    gap: 0.25rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 0.75rem;
-    padding: 0.25rem;
-}
-.tab-btn {
-    padding: 0.5rem 1.25rem;
-    border-radius: 0.625rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.3);
-    transition: all 0.15s;
-    border: none;
-    background: none;
-    cursor: pointer;
-}
-.tab-btn:hover {
-    color: rgba(255, 255, 255, 0.7);
-}
-.tab-btn--active {
-    background: rgba(139, 92, 246, 0.15);
-    color: #a78bfa;
-}
-.add-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.625rem;
-    background: rgba(139, 92, 246, 0.1);
-    color: #a78bfa;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: all 0.15s;
-    border: none;
-    cursor: pointer;
-}
-.add-btn:hover {
-    background: rgba(139, 92, 246, 0.2);
-}
-.year-select {
-    padding: 0.4rem 0.75rem;
-    border-radius: 0.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.7rem;
-    font-weight: 700;
-}
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.12); border-radius: 4px; }
 </style>

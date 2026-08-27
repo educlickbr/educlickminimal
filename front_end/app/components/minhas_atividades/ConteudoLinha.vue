@@ -11,7 +11,7 @@
             <span v-if="item.status_visibilidade === 'prazo_encerrado'" class="badge badge--prazo" title="Prazo encerrado">✕</span>
             <span v-if="item.atividade_status === 'rascunho'" class="badge badge--rascunho" title="Rascunho salvo">R</span>
             <span v-if="item.atividade_status === 'entregue' || item.avaliacao_status === 'entregue'" class="badge badge--entregue" title="Entregue">E</span>
-            <span v-if="temNota(item)" class="badge badge--nota" title="Nota">{{ notaExibida(item) }}</span>
+            <span v-if="temNota(item)" class="badge badge--nota" :title="tooltipNota(item)">{{ notaExibida(item) }}</span>
         </div>
     </button>
 </template>
@@ -50,27 +50,43 @@ function formatData(d: string | null): string {
     if (!d) return "";
     return new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 }
+
+function tooltipNota(item: any): string {
+    const n = item.atividade_nota ?? item.avaliacao_nota;
+    const c = item.atividade_comentario ?? item.avaliacao_comentario;
+    const corrigidoEm = item.atividade_corrigido_em ?? item.avaliacao_corrigido_em;
+    const corrigidoPor = item.atividade_corrigido_por_nome ?? item.avaliacao_corrigido_por_nome;
+    let t = "Nota: " + n;
+    if (corrigidoPor || corrigidoEm) {
+        t += " · Corrigido" + (corrigidoPor ? " por " + corrigidoPor : "") + (corrigidoEm ? " em " + formatData(corrigidoEm) : "");
+    }
+    if (c) t += "\nComentário: " + c;
+    return t;
+}
 </script>
 
 <style scoped>
-.conteudo-linha { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 10px; border-radius: 8px; border: none; background: transparent; cursor: pointer; transition: all 0.15s; text-align: left; }
-.conteudo-linha:hover { background: rgba(255,255,255,0.03); }
-.linha--ativa { background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.15); }
-.linha--off { opacity: 0.45; }
+.conteudo-linha {
+    display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 10px;
+    border-radius: 8px; border: 1px solid transparent; background: transparent; cursor: pointer; transition: all 0.15s ease; text-align: left;
+}
+.conteudo-linha:hover { background: var(--color-secondary-surface-hover); }
+.linha--ativa { background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.25); }
+.linha--off { opacity: 0.5; }
 
 .tipo { font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 5px; border-radius: 4px; flex-shrink: 0; }
-.tipo--material { background: rgba(96,165,250,0.12); color: #93c5fd; }
-.tipo--atividade { background: rgba(52,211,153,0.12); color: #6ee7b7; }
-.tipo--avaliacao { background: rgba(251,146,60,0.12); color: #fdba74; }
+.tipo--material { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+.tipo--atividade { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+.tipo--avaliacao { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
 
-.titulo { font-size: 11px; font-weight: 700; color: rgba(232,230,240,0.8); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.titulo { font-size: 11px; font-weight: 700; color: var(--color-text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .badges { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
 .badge { font-size: 8px; font-weight: 900; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-.badge--ok { background: rgba(52,211,153,0.12); color: #6ee7b7; }
-.badge--agendado { background: rgba(251,191,36,0.12); color: #fbbf24; }
-.badge--prazo { background: rgba(239,68,68,0.12); color: #f87171; }
-.badge--rascunho { background: rgba(148,163,184,0.12); color: #cbd5e1; font-size: 7px; }
-.badge--entregue { background: rgba(96,165,250,0.12); color: #93c5fd; }
-.badge--nota { background: rgba(139,92,246,0.14); color: #c4b5fd; width: auto; padding: 0 5px; border-radius: 6px; }
+.badge--ok { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+.badge--agendado { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+.badge--prazo { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+.badge--rascunho { background: var(--color-secondary-surface-hover); color: var(--color-secondary); font-size: 7px; border: 1px solid var(--color-divider); }
+.badge--entregue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+.badge--nota { background: rgba(139, 92, 246, 0.15); color: var(--color-primary); width: auto; padding: 0 5px; border-radius: 6px; }
 </style>

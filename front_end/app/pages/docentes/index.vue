@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useAppStore } from "~~/stores/app";
 import { useDocentesCore } from "~/composables/docentes/useDocentesCore";
 import { useDocentesEditais } from "~/composables/docentes/useDocentesEditais";
@@ -109,13 +109,13 @@ watch(core.activeTab, async (tab) => {
     <div class="page-wrap flex flex-col">
         <!-- Tabs -->
         <div class="page-top-row shrink-0">
-            <div class="tabs-nav">
+            <div class="ds-tabs-nav">
                 <button
                     v-for="tab in core.TABS"
                     :key="tab.id"
                     @click="core.setActiveTab(tab.id)"
-                    class="tab-btn"
-                    :class="{ 'tab-btn--active': core.activeTab.value === tab.id }"
+                    class="ds-tab-btn"
+                    :class="{ 'ds-tab-btn--active': core.activeTab.value === tab.id }"
                 >
                     {{ tab.label }}
                 </button>
@@ -193,41 +193,5 @@ watch(core.activeTab, async (tab) => {
     margin-bottom: 0.75rem;
     flex-wrap: wrap;
     gap: 1rem;
-}
-
-/* Tabs navigation */
-.tabs-nav {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    padding: 4px;
-}
-
-.tab-btn {
-    padding: 8px 20px;
-    border-radius: 9px;
-    font-size: 10px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: rgba(140, 135, 141, 0.4);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    white-space: nowrap;
-}
-
-.tab-btn:hover {
-    color: rgba(255, 255, 255, 0.7);
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.tab-btn--active {
-    color: #a78bfa;
-    background: rgba(139, 92, 246, 0.15);
-    box-shadow: 0 0 12px rgba(139, 92, 246, 0.08);
 }
 </style>

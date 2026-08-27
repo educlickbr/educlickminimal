@@ -154,7 +154,7 @@ onMounted(() => {
             >
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center"
+                        class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"
                     >
                         <span class="text-white text-xs font-black">EC</span>
                     </div>
@@ -293,7 +293,7 @@ onMounted(() => {
                     class="group relative bg-[#0f0f17] border border-white/5 rounded-xl overflow-hidden hover:border-primary/30 transition-all hover:translate-y-[-4px] shadow-xl hover:shadow-primary/5 flex flex-col"
                 >
                     <div
-                        class="h-1 bg-gradient-to-r from-primary to-purple-500 opacity-30 group-hover:opacity-100 transition-opacity"
+                        class="h-1 bg-primary opacity-30 group-hover:opacity-100 transition-opacity"
                     />
 
                     <div class="p-8 flex-1 flex flex-col">
@@ -430,7 +430,7 @@ onMounted(() => {
         <footer class="py-12 border-t border-white/5 text-center bg-[#0a0a0c]">
             <div class="flex items-center justify-center gap-3 mb-6">
                 <div
-                    class="w-6 h-6 rounded-md bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center"
+                    class="w-6 h-6 rounded-md bg-primary flex items-center justify-center"
                 >
                     <span class="text-white text-[8px] font-black">EC</span>
                 </div>
@@ -442,3 +442,7 @@ onMounted(() => {
         </footer>
     </div>
 </template>
+
+<style scoped>
+/* SFC Style */
+</style>

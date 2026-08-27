@@ -73,7 +73,13 @@ supabase/migrations/
 ├── 20260806100000_create_lms_rpc_avaliacao.sql           ← RPCs de avaliação completa (GET + UPSERT)
 ├── 20260806100001_fix_lms_upsert_avaliacao_completa.sql  ← fix alias value AS p (jsonb_array_elements)
 ├── 20260806100002_fix_lms_get_avaliacao_completa.sql     ← fix criado_em no ORDER BY das subqueries
-└── 20260806100003_add_audit_cols_operacional.sql         ← modificado_por/modificado_em no operacional
+├── 20260806100003_add_audit_cols_operacional.sql         ← modificado_por/modificado_em no operacional
+├── 20260806100004_admin_fechamento.sql                   ← timing no operacional + upsert com ordem
+├── 20260806100005_create_lms_rpc_aluno.sql               ← módulo do aluno (RLS + 6 RPCs)
+├── 20260819100000_fix_rls_lms_resposta_aluno.sql         ← policy gestor faltante + delete own
+├── 20260819100001_lms_fase2_dividas_rapidas.sql          ← rascunho, upload dissertativa, ordem aleatória
+├── 20260819100002_lms_fase23_avaliacao_avancada.sql      ← ambiente_seguro/autoavaliacao + nota automática
+└── 20260819100003_drop_lms_upsert_avaliacao_overload.sql ← drop overload órfão (7 params)
 ```
 
 ---
@@ -101,17 +107,16 @@ POST /api/programacao_atividades/conteudos { id?, id_entidade, tipo, titulo, des
 
 ### Aba Repositório — salvar questionário (avaliação + perguntas)
 ```
-POST /api/programacao_atividades/avaliacao { id_conteudo, id_entidade, nome, descricao, perguntas[], usuario_id }
+POST /api/programacao_atividades/avaliacao { id_conteudo, id_entidade, nome, descricao, ordem_perguntas, ambiente_seguro, autoavaliacao, perguntas[], usuario_id }
   → RPC lms_upsert_avaliacao_completa(...)
-    → UPSERT lms_avaliacao (1:1 com conteúdo, ON CONFLICT id_conteudo)
+    → UPSERT lms_avaliacao (1:1 com conteúdo, ON CONFLICT id_conteudo) + flags
     → REPLACE: DELETE lms_pergunta (CASCADE apaga alternativas) + INSERT novas
+    → valida: autoavaliacao não permite perguntas dissertativas
     → retorna { success, id, qtd_perguntas }
 
 GET /api/programacao_atividades/avaliacao?id_conteudo=X&id_entidade=Y
   → RPC lms_get_avaliacao_completa(...)
-    → lms_avaliacao JOIN lms_conteudo (valida entidade)
-    → lms_pergunta + subquery lms_resposta_possivel (alternativas[])
-    → retorna { avaliacao{ id, nome, descricao, ordem_perguntas }, perguntas[{ id, tipo, enunciado, pontuacao, obrigatoria, ordem, alternativas[{ id, texto, correta }] }] }
+    → retorna { avaliacao{ id, nome, descricao, ordem_perguntas, ambiente_seguro, autoavaliacao }, perguntas[...] }
 ```
 
 ### Aba Distribuição — escopos
@@ -124,6 +129,9 @@ GET /api/programacao_atividades/distribuicao/escopos?tipo_escopo=area|curso|modu
 
 ### Aba Distribuição — associar conteúdo a um escopo
 ```
+Sem item selecionado: a lista de escopos ocupa tudo (flex-1).
+Ao selecionar um item, ela recolhe (w-80) e o painel "Atribuindo a X" surge à direita.
+
 POST /api/programacao_atividades/distribuicao { id_entidade, id_conteudo, id_area | id_curso | id_modulo | id_componente, usuario_id }
   → RPC lms_upsert_distribuicao(...)
     → INSERT em lms_distribuicao (CHECK garante exatamente um escopo)
@@ -155,6 +163,11 @@ GET /api/programacao_atividades/curriculo/conteudos?id_programa=X&id_entidade=Y&
 
 ### Aba Currículo — associar / ativar / destacar (painel direito)
 ```
+⚠️ REGRA: a associação exige ESCOPO ALVO selecionado (botão "Adicionar" na árvore).
+   Sem escopo alvo o radio/toggle ficam desabilitados e a RPC retorna toast de aviso.
+   Sem escopo alvo, a árvore ocupa tudo (flex-1); ao definir escopo ela recolhe (w-96)
+   e o navegador surge à direita (slideInRight + borda violeta).
+
 RADIO (associação):
   POST /api/programacao_atividades/curriculo { id_entidade, id_conteudo, id_programa | id_ciclo | id_calendario, ativo:true, usuario_id }
     → RPC lms_upsert_operacional(...) — cria linha (override)
@@ -364,6 +377,19 @@ lms_progresso_aluno         -- progresso por conteúdo/aluno
 
 ## Histórico de Mudanças
 
+### 2026-08-19 — Fase 2.3 (avaliação avançada) + recolhimento dinâmico + fix RLS
+
+**Banco:**
+- Migration `19100000`: RLS `lms_resposta_aluno` — policy de gestor faltante (após DROP CASCADE da 00002) + delete own do estudante (DELETE da RPC finalizar)
+- Migration `19100001` (2.0): rascunho de atividade na listagem, upload na dissertativa (`id_arquivo_envio`), ordem aleatória
+- Migration `19100002` (2.3): `ambiente_seguro`/`autoavaliacao` em `lms_avaliacao`; upsert aceita `p_ordem_perguntas` (corrige bug latente — BFF já enviava) + flags + validação (autoavaliação sem dissertativa); finalizar calcula nota automática
+- Migration `19100003`: drop do overload órfão de 7 params da `lms_upsert_avaliacao_completa` (a 19100002 dropou a assinatura errada — a de 6 — e a de 7 ficou no banco)
+
+**Frontend:**
+- Modal de conteúdo: toggles 🔒 Ambiente seguro / 🧮 Autoavaliação na aba Perguntas (config fixa no topo + lista rolável + modal mais largo 720px); dissertativa bloqueada em autoavaliação
+- Currículo: **recolhimento dinâmico** (árvore flex-1 ↔ w-96 + navegador com slideInRight); **associação exige escopo alvo** (radio/toggle desabilitados sem escopo + toast); Fase 2.2 (navegador sempre visível) revertida por decisão do usuário
+- Distribuição: mesmo padrão — lista de escopos recolhe ao selecionar item
+
 ### 2026-08-06 — Questionários completos + radio/toggle no Currículo + fixes
 
 **Banco:**
@@ -415,7 +441,8 @@ lms_progresso_aluno         -- progresso por conteúdo/aluno
 
 ## Próximos passos (planejado)
 
-- **Aba "Minhas Atividades"** (aluno) — consumir conteúdos, responder atividades/avaliações, upload de arquivos
-- **Submissões** — usar `lms_submissao_atividade`/`lms_submissao_avaliacao` (UNIQUE por tentativa já previsto)
+- **Ilha de docentes** (Fase 2.4) — correção de entregas: lista de submissões, nota, comentário, gabarito lado a lado
+- **Relatórios** (Fase 2.5) — % de conclusão, notas médias, exportar CSV
 - **Questionário com diff** — quando submissões existirem, migrar o REPLACE para diff por id (evita apagar respostas em cascata)
 - **Índices adicionais** — monitorar performance das RPCs de currículo
+- **Notificações** — disponibilidade de conteúdo e lembretes de prazo (in-app → e-mail)

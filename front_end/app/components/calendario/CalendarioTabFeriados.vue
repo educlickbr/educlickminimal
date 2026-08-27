@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-6">
         <div v-if="ctx.loading.value" class="flex justify-center p-8">
             <div
-                class="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"
+                class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"
             />
         </div>
 
@@ -15,10 +15,10 @@
         >
             <Icon
                 name="ph:calendar-blank-duotone"
-                class="w-12 h-12 text-secondary/20 mx-auto mb-2"
+                class="w-12 h-12 text-secondary/40 mx-auto mb-2"
             />
             <p
-                class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
+                class="text-[10px] font-black text-secondary/60 uppercase tracking-widest"
             >
                 Nenhum feriado cadastrado
             </p>
@@ -28,7 +28,7 @@
             <div class="flex justify-end mb-4">
                 <button
                     @click="ctx.toggleAllMonths(monthKeys)"
-                    class="p-2 text-secondary hover:text-primary transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-div-10 rounded-lg hover:bg-div-30"
+                    class="p-2 text-secondary hover:text-primary transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-div-15 rounded-lg border border-divider hover:bg-div-30"
                 >
                     <Icon
                         name="ph:arrows-out-line-vertical-duotone"
@@ -62,7 +62,7 @@
                         :class="[
                             month.events.length > 0
                                 ? 'bg-primary shadow-[0_0_10px_rgba(139,92,246,0.3)] border border-primary text-white'
-                                : 'bg-background border-2 border-secondary/30 text-secondary/30',
+                                : 'bg-background border-2 border-divider text-secondary/40',
                             month.isCurrent
                                 ? 'scale-110 bg-primary shadow-[0_0_15px_rgba(139,92,246,0.8)] border border-primary text-white'
                                 : '',
@@ -81,7 +81,7 @@
                         ]"
                     >
                         <div
-                            class="hidden md:block absolute top-[1.6rem] w-[2rem] h-px bg-secondary/10 z-0"
+                            class="hidden md:block absolute top-[1.6rem] w-[2rem] h-px bg-divider z-0"
                             :class="
                                 isOddMonth(month.key)
                                     ? '-right-[2rem]'
@@ -100,7 +100,7 @@
                                         :class="
                                             month.isCurrent
                                                 ? 'text-primary'
-                                                : 'text-white'
+                                                : 'text-text'
                                         "
                                     >
                                         {{ month.monthName }}
@@ -154,7 +154,7 @@
                         >
                             <div class="comp-card-accent"></div>
                             <div
-                                class="hidden md:block absolute top-1/2 w-[2rem] h-px bg-secondary/10"
+                                class="hidden md:block absolute top-1/2 w-[2rem] h-px bg-divider"
                                 :class="
                                     isOddMonth(month.key)
                                         ? '-right-[2rem]'
@@ -165,20 +165,20 @@
                                 class="flex items-center gap-4 w-full relative z-10"
                             >
                                 <div
-                                    class="flex flex-col items-center justify-center bg-div-15 rounded p-1.5 min-w-[3.2rem] border border-secondary/5"
+                                    class="flex flex-col items-center justify-center bg-div-15 rounded-xl p-2 min-w-[3.4rem] border border-divider"
                                 >
                                     <span
-                                        class="text-[9px] font-black uppercase text-secondary tracking-widest"
+                                        class="text-[9px] font-black uppercase text-secondary/60 tracking-widest"
                                         >{{ getWeekDay(evt.displayDate) }}</span
                                     >
                                     <span
-                                        class="text-lg font-bold text-primary leading-none"
+                                        class="text-lg font-bold text-primary leading-none mt-0.5"
                                         >{{ getDay(evt.displayDate) }}</span
                                     >
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h4
-                                        class="text-sm font-bold truncate text-white"
+                                        class="text-sm font-bold truncate text-text"
                                     >
                                         {{ evt.displayName }}
                                     </h4>
@@ -280,11 +280,15 @@ function getWeekDay(dateStr?: string) {
     align-items: center;
     gap: 14px;
     padding: 14px 16px;
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--color-divider);
     border-radius: 12px;
     overflow: hidden;
     transition: all 0.2s;
+}
+.comp-card:hover {
+    background: var(--color-secondary-surface-hover);
+    border-color: rgba(139, 92, 246, 0.3);
 }
 .comp-card-accent {
     position: absolute;
@@ -293,7 +297,7 @@ function getWeekDay(dateStr?: string) {
     bottom: 20%;
     width: 3px;
     border-radius: 0 3px 3px 0;
-    background: linear-gradient(180deg, #7c3aed, #a78bfa);
+    background: var(--color-primary);
     opacity: 0;
     transition: opacity 0.2s;
 }
@@ -301,24 +305,25 @@ function getWeekDay(dateStr?: string) {
     opacity: 1;
 }
 .comp-action-btn {
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.5);
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-secondary);
     width: 28px;
     height: 28px;
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;
     cursor: pointer;
+    transition: all 0.15s ease;
 }
 .comp-action-edit:hover {
     background: rgba(139, 92, 246, 0.15);
-    color: #c4b5fd;
+    color: var(--color-primary);
 }
 .comp-action-delete:hover {
     background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
+    color: #ef4444;
 }
 .empty-state {
     display: flex;

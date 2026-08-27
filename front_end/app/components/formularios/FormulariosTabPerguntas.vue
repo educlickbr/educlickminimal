@@ -4,19 +4,19 @@
         <!-- Loading -->
         <div v-if="perguntasCtx.loading.value" class="py-16 flex flex-col items-center justify-center gap-3">
             <div class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin" />
-            <span class="text-[10px] font-black text-secondary/30 uppercase tracking-widest">Carregando perguntas...</span>
+            <span class="text-[10px] font-black text-secondary/50 uppercase tracking-widest">Carregando perguntas...</span>
         </div>
 
         <!-- Grid -->
         <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div v-if="perguntasCtx.perguntas.value.length === 0" class="col-span-full empty-state">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="mb-2 text-white/20">
+            <div v-if="perguntasCtx.perguntas.value.length === 0" class="col-span-full ds-empty">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="mb-2 text-secondary">
                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
                     <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
-                <p class="text-sm font-bold text-white/30">Nenhuma pergunta cadastrada</p>
-                <p class="text-[10px] font-bold text-white/15 mt-1 uppercase tracking-widest">Crie perguntas para usar nos seus formulários</p>
-                <button @click="perguntasCtx.openNova" class="empty-cta">
+                <p class="ds-name">Nenhuma pergunta cadastrada</p>
+                <p class="ds-desc text-center mt-1">Crie perguntas para usar nos seus formulários</p>
+                <button @click="perguntasCtx.openNova" class="ds-btn-primary mt-4">
                     Cadastrar Primeira Pergunta
                 </button>
             </div>
@@ -24,16 +24,16 @@
             <div
                 v-for="p in perguntasCtx.perguntas.value"
                 :key="p.id"
-                class="perg-card"
+                class="ds-card"
                 @click="!p.global && perguntasCtx.openEditar(p)"
                 :class="{ 'perg-card--global': p.global }"
             >
                 <div class="perg-accent-bar" />
-                <div class="perg-card-inner">
+                <div class="ds-card-inner">
 
                     <!-- Header: avatar + badges + ações -->
                     <div class="perg-card-header">
-                        <div class="perg-avatar">
+                        <div class="ds-avatar">
                             {{ (p.label || "?").charAt(0).toUpperCase() }}
                         </div>
 
@@ -63,10 +63,10 @@
                     </div>
 
                     <!-- Label -->
-                    <p class="perg-label">{{ p.label }}</p>
+                    <p class="ds-name">{{ p.label }}</p>
 
                     <!-- Nome interno -->
-                    <p class="perg-interno">
+                    <p class="perg-interno ds-desc">
                         <svg width="9" height="9" viewBox="0 0 12 12" fill="none">
                             <path d="M1 6h10M7 2l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -98,21 +98,7 @@ defineProps<{
 </script>
 
 <style scoped>
-/* ── Card ──────────────────────────────────────── */
-.perg-card {
-    position: relative;
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 14px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-.perg-card:hover {
-    border-color: rgba(139, 92, 246, 0.28);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(139,92,246,0.12);
-}
+/* ── Card (thema-aware base via .ds-card) ──────── */
 /* Cards globais: sem cursor de edição, hover mais sutil */
 .perg-card--global { cursor: default; }
 .perg-card--global:hover {
@@ -123,30 +109,19 @@ defineProps<{
 
 .perg-accent-bar {
     position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-    background: linear-gradient(180deg, #7c3aed, #a78bfa);
+    background: var(--color-primary);
     opacity: 0; transition: opacity 0.2s ease;
 }
-.perg-card:not(.perg-card--global):hover .perg-accent-bar { opacity: 1; }
+.ds-card:not(.perg-card--global):hover .perg-accent-bar { opacity: 1; }
 .perg-card--global .perg-accent-bar {
     background: linear-gradient(180deg, #d97706, #fbbf24);
 }
 .perg-card--global:hover .perg-accent-bar { opacity: 0.6; }
 
-.perg-card-inner {
-    padding: 18px 18px 16px 20px;
-    display: flex; flex-direction: column; gap: 8px;
-}
-
 /* ── Header ─────────────────────────────────────── */
 .perg-card-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
-.perg-avatar {
-    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
-    background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);
-    color: #a78bfa; font-size: 13px; font-weight: 900;
-    display: flex; align-items: center; justify-content: center;
-}
-.perg-card--global .perg-avatar {
+.perg-card--global .ds-avatar {
     background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); color: #fbbf24;
 }
 
@@ -161,49 +136,30 @@ defineProps<{
 .perg-badge-tipo {
     font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em;
     padding: 3px 7px; border-radius: 10px;
-    background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.15); color: rgba(167,139,250,0.7);
+    background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2);
+    color: var(--color-primary);
 }
 
 .perg-card-actions {
     margin-left: auto; display: flex; gap: 5px;
     opacity: 0; transition: opacity 0.15s ease;
 }
-.perg-card:hover .perg-card-actions { opacity: 1; }
+.ds-card:hover .perg-card-actions { opacity: 1; }
 
 .action-btn {
     width: 26px; height: 26px; border-radius: 7px; border: none;
-    background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.35);
+    background: var(--color-secondary-surface); color: var(--color-secondary);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: all 0.15s ease;
 }
-.action-edit:hover   { background: rgba(139,92,246,0.18); color: #c4b5fd; }
+.action-btn:hover { background: var(--color-secondary-surface-hover); color: var(--color-text); }
+.action-edit:hover   { background: rgba(139,92,246,0.18); color: var(--color-primary); }
 .action-delete:hover { background: rgba(239,68,68,0.15);  color: #fca5a5; }
 
 /* ── Content ─────────────────────────────────────── */
-.perg-label {
-    font-size: 13px; font-weight: 900; color: rgba(232,230,240,0.92);
-    line-height: 1.3; margin-top: 2px;
-}
 .perg-interno {
     display: flex; align-items: center; gap: 5px;
-    font-size: 10px; font-weight: 700;
-    color: rgba(255,255,255,0.22); font-style: italic;
+    font-style: italic;
     font-variant-numeric: tabular-nums;
 }
-
-/* ── Empty state ─────────────────────────────────── */
-.empty-state {
-    display: flex; flex-direction: column; align-items: center;
-    padding: 52px 24px;
-    background: rgba(255,255,255,0.015); border-radius: 14px;
-    border: 1px dashed rgba(255,255,255,0.07);
-}
-.empty-cta {
-    margin-top: 16px; padding: 9px 20px; border-radius: 10px;
-    background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25);
-    color: #c4b5fd; font-size: 11px; font-weight: 800;
-    text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer;
-    transition: all 0.15s ease;
-}
-.empty-cta:hover { background: rgba(139,92,246,0.2); }
 </style>

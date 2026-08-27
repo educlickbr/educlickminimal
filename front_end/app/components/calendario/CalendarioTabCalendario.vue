@@ -4,14 +4,14 @@
         <div class="flex flex-col md:flex-row md:items-center gap-4">
             <div class="flex-1 flex flex-col gap-1.5">
                 <label
-                    class="text-[10px] font-black text-secondary/50 uppercase tracking-[0.18em]"
+                    class="text-[10px] font-black text-secondary/60 uppercase tracking-[0.18em]"
                     >Oferta / Programa</label
                 >
                 <div class="relative">
                     <select
                         v-model="ctx.selectedProgramaId.value"
                         @change="ctx.onProgramaChange"
-                        class="w-full px-4 py-3 rounded-xl border border-secondary/10 bg-div-5 text-sm font-bold text-primary outline-none appearance-none cursor-pointer transition-all hover:border-primary/30 focus:border-primary/50"
+                        class="w-full px-4 py-3 rounded-xl border border-field-border bg-field-bg text-sm font-bold text-field-text outline-none appearance-none cursor-pointer transition-all hover:border-primary/30 focus:border-primary/50"
                     >
                         <option :value="null" disabled>
                             — Selecione um Programa —
@@ -37,12 +37,12 @@
             >
                 <button
                     @click="ctx.goToToday"
-                    class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-div-10 border border-secondary/5 text-secondary/50 hover:text-primary hover:border-primary/30 transition-all"
+                    class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-div-15 border border-divider text-secondary hover:text-text hover:bg-div-30 transition-all"
                 >
                     Hoje
                 </button>
                 <div
-                    class="flex items-center p-1 bg-div-10 rounded-lg border border-secondary/5"
+                    class="flex items-center p-1 bg-div-15 rounded-lg border border-divider"
                 >
                     <button
                         @click="ctx.viewMode.value = 'mensal'"
@@ -50,7 +50,7 @@
                         :class="
                             ctx.viewMode.value === 'mensal'
                                 ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                                : 'text-secondary/50 hover:text-secondary'
+                                : 'text-secondary/60 hover:text-text'
                         "
                     >
                         Mensal
@@ -61,7 +61,7 @@
                         :class="
                             ctx.viewMode.value === 'semanal'
                                 ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                                : 'text-secondary/50 hover:text-secondary'
+                                : 'text-secondary/60 hover:text-text'
                         "
                     >
                         Semanal
@@ -79,7 +79,7 @@
                 class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"
             />
             <span
-                class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
+                class="text-[10px] font-black text-secondary/50 uppercase tracking-widest"
                 >Carregando programas...</span
             >
         </div>
@@ -91,10 +91,10 @@
                 name="ph:folder-simple-dashed-duotone"
                 class="w-10 h-10 text-secondary/30"
             />
-            <p class="text-sm font-bold text-white/40 mt-2">
+            <p class="text-sm font-bold text-secondary/60 mt-2">
                 Nenhum programa encontrado
             </p>
-            <p class="text-xs text-secondary/30">
+            <p class="text-xs text-secondary/40">
                 Vá para a aba de Ofertas para criar seu primeiro programa.
             </p>
         </div>
@@ -103,10 +103,10 @@
                 name="ph:calendar-dots-duotone"
                 class="w-10 h-10 text-primary/50"
             />
-            <p class="text-sm font-bold text-white/40 mt-2">
+            <p class="text-sm font-bold text-secondary/60 mt-2">
                 Selecione um programa acima
             </p>
-            <p class="text-xs text-secondary/30">
+            <p class="text-xs text-secondary/40">
                 O calendário consolidado de aulas será exibido aqui.
             </p>
         </div>
@@ -118,7 +118,7 @@
                 class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"
             />
             <span
-                class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
+                class="text-[10px] font-black text-secondary/50 uppercase tracking-widest"
                 >Carregando calendário...</span
             >
         </div>
@@ -130,10 +130,10 @@
                 name="ph:calendar-blank-duotone"
                 class="w-10 h-10 text-secondary/30"
             />
-            <p class="text-sm font-bold text-white/40 mt-2">
+            <p class="text-sm font-bold text-secondary/60 mt-2">
                 Nenhum encontro agendado
             </p>
-            <p class="text-xs text-secondary/30">
+            <p class="text-xs text-secondary/40">
                 Este programa ainda não tem ciclos com calendário gerado.
             </p>
         </div>
@@ -143,25 +143,25 @@
             <div class="flex items-center justify-between mb-4">
                 <button
                     @click="ctx.prevMonth()"
-                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-div-10 border border-secondary/5 hover:bg-div-20 hover:border-primary/20 text-secondary/50 hover:text-primary transition-all"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-div-15 border border-divider hover:bg-div-30 text-secondary hover:text-text transition-all"
                 >
                     <Icon name="ph:caret-left-bold" class="w-4 h-4" />
                 </button>
                 <h3
-                    class="text-sm font-black text-white uppercase tracking-widest"
+                    class="text-sm font-black text-text uppercase tracking-widest"
                 >
                     {{ ctx.calMonthLabel.value }}
                 </h3>
                 <button
                     @click="ctx.nextMonth()"
-                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-div-10 border border-secondary/5 hover:bg-div-20 hover:border-primary/20 text-secondary/50 hover:text-primary transition-all"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-div-15 border border-divider hover:bg-div-30 text-secondary hover:text-text transition-all"
                 >
                     <Icon name="ph:caret-right-bold" class="w-4 h-4" />
                 </button>
             </div>
-            <div class="rounded-xl border border-secondary/8 overflow-hidden">
+            <div class="rounded-xl border border-divider overflow-hidden">
                 <div
-                    class="grid grid-cols-7 bg-div-10 border-b border-secondary/8"
+                    class="grid grid-cols-7 bg-div-15 border-b border-divider"
                 >
                     <div
                         v-for="d in ctx.CAL_DAYS"
@@ -169,7 +169,7 @@
                         class="py-2 text-center"
                     >
                         <span
-                            class="text-[9px] font-black text-secondary/40 uppercase tracking-[0.18em]"
+                            class="text-[9px] font-black text-secondary/60 uppercase tracking-[0.18em]"
                             >{{ d }}</span
                         >
                     </div>
@@ -180,16 +180,16 @@
                     class="grid grid-cols-7"
                     :class="
                         Number(wi) < ctx.calMonthGrid.value.length - 1
-                            ? 'border-b border-secondary/8'
+                            ? 'border-b border-divider'
                             : ''
                     "
                 >
                     <div
                         v-for="cell in week"
                         :key="cell.dateStr"
-                        class="min-h-[110px] p-2 border-r border-secondary/8 last:border-r-0 flex flex-col gap-1 transition-colors"
+                        class="min-h-[110px] p-2 border-r border-divider last:border-r-0 flex flex-col gap-1 transition-colors"
                         :class="[
-                            !cell.isCurrentMonth ? 'opacity-30' : '',
+                            !cell.isCurrentMonth ? 'opacity-40' : '',
                             cell.isToday ? 'bg-primary/5' : '',
                             ctx.dragTargetDate.value === cell.dateStr &&
                             ctx.draggingItem.value
@@ -212,7 +212,7 @@
                                 :class="
                                     cell.isToday
                                         ? 'bg-primary text-white'
-                                        : 'text-secondary/50'
+                                        : 'text-text'
                                 "
                                 >{{ cell.day }}</span
                             >
@@ -229,7 +229,7 @@
                                         ? 'opacity-40 scale-95'
                                         : '',
                                     item.status === 'cancelada'
-                                        ? 'bg-secondary/10 border border-dashed border-secondary/30'
+                                        ? 'bg-secondary/10 border border-dashed border-divider'
                                         : item.status === 'reagendada'
                                           ? 'bg-emerald-500/15 border border-emerald-500/25'
                                           : 'bg-primary/15 border border-primary/25',
@@ -271,7 +271,7 @@
                                     :class="
                                         item.status === 'cancelada'
                                             ? 'text-secondary/60'
-                                            : 'text-white/70'
+                                            : 'text-text'
                                     "
                                 >
                                     {{ item.ciclo_desc }}
@@ -299,7 +299,7 @@
                                 class="px-2 py-1.5 rounded-lg bg-red-500/15 border border-red-500/20"
                             >
                                 <p
-                                    class="text-[9px] font-black text-red-400 leading-tight"
+                                    class="text-[9px] font-black text-red-500 leading-tight"
                                 >
                                     🛑 {{ item.nome }}
                                 </p>
@@ -309,7 +309,7 @@
                                 class="px-2 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/20"
                             >
                                 <p
-                                    class="text-[9px] font-black text-amber-400 leading-tight"
+                                    class="text-[9px] font-black text-amber-500 leading-tight"
                                 >
                                     📅 {{ item.nome_evento }}
                                 </p>
@@ -325,30 +325,30 @@
             <div class="flex items-center justify-between mb-4">
                 <button
                     @click="ctx.prevWeek()"
-                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-div-10 border border-secondary/5 hover:bg-div-20 hover:border-primary/20 text-secondary/50 hover:text-primary transition-all"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-div-15 border border-divider hover:bg-div-30 text-secondary hover:text-text transition-all"
                 >
                     <Icon name="ph:caret-left-bold" class="w-4 h-4" />
                 </button>
                 <h3
-                    class="text-sm font-black text-white uppercase tracking-widest"
+                    class="text-sm font-black text-text uppercase tracking-widest"
                 >
                     {{ ctx.calWeekLabel.value }}
                 </h3>
                 <button
                     @click="ctx.nextWeek()"
-                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-div-10 border border-secondary/5 hover:bg-div-20 hover:border-primary/20 text-secondary/50 hover:text-primary transition-all"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg bg-div-15 border border-divider hover:bg-div-30 text-secondary hover:text-text transition-all"
                 >
                     <Icon name="ph:caret-right-bold" class="w-4 h-4" />
                 </button>
             </div>
-            <div class="rounded-xl border border-secondary/8 overflow-hidden">
+            <div class="rounded-xl border border-divider overflow-hidden">
                 <div
-                    class="grid grid-cols-7 bg-div-10 border-b border-secondary/8"
+                    class="grid grid-cols-7 bg-div-15 border-b border-divider"
                 >
                     <div
                         v-for="day in ctx.calWeekDays.value"
                         :key="day.dateStr"
-                        class="py-3 text-center border-r border-secondary/8 last:border-r-0"
+                        class="py-3 text-center border-r border-divider last:border-r-0"
                         :class="day.isToday ? 'bg-primary/10' : ''"
                     >
                         <p
@@ -356,7 +356,7 @@
                             :class="
                                 day.isToday
                                     ? 'text-primary'
-                                    : 'text-secondary/40'
+                                    : 'text-secondary/60'
                             "
                         >
                             {{ day.label }}
@@ -366,7 +366,7 @@
                             :class="
                                 day.isToday
                                     ? 'bg-primary text-white'
-                                    : 'text-white'
+                                    : 'text-text'
                             "
                             >{{ day.dayNum }}</span
                         >
@@ -376,7 +376,7 @@
                     <div
                         v-for="day in ctx.calWeekDays.value"
                         :key="day.dateStr + '_events'"
-                        class="min-h-[250px] p-2 flex flex-col gap-2 border-r border-secondary/8 last:border-r-0 transition-colors"
+                        class="min-h-[250px] p-2 flex flex-col gap-2 border-r border-divider last:border-r-0 transition-colors"
                         :class="[
                             day.isToday ? 'bg-primary/5' : '',
                             ctx.dragTargetDate.value === day.dateStr &&
@@ -398,7 +398,7 @@
                             v-if="day.events.length === 0"
                             class="flex-1 flex items-center justify-center"
                         >
-                            <span class="text-[9px] text-secondary/15 font-bold"
+                            <span class="text-[9px] text-secondary/30 font-bold"
                                 >—</span
                             >
                         </div>
@@ -414,7 +414,7 @@
                                         ? 'opacity-40 scale-95'
                                         : '',
                                     item.status === 'cancelada'
-                                        ? 'bg-secondary/10 border border-dashed border-secondary/30'
+                                        ? 'bg-secondary/10 border border-dashed border-divider'
                                         : item.status === 'reagendada'
                                           ? 'bg-emerald-500/12 border border-emerald-500/25'
                                           : 'bg-primary/12 border border-primary/25',
@@ -455,7 +455,7 @@
                                     :class="
                                         item.status === 'cancelada'
                                             ? 'text-secondary/60'
-                                            : 'text-white/80'
+                                            : 'text-text'
                                     "
                                 >
                                     {{ item.ciclo_desc }}
@@ -483,7 +483,7 @@
                                 class="px-2 py-1.5 rounded-lg bg-red-500/15 border border-red-500/20"
                             >
                                 <p
-                                    class="text-[9px] font-black text-red-400 leading-tight"
+                                    class="text-[9px] font-black text-red-500 leading-tight"
                                 >
                                     🛑 {{ item.nome }}
                                 </p>
@@ -493,7 +493,7 @@
                                 class="px-2 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/20"
                             >
                                 <p
-                                    class="text-[9px] font-black text-amber-400 leading-tight"
+                                    class="text-[9px] font-black text-amber-500 leading-tight"
                                 >
                                     📅 {{ item.nome_evento }}
                                 </p>

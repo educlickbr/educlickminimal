@@ -6,7 +6,7 @@
             @click="ctx.visaoCentral.value = 'menu'"
             title="Ver como árvore por escopo"
         >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"></path><path d="M3 6h.01M3 12h.01M3 18h.01"></path></svg>
+            <Icon name="ph:tree-structure-bold" class="w-3 h-3" />
             Menu
         </button>
         <button
@@ -15,7 +15,7 @@
             @click="ctx.visaoCentral.value = 'resumo'"
             title="Ver como lista de conteúdos"
         >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <Icon name="ph:squares-four-bold" class="w-3 h-3" />
             Resumo
         </button>
     </div>
@@ -30,8 +30,11 @@ defineProps<{
 </script>
 
 <style scoped>
-.visao-btn { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); color: rgba(255,255,255,0.4); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-.visao-btn:hover { color: #c4b5fd; border-color: rgba(139,92,246,0.35); background: rgba(139,92,246,0.05); }
-.visao-btn--on { background: rgba(139,92,246,0.12); color: #c4b5fd; border-color: rgba(139,92,246,0.25); }
-.visao-btn--on svg { color: #c4b5fd; }
+.visao-btn {
+    display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px;
+    border-radius: 6px; border: 1px solid var(--color-divider); background: var(--color-secondary-surface);
+    color: var(--color-secondary); font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.visao-btn:hover { color: var(--color-primary); border-color: rgba(139,92,246,0.35); background: var(--color-secondary-surface-hover); }
+.visao-btn--on { background: rgba(139,92,246,0.12); color: var(--color-primary); border-color: rgba(139,92,246,0.25); }
 </style>

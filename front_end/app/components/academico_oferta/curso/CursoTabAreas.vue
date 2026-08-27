@@ -12,18 +12,13 @@
             </h4>
             <div class="area-form-row">
                 <div class="area-field">
-                    <label class="area-label">Nome da Área</label>
-                    <input
-                        v-model="formArea.nome_area"
-                        placeholder="Ex: Exatas, Saúde, Humanas..."
-                        class="area-input"
-                    />
+                    <BaseField v-model="formArea.nome_area" label="Nome da Área" placeholder="Ex: Exatas, Saúde, Humanas..." />
                 </div>
                 <div class="area-form-actions">
                     <button
                         @click="$emit('saveArea')"
                         :disabled="loadingArea || !formArea.nome_area.trim()"
-                        class="area-save-btn"
+                        class="ds-btn-primary"
                     >
                         {{ loadingArea ? "Salvando..." : formArea.id ? "Atualizar" : "Criar Área" }}
                     </button>
@@ -54,9 +49,9 @@
 
             <div
                 v-else-if="areasDisponiveis.length === 0"
-                class="area-empty"
+                class="ds-empty"
             >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="mb-2 text-white/15">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="mb-2 text-secondary/25">
                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
                     <path d="M12 8v4M12 16v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
@@ -112,7 +107,7 @@ defineEmits<{
 .area-form-title {
     display: flex; align-items: center; gap: 7px;
     font-size: 10px; font-weight: 900; text-transform: uppercase;
-    letter-spacing: 0.14em; color: #a78bfa;
+    letter-spacing: 0.14em; color: var(--color-primary);
 }
 .area-form-row {
     display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
@@ -120,67 +115,49 @@ defineEmits<{
 .area-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
 .area-label {
     font-size: 9px; font-weight: 900; text-transform: uppercase;
-    letter-spacing: 0.14em; color: rgba(255,255,255,0.3);
+    letter-spacing: 0.14em; color: var(--color-secondary);
 }
 .area-input {
     width: 100%; padding: 10px 12px; border-radius: 9px;
-    border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.04);
-    color: rgba(232,230,240,0.9); font-size: 12px; font-weight: 700;
+    border: 1px solid var(--field-border); background: var(--field-bg);
+    color: var(--field-text); font-size: 12px; font-weight: 700;
     outline: none; transition: border-color 0.15s;
 }
-.area-input:focus { border-color: rgba(139,92,246,0.45); }
+.area-input:focus { border-color: var(--field-border-focus); }
 
 .area-form-actions { display: flex; gap: 6px; flex-shrink: 0; }
-.area-save-btn {
-    padding: 10px 18px; border-radius: 9px; border: none;
-    background: linear-gradient(135deg,#7c3aed,#8b5cf6);
-    color: #fff; font-size: 10px; font-weight: 900;
-    text-transform: uppercase; letter-spacing: 0.08em;
-    cursor: pointer; transition: all 0.15s; white-space: nowrap;
-    box-shadow: 0 3px 10px rgba(139,92,246,0.3);
-}
-.area-save-btn:hover { background: linear-gradient(135deg,#6d28d9,#7c3aed); }
-.area-save-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .area-cancel-btn {
     width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04);
-    color: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--field-border); background: var(--color-secondary-surface);
+    color: var(--color-secondary); display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: all 0.15s;
 }
-.area-cancel-btn:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+.area-cancel-btn:hover { background: var(--color-secondary-surface-hover); color: var(--color-text); }
 
 /* ── List ────────────────────────────────────────── */
 .area-list-header {
     display: flex; align-items: center; gap: 8px;
     font-size: 9px; font-weight: 900; text-transform: uppercase;
-    letter-spacing: 0.14em; color: rgba(255,255,255,0.25);
+    letter-spacing: 0.14em; color: var(--color-secondary);
     padding: 0 2px;
 }
 .area-list-count {
     padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 900;
-    background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.15); color: #a78bfa;
+    background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.15); color: var(--color-primary);
 }
 
 .area-loading { display: flex; justify-content: center; padding: 20px; }
 .area-spinner {
     width: 20px; height: 20px; border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.06); border-top-color: #8b5cf6;
+    border: 2px solid var(--color-divider); border-top-color: var(--color-primary);
     animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.area-empty {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 32px 16px; border-radius: 10px;
-    background: rgba(255,255,255,0.015); border: 1px dashed rgba(255,255,255,0.06);
-    font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.2);
-    text-align: center;
-}
-
 .area-row {
     display: flex; align-items: center; gap: 10px;
     padding: 11px 14px; border-radius: 10px;
-    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+    background: var(--color-secondary-surface); border: 1px solid var(--field-border);
     transition: border-color 0.15s ease, background 0.15s ease;
 }
 .area-row:hover { border-color: rgba(139,92,246,0.18); background: rgba(139,92,246,0.03); }
@@ -190,7 +167,7 @@ defineEmits<{
     background: rgba(139,92,246,0.4);
 }
 .area-row-name {
-    flex: 1; font-size: 12px; font-weight: 700; color: rgba(232,230,240,0.85);
+    flex: 1; font-size: 12px; font-weight: 700; color: var(--color-text);
     min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .area-row-actions { display: flex; gap: 4px; flex-shrink: 0; }
@@ -198,8 +175,8 @@ defineEmits<{
     width: 26px; height: 26px; border-radius: 7px; border: none;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: all 0.15s;
-    background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.25);
+    background: var(--color-secondary-surface); color: var(--color-secondary);
 }
-.area-row-btn--edit:hover  { background: rgba(139,92,246,0.15); color: #c4b5fd; }
-.area-row-btn--delete:hover { background: rgba(239,68,68,0.12);  color: #f87171; }
+.area-row-btn--edit:hover  { background: rgba(139,92,246,0.15); color: var(--color-primary); }
+.area-row-btn--delete:hover { background: rgba(239,68,68,0.12);  color: var(--color-danger); }
 </style>

@@ -395,3 +395,7 @@ function onViewFile(perguntaId: string) {
     emit("viewFile", perguntaId);
 }
 </script>
+
+<style scoped>
+/* SFC Style */
+</style>

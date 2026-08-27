@@ -108,15 +108,16 @@ watch(activeTab, (tab) => {
 </script>
 
 <template>
-	<div class="h-full flex flex-col">
+	<div class="h-full flex flex-col page-wrap">
 		<!-- Tabs Navigation -->
-		<div class="page-top-row">
-			<nav class="tabs-nav">
+		<div class="page-top-row shrink-0">
+			<nav class="ds-tabs-nav">
 				<button
 					v-for="tab in tabs"
 					:key="tab.id"
 					@click="activeTab = tab.id"
-					:class="['tab-btn', activeTab === tab.id ? 'tab-btn--active' : '']"
+					class="ds-tab-btn"
+					:class="{ 'ds-tab-btn--active': activeTab === tab.id }"
 				>{{ tab.label }}</button>
 			</nav>
 		</div>
@@ -137,7 +138,7 @@ watch(activeTab, (tab) => {
 
 		<!-- ═══ ABA: CALENDÁRIO ═══ -->
 		<template v-if="activeTab === 'calendario'">
-			<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 shrink-0">
+			<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 shrink-0">
 
 				<div class="flex items-center gap-3 w-full md:w-auto flex-wrap">
 					<!-- Sala Filter -->
@@ -154,7 +155,7 @@ watch(activeTab, (tab) => {
 						/>
 					</div>
 
-					<div class="h-8 w-px bg-white/5 mx-1 hidden md:block" />
+					<div class="h-8 w-px bg-divider mx-1 hidden md:block" />
 
 					<!-- Date Picker -->
 					<div class="relative">
@@ -168,38 +169,34 @@ watch(activeTab, (tab) => {
 						/>
 						<button
 							@click="() => dateInput?.showPicker()"
-							class="bg-[var(--field-bg-select)] border border-[var(--field-border)] rounded-xl px-4 py-2.5 text-xs font-bold text-white flex items-center gap-2 h-[42px] hover:border-primary/50 transition-colors w-full"
+							class="bg-field-bg border border-field-border rounded-xl px-4 py-2.5 text-xs font-bold text-field-text flex items-center gap-2 h-[42px] hover:border-primary/50 transition-colors w-full"
 						>
-							<svg class="w-4 h-4 text-secondary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-							</svg>
+							<Icon name="ph:calendar-blank-light" class="w-4 h-4 text-secondary" />
 							<span>{{ format(currentDate, 'dd/MM/yyyy') }}</span>
 						</button>
 					</div>
 
 					<!-- Navigation -->
-					<div class="flex items-center bg-[var(--field-bg-select)] rounded-xl border border-white/10 h-[42px]">
+					<div class="flex items-center bg-div-15 rounded-xl border border-divider h-[42px]">
 						<button
 							@click="navigateWeek('prev')"
-							class="px-3 text-secondary/60 hover:text-white border-r border-white/10 h-full flex items-center transition-colors"
+							class="px-3 text-secondary hover:text-text border-r border-divider h-full flex items-center transition-colors"
+							title="Semana anterior"
 						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-							</svg>
+							<Icon name="ph:caret-left-bold" class="w-4 h-4" />
 						</button>
 						<button
 							@click="navigateWeek('today')"
-							class="px-4 text-[10px] font-black uppercase tracking-widest text-white h-full flex items-center hover:bg-white/5 transition-colors"
+							class="px-4 text-[10px] font-black uppercase tracking-widest text-text h-full flex items-center hover:bg-div-30 transition-colors"
 						>
 							Hoje
 						</button>
 						<button
 							@click="navigateWeek('next')"
-							class="px-3 text-secondary/60 hover:text-white border-l border-white/10 h-full flex items-center transition-colors"
+							class="px-3 text-secondary hover:text-text border-l border-divider h-full flex items-center transition-colors"
+							title="Próxima semana"
 						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-							</svg>
+							<Icon name="ph:caret-right-bold" class="w-4 h-4" />
 						</button>
 					</div>
 				</div>
@@ -234,13 +231,19 @@ watch(activeTab, (tab) => {
 			:userId="appStore.user_expandido_id || ''"
 			@refresh="fetchReservasWrapper"
 		/>
-				</div>
-			</template>
+	</div>
+</template>
 
-		<style scoped>
-		.page-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
-		.tabs-nav { display: flex; gap: 4px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 4px; }
-		.tab-btn { padding: 7px 16px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.28); border: none; background: none; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-		.tab-btn:hover { color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.04); }
-		.tab-btn--active { background: rgba(139,92,246,0.14); color: #c4b5fd; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
-		</style>
+<style scoped>
+.page-wrap {
+	padding: 0.25rem 1.5rem 1rem;
+}
+.page-top-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 0.75rem;
+	flex-wrap: wrap;
+	gap: 1rem;
+}
+</style>

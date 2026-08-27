@@ -1,26 +1,11 @@
 <template>
     <div class="flex flex-col h-full p-6">
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-4">
-                <h1 class="text-lg font-black text-white/90">
-                    Gateway de Pagamento
-                </h1>
-            </div>
-        </div>
-
+        <!-- Banner de sucesso ao retornar do Stripe -->
         <div
             v-if="conectadoAgora"
-            class="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold flex items-center gap-2"
+            class="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-500 text-xs font-bold flex items-center gap-2"
         >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path
-                    d="M3.5 8l3 3L12.5 4"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                />
-            </svg>
+            <Icon name="ph:check-circle-bold" class="w-4 h-4 shrink-0" />
             Conta Stripe conectada com sucesso!
         </div>
 
@@ -31,7 +16,7 @@
         </div>
 
         <div v-else class="max-w-lg">
-            <p class="text-xs text-secondary/50 mb-6 leading-relaxed">
+            <p class="text-xs text-secondary/70 mb-6 leading-relaxed">
                 Configure o gateway de pagamento para receber pagamentos de
                 matrículas e vendas. Atualmente apenas Stripe é suportado.
             </p>
@@ -77,3 +62,10 @@ onMounted(() => {
     fetchConfig();
 });
 </script>
+
+<style scoped>
+.pagamento-page {
+    display: block;
+}
+</style>
+

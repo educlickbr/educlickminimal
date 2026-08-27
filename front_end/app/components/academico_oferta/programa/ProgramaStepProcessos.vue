@@ -50,13 +50,7 @@
 
                 <!-- Nome do processo -->
                 <div class="proc-field">
-                    <label class="proc-label">Nome do Processo</label>
-                    <input
-                        type="text"
-                        v-model="processo.nome_processo"
-                        placeholder="Ex: Vestibular 2026/1"
-                        class="proc-input"
-                    />
+                    <BaseField v-model="processo.nome_processo" label="Nome do Processo" placeholder="Ex: Vestibular 2026/1" />
                 </div>
 
                 <!-- Grid de datas -->
@@ -72,12 +66,10 @@
                         </div>
                         <div class="proc-date-row">
                             <div class="proc-field">
-                                <label class="proc-label">Início</label>
-                                <input type="datetime-local" v-model="processo.data_inicio" class="proc-input" />
+                                <BaseField v-model="processo.data_inicio" label="Início" type="datetime-local" />
                             </div>
                             <div class="proc-field">
-                                <label class="proc-label">Fim</label>
-                                <input type="datetime-local" v-model="processo.data_fim" class="proc-input" />
+                                <BaseField v-model="processo.data_fim" label="Fim" type="datetime-local" />
                             </div>
                         </div>
                     </div>
@@ -95,12 +87,10 @@
                         </div>
                         <div class="proc-date-row">
                             <div class="proc-field">
-                                <label class="proc-label">Início</label>
-                                <input type="datetime-local" v-model="processo.matricula_inicio" class="proc-input proc-input--green" />
+                                <BaseField v-model="processo.matricula_inicio" label="Início" type="datetime-local" />
                             </div>
                             <div class="proc-field">
-                                <label class="proc-label">Fim</label>
-                                <input type="datetime-local" v-model="processo.matricula_fim" class="proc-input proc-input--green" />
+                                <BaseField v-model="processo.matricula_fim" label="Fim" type="datetime-local" />
                             </div>
                         </div>
                     </div>
@@ -150,17 +140,17 @@ defineEmits<{
 <style scoped>
 /* ── Section header ──────────────────────────────── */
 .step-section-title {
-    font-size: 13px; font-weight: 900; color: rgba(232,230,240,0.9);
+    font-size: 13px; font-weight: 900; color: var(--color-text);
     text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;
 }
-.step-section-desc { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.3); }
+.step-section-desc { font-size: 11px; font-weight: 600; color: var(--color-secondary); }
 
 /* ── Add button ──────────────────────────────────── */
 .add-processo-btn {
     display: flex; align-items: center; gap: 6px; white-space: nowrap;
     padding: 9px 16px; border-radius: 10px;
     border: 1px solid rgba(139,92,246,0.25); background: rgba(139,92,246,0.08);
-    color: #a78bfa; font-size: 10px; font-weight: 900;
+    color: var(--color-primary); font-size: 10px; font-weight: 900;
     text-transform: uppercase; letter-spacing: 0.08em;
     cursor: pointer; transition: all 0.15s ease; flex-shrink: 0;
 }
@@ -171,7 +161,7 @@ defineEmits<{
 .processo-card {
     display: flex; flex-direction: column; gap: 16px;
     padding: 20px; border-radius: 14px;
-    background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);
+    background: var(--color-secondary-surface); border: 1px solid var(--field-border);
 }
 
 .processo-card-header {
@@ -180,14 +170,14 @@ defineEmits<{
 .processo-badge {
     display: flex; align-items: center; gap: 7px;
     font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em;
-    color: #a78bfa; background: rgba(139,92,246,0.1);
+    color: var(--color-primary); background: rgba(139,92,246,0.1);
     border: 1px solid rgba(139,92,246,0.2);
     padding: 6px 12px; border-radius: 20px;
 }
 .remove-btn {
     width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
     border: 1px solid rgba(239,68,68,0.25); background: rgba(239,68,68,0.06);
-    color: #f87171; display: flex; align-items: center; justify-content: center;
+    color: var(--color-danger); display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: all 0.15s ease;
 }
 .remove-btn:hover { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.4); }
@@ -196,15 +186,15 @@ defineEmits<{
 .proc-field { display: flex; flex-direction: column; gap: 6px; }
 .proc-label {
     font-size: 9px; font-weight: 900; text-transform: uppercase;
-    letter-spacing: 0.14em; color: rgba(255,255,255,0.3);
+    letter-spacing: 0.14em; color: var(--color-secondary);
 }
 .proc-input {
     width: 100%; padding: 10px 12px; border-radius: 9px;
-    border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.04);
-    color: rgba(232,230,240,0.9); font-size: 12px; font-weight: 700;
+    border: 1px solid var(--field-border); background: var(--field-bg);
+    color: var(--field-text); font-size: 12px; font-weight: 700;
     outline: none; transition: border-color 0.15s ease;
 }
-.proc-input:focus { border-color: rgba(139,92,246,0.45); }
+.proc-input:focus { border-color: var(--field-border-focus); }
 .proc-input--green:focus { border-color: rgba(34,197,94,0.4); }
 
 /* ── Date groups ─────────────────────────────────── */
@@ -219,10 +209,10 @@ defineEmits<{
 .proc-date-group-header {
     display: flex; align-items: center; gap: 7px;
     font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em;
-    padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 8px; border-bottom: 1px solid var(--color-divider);
 }
-.proc-date-group-header--primary { color: #a78bfa; }
-.proc-date-group-header--green   { color: #4ade80; }
+.proc-date-group-header--primary { color: var(--color-primary); }
+.proc-date-group-header--green   { color: var(--color-success); }
 
 .proc-optional-tag {
     margin-left: auto; font-size: 8px; font-weight: 900;

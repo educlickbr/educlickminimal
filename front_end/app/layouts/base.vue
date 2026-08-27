@@ -2,10 +2,16 @@
 import { useAppStore } from "../../stores/app";
 const store = useAppStore();
 const isMenuOpen = useState("menu-open", () => false);
+const semAcesso = ref(false);
 
-onMounted(() => {
+onMounted(async () => {
     store.initTheme();
-    store.initSession(); // Single BFF call for everything
+    await store.initSession(); // Single BFF call for everything
+    // Gate de produto (Fase F): sem acesso -> avisa e desloga
+    if (store.sem_acesso) {
+        semAcesso.value = true;
+        await store.logout();
+    }
 });
 
 async function handleLogout() {
@@ -24,14 +30,44 @@ const pageTitle = computed(() => {
     if (route.path === "/calendario-salas") return "Calendário de Salas";
     if (route.path === "/docentes") return "Gestão de Docentes";
     if (route.path === "/minhas_atividades") return "Minhas Atividades";
+    if (route.path.startsWith("/portal-docente")) return "Portal Docente";
     return "EduClick";
 });
 </script>
 
 <template>
     <div
-        class="h-screen bg-background flex flex-col md:flex-row gap-4 p-2 md:p-5 overflow-hidden font-sans text-text transition-colors duration-300"
+        class="relative h-screen bg-background flex flex-col md:flex-row gap-4 p-2 md:p-5 overflow-hidden font-sans text-text transition-colors duration-300"
     >
+        <!-- Gate de produto: sem acesso (Fase F) -->
+        <div
+            v-if="semAcesso"
+            class="absolute inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm px-6"
+        >
+            <div
+                class="max-w-sm w-full bg-div-15 border border-divider rounded-xl p-8 text-center shadow-2xl"
+            >
+                <div
+                    class="w-12 h-12 rounded-full bg-warning/15 border border-warning/25 flex items-center justify-center mx-auto mb-4"
+                >
+                    <Icon name="ph:warning-bold" class="w-6 h-6 text-warning" />
+                </div>
+                <h2 class="text-lg font-black text-text">
+                    Acesso indisponível
+                </h2>
+                <p class="text-sm text-secondary/70 mt-2 leading-relaxed">
+                    Você está sendo deslogado: sua conta não tem acesso a este
+                    produto nesta entidade.
+                </p>
+                <NuxtLink
+                    to="/auth/login"
+                    class="mt-6 inline-block text-[10px] font-black uppercase tracking-widest text-text bg-div-15 border border-divider px-8 py-4 rounded-lg hover:bg-div-30 hover:text-primary transition-all"
+                >
+                    Voltar ao login
+                </NuxtLink>
+            </div>
+        </div>
+
         <!-- Full Page Menu Overlay -->
         <FullPageMenu :isOpen="isMenuOpen" @close="isMenuOpen = false" />
 
@@ -40,7 +76,7 @@ const pageTitle = computed(() => {
             class="flex-1 flex flex-col gap-4 h-full overflow-hidden relative"
         >
             <header
-                class="bg-transparent md:bg-div-15 px-2 py-1 md:px-4 md:py-3 rounded-xl shrink-0 flex items-center justify-between shadow-none md:shadow-sm border-0 md:border border-white/5 transition-all"
+                class="bg-transparent md:bg-div-15 px-2 py-1 md:px-4 md:py-3 rounded-xl shrink-0 flex items-center justify-between shadow-none md:shadow-sm border-0 md:border border-divider transition-all"
             >
                 <!-- Brand / User Avatar -->
                 <div class="flex items-center gap-3">
@@ -77,6 +113,18 @@ const pageTitle = computed(() => {
                 <div class="flex items-center">
                     <!-- Auth State Buttons -->
                     <div v-if="store.user" class="flex items-center gap-2">
+                        <!-- Theme Toggle -->
+                        <button
+                            @click="store.toggleTheme()"
+                            class="w-10 h-10 flex items-center justify-center rounded-lg text-secondary hover:text-primary hover:bg-div-30 transition-all"
+                            :title="store.isDark ? 'Modo claro' : 'Modo escuro'"
+                        >
+                            <Icon
+                                :name="store.isDark ? 'ph:sun-bold' : 'ph:moon-bold'"
+                                class="w-5 h-5"
+                            />
+                        </button>
+
                         <!-- Logout Button -->
                         <button
                             @click="handleLogout"
@@ -107,7 +155,7 @@ const pageTitle = computed(() => {
                     <NuxtLink
                         v-else
                         to="/auth/login"
-                        class="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-text hover:text-primary bg-div-30 px-3 py-1.5 rounded transition-all hover:bg-div-30/80 border border-transparent hover:border-secondary/5"
+                        class="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-text hover:text-primary bg-div-30 px-3 py-1.5 rounded transition-all hover:bg-div-30/80 border border-transparent hover:border-divider"
                     >
                         <span>Entrar</span>
                     </NuxtLink>
@@ -121,7 +169,7 @@ const pageTitle = computed(() => {
                 <slot />
 
                 <footer
-                    class="py-6 text-center text-[9px] uppercase tracking-widest text-white/20 font-bold border-t border-white/5 mt-auto"
+                    class="py-6 text-center text-[9px] uppercase tracking-widest text-secondary/40 font-bold border-t border-divider mt-auto"
                 >
                     © {{ new Date().getFullYear() }} EduClick
                 </footer>
@@ -133,7 +181,7 @@ const pageTitle = computed(() => {
             class="w-full md:w-[320px] lg:w-[380px] shrink-0 hidden lg:flex flex-col gap-4 h-full"
         >
             <div
-                class="bg-div-15 h-full rounded-xl border border-white/5 p-5 shadow-sm overflow-y-auto flex flex-col gap-6"
+                class="bg-div-15 h-full rounded-xl border border-divider p-5 shadow-sm overflow-y-auto flex flex-col gap-6"
             >
                 <slot name="sidebar">
                     <!-- Default Content / Skeleton can go here if needed -->

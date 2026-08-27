@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col gap-6">
-    <div v-if="!savedModuloId" class="py-12 text-center bg-div-10/30 rounded-xl border border-dashed border-secondary/10">
+    <div v-if="!savedModuloId" class="py-12 text-center bg-div-15/60 rounded-xl border border-dashed border-secondary/10">
       <Icon name="ph:info-duotone" class="w-10 h-10 text-secondary/20 mx-auto mb-3" />
       <p class="text-xs text-secondary/60 font-medium">Salve o módulo primeiro para gerenciar os planos de aula.</p>
     </div>
@@ -8,20 +8,20 @@
       <div class="p-5 rounded-xl border border-primary/10 bg-primary/5 flex flex-col gap-4">
         <h4 class="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2"><Icon name="ph:plus-circle-bold" /> {{ editingPlanoId ? "Editar" : "Adicionar" }} Plano de Aula</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="flex flex-col gap-1.5"><label class="text-[9px] font-black text-secondary/60 uppercase tracking-widest px-1">Componente Curricular</label><select v-model="formPlano.id_componente" class="w-full px-3 py-2 rounded-lg border border-secondary/10 bg-background text-xs font-bold text-primary outline-none"><option :value="null" disabled>Selecione um componente...</option><option v-for="comp in componentesParaPlano" :key="comp.id" :value="comp.id">{{ comp.nome_componente }}</option></select></div>
-          <div class="flex flex-col gap-1.5"><label class="text-[9px] font-black text-secondary/60 uppercase tracking-widest px-1">Título do Plano</label><input v-model="formPlano.titulo_plano" placeholder="Ex: Introdução ao Minimax" class="w-full px-3 py-2 rounded-lg border border-secondary/10 bg-background text-xs font-bold text-primary outline-none" /></div>
+          <div class="flex flex-col gap-1.5"><BaseField v-model="formPlano.id_componente" type="select" empty-label="Selecione o componente" :options="componentesParaPlano" optionValueKey="id" optionLabelKey="nome_componente" label="Componente Curricular" /></div>
+          <div class="flex flex-col gap-1.5"><BaseField v-model="formPlano.titulo_plano" label="Título do Plano" placeholder="Ex: Introdução ao Minimax" /></div>
         </div>
         <div class="flex flex-col gap-1.5"><label class="text-[9px] font-black text-secondary/60 uppercase tracking-widest px-1">Ementa / Conteúdo</label><RichTextEditor v-model="formPlano.ementa" placeholder="Detalhe o conteúdo e os requisitos da aula..." /></div>
         <div class="flex justify-end gap-2">
-          <button v-if="editingPlanoId" @click="$emit('resetPlano')" class="px-3 py-1.5 rounded bg-div-10 text-[10px] font-black text-secondary uppercase tracking-widest">Cancelar</button>
-          <button @click="$emit('savePlano')" :disabled="loadingPlano" class="px-4 py-1.5 rounded bg-primary text-white text-[10px] font-black uppercase tracking-widest hover:brightness-110 disabled:opacity-50">{{ loadingPlano ? "Salvando..." : editingPlanoId ? "Atualizar Plano" : "Adicionar Plano" }}</button>
+          <button v-if="editingPlanoId" @click="$emit('resetPlano')" class="ds-btn-cancel">Cancelar</button>
+          <button @click="$emit('savePlano')" :disabled="loadingPlano" class="ds-btn-primary">{{ loadingPlano ? "Salvando..." : editingPlanoId ? "Atualizar Plano" : "Adicionar Plano" }}</button>
         </div>
       </div>
       <div class="flex flex-col gap-3">
         <p class="text-[10px] font-black text-secondary/40 uppercase tracking-[0.2em] px-1">Planos Cadastrados ({{ planos.length }})</p>
         <div v-if="loadingPlanos" class="py-4 flex justify-center"><LoadingOverlay :show="true" /></div>
-        <div v-else-if="planos.length === 0" class="py-8 text-center text-[10px] text-secondary/30 uppercase font-bold tracking-widest bg-div-5 rounded-lg border border-secondary/5">Nenhum plano associado a este módulo.</div>
-        <div v-for="p in planos" :key="p.id" class="flex items-center justify-between p-3 rounded-lg border border-secondary/5 bg-div-10 group hover:border-primary/20 transition-all">
+        <div v-else-if="planos.length === 0" class="ds-empty">Nenhum plano associado a este módulo.</div>
+        <div v-for="p in planos" :key="p.id" class="flex items-center justify-between p-3 rounded-lg border border-divider bg-div-15 group hover:border-primary/20 transition-all">
           <div class="flex flex-col min-w-0"><div class="flex items-center gap-2"><span class="text-[8px] font-black bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase tracking-tighter">{{ p.nome_componente }}</span><h5 class="text-[11px] font-bold text-primary truncate">{{ p.titulo_plano }}</h5></div><p class="text-[10px] text-secondary/50 truncate mt-0.5">{{ p.ementa?.replace(/<[^>]*>/g, "") || "Sem ementa" }}</p></div>
           <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button @click="$emit('editPlano', p)" class="p-2 text-secondary/40 hover:text-primary transition-colors rounded"><Icon name="ph:pencil-simple-bold" class="w-4 h-4" /></button>
@@ -45,3 +45,7 @@ defineProps<{
 }>();
 defineEmits<{ savePlano: []; resetPlano: []; editPlano: [p: any]; deletePlano: [id: string] }>();
 </script>
+
+<style scoped>
+/* SFC Style */
+</style>

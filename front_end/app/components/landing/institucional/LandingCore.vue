@@ -18,7 +18,7 @@
                 <div
                     class="group bg-white/[0.04] border border-white/5 rounded-xl p-7 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
                     <div
-                        class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        class="absolute inset-x-0 top-0 h-0.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div
                         class="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
                         <Icon name="ph:stack-bold" class="w-6 h-6 text-primary" />
@@ -37,7 +37,7 @@
                 <div
                     class="group bg-white/[0.04] border border-white/5 rounded-xl p-7 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
                     <div
-                        class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        class="absolute inset-x-0 top-0 h-0.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div
                         class="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
                         <Icon name="ph:student-bold" class="w-6 h-6 text-primary" />
@@ -56,7 +56,7 @@
                 <div
                     class="group bg-white/[0.04] border border-white/5 rounded-xl p-7 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
                     <div
-                        class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        class="absolute inset-x-0 top-0 h-0.5 bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div
                         class="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-5">
                         <Icon name="ph:shopping-cart-bold" class="w-6 h-6 text-primary" />
@@ -73,3 +73,7 @@
         </div>
     </section>
 </template>
+
+<style scoped>
+/* SFC Style */
+</style>

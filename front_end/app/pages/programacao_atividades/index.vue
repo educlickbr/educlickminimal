@@ -27,7 +27,6 @@ function setActiveTab(k: string) {
     router.replace({ query: { ...route.query, tab: k } });
 }
 
-// Contexto do Currículo compartilhado entre a aba e o sidebar
 const core = useProgAtividadesCore();
 const toast = useToast();
 
@@ -56,19 +55,15 @@ const ctxCurriculo = useProgAtividadesCurriculo({
         </template>
 
         <div class="page-wrap">
-
-
             <!-- Tabs -->
             <div class="page-top-row">
-                <nav class="tabs-nav">
+                <nav class="ds-tabs-nav">
                     <button
                         v-for="tab in tabs"
                         :key="tab.key"
                         @click="setActiveTab(tab.key)"
-                        :class="[
-                            'tab-btn',
-                            activeTab === tab.key ? 'tab-btn--active' : '',
-                        ]"
+                        class="ds-tab-btn"
+                        :class="{ 'ds-tab-btn--active': activeTab === tab.key }"
                     >
                         {{ tab.label }}
                     </button>
@@ -86,54 +81,26 @@ const ctxCurriculo = useProgAtividadesCurriculo({
 
 <style scoped>
 .page-wrap {
-    padding: 1.5rem 1.75rem;
-    min-height: 100vh;
+    padding: 0.25rem 1.5rem 1rem;
 }
 
-
-
-/* ── Tabs ─────────────────────────────────── */
 .page-top-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     flex-wrap: wrap;
     gap: 1rem;
 }
-.tabs-nav {
-    display: flex;
-    gap: 4px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 4px;
-}
-.tab-btn {
-    padding: 7px 20px;
-    border-radius: 8px;
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.28);
-    transition: all 0.15s;
-    border: none;
-    background: none;
-    cursor: pointer;
-}
-.tab-btn:hover {
-    color: rgba(255, 255, 255, 0.55);
-    background: rgba(255, 255, 255, 0.04);
-}
-.tab-btn--active {
-    background: rgba(139, 92, 246, 0.14);
-    color: #c4b5fd;
-}
 
 /* Sidebar placeholder */
-.dash-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 12px 14px; }
-.dash-title { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.35); display: block; margin-bottom: 8px; }
-.dash-text { font-size: 10.5px; font-weight: 600; color: rgba(255,255,255,0.45); line-height: 1.55; }
-.dash-text b { color: rgba(255,255,255,0.75); }
+.dash-card {
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: 14px;
+    padding: 14px 16px;
+}
+.dash-title { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-secondary); opacity: 0.8; display: block; margin-bottom: 8px; }
+.dash-text { font-size: 10.5px; font-weight: 600; color: var(--color-secondary); opacity: 0.7; line-height: 1.55; }
+.dash-text b { color: var(--color-text); }
 </style>

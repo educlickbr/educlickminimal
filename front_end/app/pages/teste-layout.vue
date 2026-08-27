@@ -40,3 +40,7 @@ definePageMeta({
     </div>
   </div>
 </template>
+
+<style scoped>
+/* SFC Style */
+</style>

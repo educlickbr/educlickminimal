@@ -33,14 +33,14 @@ function setActiveTab(k: string) {
 <template>
     <div class="page-wrap">
         <div class="page-top-row">
-            <nav class="tabs-nav">
+            <nav class="ds-tabs-nav">
                 <button
                     v-for="tab in tabs"
                     :key="tab.key"
                     @click="setActiveTab(tab.key)"
                     :class="[
-                        'tab-btn',
-                        activeTab === tab.key ? 'tab-btn--active' : '',
+                        'ds-tab-btn',
+                        activeTab === tab.key ? 'ds-tab-btn--active' : '',
                     ]"
                 >
                     {{ tab.label }}
@@ -70,32 +70,5 @@ function setActiveTab(k: string) {
     margin-bottom: 2rem;
     flex-wrap: wrap;
     gap: 1rem;
-}
-.tabs-nav {
-    display: flex;
-    gap: 0.25rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 0.75rem;
-    padding: 0.25rem;
-}
-.tab-btn {
-    padding: 0.5rem 1.25rem;
-    border-radius: 0.625rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.3);
-    transition: all 0.15s;
-    border: none;
-    background: none;
-    cursor: pointer;
-}
-.tab-btn:hover {
-    color: rgba(255, 255, 255, 0.7);
-}
-.tab-btn--active {
-    background: rgba(139, 92, 246, 0.15);
-    color: #a78bfa;
 }
 </style>

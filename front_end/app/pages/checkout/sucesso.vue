@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#0a0a0c] text-white font-sans flex items-center justify-center p-6">
+  <div data-theme="dark" class="min-h-screen bg-[#0a0a0c] text-white font-sans flex items-center justify-center p-6">
     <div class="max-w-md w-full text-center">
       <div class="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-6">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-green-400">
@@ -18,3 +18,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: false })
 </script>
+
+<style scoped>
+/* SFC Style */
+</style>

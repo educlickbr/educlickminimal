@@ -57,6 +57,9 @@ export default defineNuxtConfig({
       process.env.POWER_AUTOMATE_TOKEN_CADASTRO || "",
     powerAutomateConvite:
       process.env.POWER_AUTOMATE_CONVITE || "",
+    // Dev: força qual entidade renderiza como ativa no localhost
+    // (ambiente EDUCLICK_FALLBACK_ENTIDADE_ID), para ver branding/permissões.
+    fallbackEntidadeId: process.env.EDUCLICK_FALLBACK_ENTIDADE_ID || "",
   },
 
   // 5. Vite - permitir hosts externos (ngrok)

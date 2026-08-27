@@ -20,21 +20,15 @@
         <!-- Formulário -->
         <div class="prog-form-row">
           <div class="prog-field prog-field--wide">
-            <label class="prog-field-label">Dia da Semana</label>
-            <select v-model="formSemana.dia_sem" class="prog-select">
-              <option :value="null" disabled>Selecione...</option>
-              <option v-for="d in DOW_OPTIONS" :key="d.val" :value="d.val">{{ d.label }}</option>
-            </select>
+            <BaseField v-model="formSemana.dia_sem" type="select" empty-label="Selecione o dia" :options="DOW_OPTIONS" optionValueKey="val" optionLabelKey="label" label="Dia da Semana" />
           </div>
           <div class="prog-field">
-            <label class="prog-field-label">Início</label>
-            <input type="time" v-model="formSemana.hora_ini" class="prog-input" />
+            <BaseField v-model="formSemana.hora_ini" label="Início" type="time" />
           </div>
           <div class="prog-field">
-            <label class="prog-field-label">Fim</label>
-            <input type="time" v-model="formSemana.hora_fim" class="prog-input" />
+            <BaseField v-model="formSemana.hora_fim" label="Fim" type="time" />
           </div>
-          <button @click="$emit('addDiaSemana')" class="prog-add-btn">
+          <button @click="$emit('addDiaSemana')" class="ds-btn-primary">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             Adicionar
           </button>
@@ -125,22 +119,18 @@
       <div class="prog-card prog-card--orange">
         <div class="prog-form-row">
           <div class="prog-field">
-            <label class="prog-field-label">Data</label>
-            <input type="date" v-model="formExtra.data" class="prog-input" />
+            <BaseField v-model="formExtra.data" label="Data" type="date" />
           </div>
           <div class="prog-field">
-            <label class="prog-field-label">Início</label>
-            <input type="time" v-model="formExtra.hora_ini" class="prog-input" />
+            <BaseField v-model="formExtra.hora_ini" label="Início" type="time" />
           </div>
           <div class="prog-field">
-            <label class="prog-field-label">Fim</label>
-            <input type="time" v-model="formExtra.hora_fim" class="prog-input" />
+            <BaseField v-model="formExtra.hora_fim" label="Fim" type="time" />
           </div>
           <div class="prog-field prog-field--wide">
-            <label class="prog-field-label">Motivo</label>
-            <input type="text" v-model="formExtra.observacoes" placeholder="Ex: Reposição feriado" class="prog-input" />
+            <BaseField v-model="formExtra.observacoes" label="Motivo" placeholder="Ex: Reposição feriado" />
           </div>
-          <button @click="$emit('addDiaExtra')" class="prog-add-btn prog-add-btn--orange">
+          <button @click="$emit('addDiaExtra')" class="ds-btn-primary prog-add-btn--orange">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             Incluir
           </button>
@@ -245,15 +235,15 @@ defineEmits<{ addDiaSemana: []; removeDiaSemana: [index: number]; simularCalenda
   background: rgba(249,115,22,0.12); border-color: rgba(249,115,22,0.22); color: #fb923c;
 }
 .prog-step--muted {
-  background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.3);
+  background: var(--color-secondary-surface); border-color: var(--field-border); color: var(--color-secondary);
 }
 
 .prog-label {
-  font-size: 11px; font-weight: 900; color: rgba(232,230,240,0.85);
+  font-size: 11px; font-weight: 900; color: var(--color-text);
   text-transform: uppercase; letter-spacing: 0.12em;
 }
 .prog-sublabel {
-  font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.28);
+  font-size: 10px; font-weight: 600; color: var(--color-secondary);
   margin-top: 3px;
 }
 
@@ -289,13 +279,13 @@ defineEmits<{ addDiaSemana: []; removeDiaSemana: [index: number]; simularCalenda
 
 .prog-field-label {
   font-size: 9px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: 0.14em; color: rgba(255,255,255,0.35); padding: 0 2px;
+  letter-spacing: 0.14em; color: var(--color-secondary); padding: 0 2px;
 }
 .prog-input, .prog-select {
   width: 100%; padding: 10px 12px; border-radius: 9px;
-  border: 1px solid rgba(255,255,255,0.07);
-  background: rgba(255,255,255,0.04);
-  color: rgba(232,230,240,0.9); font-size: 12px; font-weight: 700;
+  border: 1px solid var(--field-border);
+  background: var(--field-bg);
+  color: var(--field-text); font-size: 12px; font-weight: 700;
   outline: none; transition: border-color 0.15s ease, background 0.15s ease;
 }
 .prog-input:focus, .prog-select:focus {
@@ -304,66 +294,55 @@ defineEmits<{ addDiaSemana: []; removeDiaSemana: [index: number]; simularCalenda
   box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
 }
 
-.prog-add-btn {
-  display: flex; align-items: center; gap: 6px; white-space: nowrap;
-  padding: 10px 18px; border-radius: 9px; border: none;
-  background: linear-gradient(135deg,#7c3aed,#8b5cf6);
-  color: #fff; font-size: 10px; font-weight: 900;
-  text-transform: uppercase; letter-spacing: 0.08em;
-  cursor: pointer; transition: all 0.15s ease;
-  box-shadow: 0 4px 12px rgba(139,92,246,0.3);
-  flex-shrink: 0; height: 40px;
-}
-.prog-add-btn:hover { background: linear-gradient(135deg,#6d28d9,#7c3aed); transform: translateY(-1px); }
 .prog-add-btn--orange {
-  background: linear-gradient(135deg,#ea580c,#f97316);
+  background: linear-gradient(135deg,#ea580c,#f97316) !important;
   box-shadow: 0 4px 12px rgba(249,115,22,0.3);
 }
-.prog-add-btn--orange:hover { background: linear-gradient(135deg,#c2410c,#ea580c); }
+.prog-add-btn--orange:hover { background: linear-gradient(135deg,#c2410c,#ea580c) !important; }
 
 /* ── Chips ─────────────────────────────────────── */
 .prog-chips {
   display: flex; flex-wrap: wrap; gap: 8px;
-  padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 14px; border-top: 1px solid var(--color-divider);
 }
 .prog-chip {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 12px; border-radius: 20px;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  background: var(--color-secondary-surface); border: 1px solid var(--field-border);
 }
 .prog-chip--primary { border-color: rgba(139,92,246,0.2); }
 .prog-chip--orange  { border-color: rgba(249,115,22,0.2);  }
 
 .prog-chip-day {
   font-size: 10px; font-weight: 900;
-  color: #a78bfa;
+  color: var(--color-primary);
 }
 .prog-chip--orange .prog-chip-day { color: #fb923c; }
 
 .prog-chip-time {
   font-size: 10px; font-weight: 600;
-  color: rgba(255,255,255,0.45);
+  color: var(--color-secondary);
   font-variant-numeric: tabular-nums;
 }
 .prog-chip-remove {
   background: none; border: none; cursor: pointer;
-  color: rgba(255,255,255,0.25); display: flex; padding: 0;
+  color: var(--color-secondary); display: flex; padding: 0;
   transition: color 0.15s;
 }
-.prog-chip-remove:hover { color: #f87171; }
+.prog-chip-remove:hover { color: var(--color-danger); }
 
 /* ── Simulação results ─────────────────────────── */
 .prog-sim-btn {
   display: flex; align-items: center; gap: 7px; white-space: nowrap;
   padding: 10px 20px; border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.04);
-  color: rgba(255,255,255,0.6); font-size: 10px; font-weight: 900;
+  border: 1px solid var(--field-border);
+  background: var(--color-secondary-surface);
+  color: var(--color-secondary); font-size: 10px; font-weight: 900;
   text-transform: uppercase; letter-spacing: 0.08em;
   cursor: pointer; transition: all 0.15s ease; flex-shrink: 0;
 }
 .prog-sim-btn:hover:not(:disabled) {
-  background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.3); color: #c4b5fd;
+  background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.3); color: var(--color-primary);
 }
 .prog-sim-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .prog-spin { animation: spin 0.7s linear infinite; }
@@ -375,14 +354,14 @@ defineEmits<{ addDiaSemana: []; removeDiaSemana: [index: number]; simularCalenda
 .prog-sim-stat {
   display: flex; flex-direction: column; gap: 6px; align-items: center;
   padding: 16px 12px; border-radius: 12px;
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  background: var(--color-secondary-surface); border: 1px solid var(--field-border);
 }
 .prog-sim-stat-label {
   font-size: 8px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: 0.12em; color: rgba(255,255,255,0.3);
+  letter-spacing: 0.12em; color: var(--color-secondary);
 }
 .prog-sim-stat-value {
-  font-size: 22px; font-weight: 900; color: rgba(232,230,240,0.9); line-height: 1;
+  font-size: 22px; font-weight: 900; color: var(--color-text); line-height: 1;
 }
 .prog-sim-stat-value--sm { font-size: 12px; font-variant-numeric: tabular-nums; }
 
@@ -409,8 +388,8 @@ defineEmits<{ addDiaSemana: []; removeDiaSemana: [index: number]; simularCalenda
 
 /* ── Schedule ──────────────────────────────────── */
 .prog-schedule {
-  border: 1px solid rgba(255,255,255,0.06); border-radius: 14px;
-  background: rgba(255,255,255,0.02); overflow: hidden;
+  border: 1px solid var(--field-border); border-radius: 14px;
+  background: var(--color-secondary-surface); overflow: hidden;
   max-height: 320px; overflow-y: auto;
 }
 .prog-schedule-row {
@@ -418,8 +397,8 @@ defineEmits<{ addDiaSemana: []; removeDiaSemana: [index: number]; simularCalenda
   padding: 10px 16px; border-left: 3px solid transparent;
   transition: background 0.1s;
 }
-.prog-schedule-row:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.04); }
-.prog-schedule-row:hover { background: rgba(255,255,255,0.025); }
+.prog-schedule-row:not(:last-child) { border-bottom: 1px solid var(--color-divider); }
+.prog-schedule-row:hover { background: var(--color-secondary-surface-hover); }
 .prog-schedule-row--regular { border-left-color: rgba(139,92,246,0.4); }
 .prog-schedule-row--extra   { border-left-color: rgba(249,115,22,0.4); }
 .prog-schedule-row--feriado { border-left-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.03); }
@@ -427,11 +406,11 @@ defineEmits<{ addDiaSemana: []; removeDiaSemana: [index: number]; simularCalenda
 
 .prog-sch-num {
   width: 28px; flex-shrink: 0;
-  font-size: 9px; font-weight: 900; color: rgba(255,255,255,0.2);
+  font-size: 9px; font-weight: 900; color: var(--color-secondary);
 }
 .prog-sch-date { flex-shrink: 0; width: 60px; }
-.prog-sch-date-val { font-size: 11px; font-weight: 700; color: rgba(232,230,240,0.8); display: block; font-variant-numeric: tabular-nums; }
-.prog-sch-dow  { font-size: 8px;  font-weight: 900; color: rgba(255,255,255,0.2); text-transform: uppercase; }
+.prog-sch-date-val { font-size: 11px; font-weight: 700; color: var(--color-text); display: block; font-variant-numeric: tabular-nums; }
+.prog-sch-dow  { font-size: 8px;  font-weight: 900; color: var(--color-secondary); text-transform: uppercase; }
 
 .prog-sch-type {
   flex-shrink: 0; font-size: 8px; font-weight: 900;
@@ -443,11 +422,11 @@ defineEmits<{ addDiaSemana: []; removeDiaSemana: [index: number]; simularCalenda
 .prog-sch-type--feriado { background: rgba(239,68,68,0.12);   color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
 .prog-sch-type--evento  { background: rgba(245,158,11,0.12);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
 
-.prog-sch-obs { flex: 1; font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.35); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prog-sch-obs { flex: 1; font-size: 10px; font-weight: 600; color: var(--color-secondary); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .prog-sch-time { flex-shrink: 0; text-align: right; }
-.prog-sch-time span { font-size: 11px; font-weight: 700; color: rgba(232,230,240,0.7); font-variant-numeric: tabular-nums; }
-.prog-sch-sep  { color: rgba(255,255,255,0.2); margin: 0 2px; }
-.prog-sch-dur  { display: block; font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.25); margin-top: 2px; }
-.prog-sch-suspended { font-size: 10px; font-style: italic; color: rgba(255,255,255,0.25); font-weight: 700; }
+.prog-sch-time span { font-size: 11px; font-weight: 700; color: var(--color-text); font-variant-numeric: tabular-nums; }
+.prog-sch-sep  { color: var(--color-secondary); margin: 0 2px; }
+.prog-sch-dur  { display: block; font-size: 8px; font-weight: 700; color: var(--color-secondary); margin-top: 2px; }
+.prog-sch-suspended { font-size: 10px; font-style: italic; color: var(--color-secondary); font-weight: 700; }
 </style>

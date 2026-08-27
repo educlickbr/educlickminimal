@@ -50,14 +50,14 @@ watch(activeTab, async (val) => {
 <template>
     <div class="page-wrap">
         <div class="page-top-row">
-            <nav class="tabs-nav">
+            <nav class="ds-tabs-nav">
                 <button
                     v-for="tab in tabs"
                     :key="tab.key"
                     @click="setActiveTab(tab.key)"
                     :class="[
-                        'tab-btn',
-                        activeTab === tab.key ? 'tab-btn--active' : '',
+                        'ds-tab-btn',
+                        activeTab === tab.key ? 'ds-tab-btn--active' : '',
                     ]"
                 >
                     {{ tab.label }}
@@ -66,7 +66,7 @@ watch(activeTab, async (val) => {
             <button
                 v-if="activeTab === 'perguntas'"
                 @click="perguntasCtx.openNova()"
-                class="add-btn"
+                class="ds-btn-primary"
             >
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 Nova Pergunta
@@ -74,7 +74,7 @@ watch(activeTab, async (val) => {
             <button
                 v-if="activeTab === 'configuracoes'"
                 @click="tabConfigRef?.novoFormulario()"
-                class="add-btn"
+                class="ds-btn-primary"
             >
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 Novo Formulário
@@ -109,54 +109,5 @@ watch(activeTab, async (val) => {
     margin-bottom: 2rem;
     flex-wrap: wrap;
     gap: 1rem;
-}
-.tabs-nav {
-    display: flex;
-    gap: 0.25rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 0.75rem;
-    padding: 0.25rem;
-}
-.tab-btn {
-    padding: 0.5rem 1.25rem;
-    border-radius: 0.625rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.3);
-    transition: all 0.15s;
-    border: none;
-    background: none;
-    cursor: pointer;
-}
-.tab-btn:hover {
-    color: rgba(255, 255, 255, 0.7);
-}
-.tab-btn--active {
-    background: rgba(139, 92, 246, 0.15);
-    color: #a78bfa;
-}
-.add-btn {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 9px 18px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-    border: 1px solid rgba(139, 92, 246, 0.4);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
-}
-.add-btn:hover {
-    background: linear-gradient(135deg, #6d28d9, #7c3aed);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.45);
-    transform: translateY(-1px);
 }
 </style>

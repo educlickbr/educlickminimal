@@ -6,6 +6,13 @@ import { useAppStore } from "~~/stores/app";
 const store = useAppStore();
 const { showToast } = useToast();
 
+// Aplica o tema/branding da entidade (via BFF) quando deslogado;
+// se não houver entidade resolvida, respeita a preferência manual.
+onMounted(async () => {
+    const { aplicarTemaDaEntidadePublica } = useTemaEntidade();
+    const aplicouEntidade = await aplicarTemaDaEntidadePublica();
+    if (!aplicouEntidade) store.initTheme();
+});
 const email = ref("");
 const loading = ref(false);
 
@@ -51,7 +58,7 @@ const handleRecover = async () => {
 
 <template>
     <div
-        class="min-h-screen flex items-center justify-center bg-[#0a0a0c] p-6 font-sans relative overflow-hidden"
+        class="min-h-screen flex items-center justify-center bg-background p-6 font-sans relative overflow-hidden"
     >
         <!-- Background Accents -->
         <div class="absolute inset-0 pointer-events-none">
@@ -66,11 +73,11 @@ const handleRecover = async () => {
         <div class="w-full max-w-md relative z-10">
             <!-- Card -->
             <div
-                class="bg-div-15 backdrop-blur-2xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl"
+                class="bg-div-15 backdrop-blur-2xl border border-divider rounded-[2.5rem] p-8 md:p-12 shadow-2xl"
             >
                 <div class="flex flex-col items-center mb-8">
                     <h1
-                        class="text-2xl font-black text-white uppercase tracking-[0.2em] text-center"
+                        class="text-2xl font-black text-text uppercase tracking-[0.2em] text-center"
                     >
                         Recuperar Senha
                     </h1>
@@ -95,10 +102,10 @@ const handleRecover = async () => {
                                 id="email"
                                 required
                                 placeholder="seu@email.com"
-                                class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-white/10 group-hover:border-white/20"
+                                class="w-full bg-field border border-field-border rounded-2xl px-5 py-4 text-sm font-bold text-field-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:field-placeholder group-hover:border-field-border"
                             />
                             <div
-                                class="absolute right-5 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-primary transition-colors"
+                                class="absolute right-5 top-1/2 -translate-y-1/2 text-field-placeholder group-focus-within:text-primary transition-colors"
                             >
                                 <svg
                                     class="w-5 h-5"
@@ -137,7 +144,7 @@ const handleRecover = async () => {
                 <div class="mt-8 text-center space-y-4">
                     <NuxtLink
                         to="/auth/login"
-                        class="inline-block text-[10px] font-black uppercase tracking-widest text-secondary/60 hover:text-white transition-colors"
+                        class="inline-block text-[10px] font-black uppercase tracking-widest text-secondary/60 hover:text-text transition-colors"
                     >
                         ← Voltar para Login
                     </NuxtLink>
@@ -146,3 +153,7 @@ const handleRecover = async () => {
         </div>
     </div>
 </template>
+
+<style scoped>
+/* SFC Style */
+</style>

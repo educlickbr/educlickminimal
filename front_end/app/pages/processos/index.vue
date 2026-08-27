@@ -64,7 +64,7 @@ onMounted(async () => {
                 class="w-8 h-8 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"
             />
             <span
-                class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
+                class="text-[10px] font-black text-secondary/50 uppercase tracking-widest"
             >
                 Carregando áreas...
             </span>
@@ -74,12 +74,12 @@ onMounted(async () => {
         <div v-else-if="core.areas.value.length === 0" class="empty-state">
             <Icon
                 name="ph:buildings-light"
-                class="w-16 h-16 text-secondary/20 mb-4"
+                class="w-16 h-16 text-secondary/40 mb-4"
             />
-            <p class="text-sm font-bold text-white/40 mb-2">
+            <p class="text-sm font-bold text-secondary/60 mb-2">
                 Nenhuma área cadastrada
             </p>
-            <p class="text-xs text-secondary/40">
+            <p class="text-xs text-secondary/50">
                 Cadastre áreas acadêmicas para configurar processos seletivos.
             </p>
         </div>
@@ -131,8 +131,8 @@ onMounted(async () => {
     align-items: center;
     justify-content: center;
     padding: 5rem 2rem;
-    background: rgba(255, 255, 255, 0.015);
-    border: 2px dashed rgba(255, 255, 255, 0.08);
+    background: var(--color-secondary-surface);
+    border: 2px dashed var(--color-divider);
     border-radius: 1rem;
 }
 
@@ -148,7 +148,7 @@ select {
     width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--color-divider);
     border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {

@@ -131,7 +131,7 @@ async function handleSubmit() {
         <!-- Header -->
         <header class="sticky top-0 z-50 bg-[#0f0f17]/80 backdrop-blur-md border-b border-white/5 px-6 py-4">
             <div class="max-w-3xl mx-auto flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shadow-lg shadow-primary/20">
+                <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
                     <Icon name="ph:graduation-cap-fill" class="w-5 h-5 text-white" />
                 </div>
                 <span class="text-xs font-black text-text uppercase tracking-[0.2em]">

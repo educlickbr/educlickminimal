@@ -19,7 +19,22 @@ onMounted(async () => {
         store.initTheme();
         await store.initSession();
 
+        // Gate de produto (Fase F): sem acesso -> desloga e volta à landing
+        if (store.sem_acesso) {
+            await store.logout();
+            showLanding.value = true;
+            ready.value = true;
+            return;
+        }
+
         if (user.value) {
+            // Logado: primeira página pós-login = rota_inicial da entidade ativa.
+            // Se for '/' (default), mantém exibindo o menu como hoje (evita loop).
+            const rotaInicial = store.rota_inicial;
+            if (rotaInicial && rotaInicial !== "/") {
+                await navigateTo(rotaInicial);
+                return;
+            }
             showLanding.value = false;
         } else {
             showLanding.value = true;
@@ -54,3 +69,7 @@ onMounted(async () => {
         </div>
     </div>
 </template>
+
+<style scoped>
+/* SFC Style */
+</style>

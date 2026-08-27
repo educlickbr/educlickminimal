@@ -30,6 +30,14 @@ const codigoError = ref('')
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
+// Aplica o tema/branding da entidade (via BFF) quando deslogado;
+// se não houver entidade resolvida, respeita a preferência manual.
+onMounted(async () => {
+    const { aplicarTemaDaEntidadePublica } = useTemaEntidade();
+    const aplicouEntidade = await aplicarTemaDaEntidadePublica();
+    if (!aplicouEntidade) store.initTheme();
+})
+
 async function verificarEmail() {
     onboarding.value = null
     showCriarSenha.value = false
@@ -133,7 +141,7 @@ async function criarConta() {
             // Login automático (signUp já logou, mas vamos garantir)
             await store.initSession()
             const redirectTo = route.query.redirectTo as string
-            router.push(redirectTo || '/')
+            router.push(redirectTo || store.rota_inicial || '/')
         } else {
             codigoError.value = vinculo?.message || "Erro ao vincular conta."
         }
@@ -160,7 +168,7 @@ const handleLogin = async () => {
         if (data.user) {
             await store.initSession()
             const redirectTo = route.query.redirectTo as string
-            router.push(redirectTo || '/')
+            router.push(redirectTo || store.rota_inicial || '/')
         }
     } catch (err: any) {
         errorMsg.value = err.message || 'Erro ao realizar login'
@@ -171,7 +179,7 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[#0a0a0c] p-6 font-sans relative overflow-hidden">
+  <div class="min-h-screen flex items-center justify-center bg-background p-6 font-sans relative overflow-hidden">
     
     <div class="absolute inset-0 pointer-events-none">
         <div class="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] bg-primary/20 rounded-full blur-[180px] animate-pulse"></div>
@@ -181,10 +189,10 @@ const handleLogin = async () => {
 
     <div class="w-full max-w-md relative z-10">
         
-        <div class="bg-div-15 backdrop-blur-2xl border border-white/5 rounded-xl p-8 md:p-12 shadow-2xl">
+        <div class="bg-div-15 backdrop-blur-2xl border border-divider rounded-xl p-8 md:p-12 shadow-2xl">
             
             <div class="flex flex-col items-center mb-10">
-                <h1 class="text-3xl font-black text-white uppercase tracking-[0.3em] text-center">
+                <h1 class="text-3xl font-black text-text uppercase tracking-[0.3em] text-center">
                     LOGIN
                 </h1>
                 <p v-if="route.query.redirectTo" class="text-[10px] font-bold text-primary uppercase tracking-widest mt-4">
@@ -207,7 +215,7 @@ const handleLogin = async () => {
                                 placeholder="seu@email.com"
                                 @input="onEmailInput"
                                 @blur="verificarEmail"
-                                class="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-white/10 group-hover:border-white/20"
+                                class="w-full bg-field border border-field-border rounded-lg px-5 py-4 text-sm font-bold text-field-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:field-placeholder group-hover:border-field-border"
                             />
                         </div>
                     </div>
@@ -233,7 +241,7 @@ const handleLogin = async () => {
                         <div class="space-y-2">
                             <div class="flex items-center justify-between px-1">
                                 <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60">Senha</label>
-                                <NuxtLink to="/auth/recuperar_senha" class="text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors">Esqueceu?</NuxtLink>
+                                <NuxtLink to="/auth/recuperar_senha" class="text-[10px] font-black uppercase tracking-widest text-primary hover:text-text transition-colors">Esqueceu?</NuxtLink>
                             </div>
                             <div class="relative group">
                                 <input 
@@ -241,7 +249,7 @@ const handleLogin = async () => {
                                     :type="showPassword ? 'text' : 'password'" 
                                     required
                                     placeholder="••••••••"
-                                    class="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:text-white/10 group-hover:border-white/20"
+                                    class="w-full bg-field border border-field-border rounded-lg px-5 py-4 text-sm font-bold text-field-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all placeholder:field-placeholder group-hover:border-field-border"
                                 />
                             </div>
                         </div>
@@ -268,7 +276,7 @@ const handleLogin = async () => {
                     <p class="text-[10px] font-bold text-secondary/40 uppercase tracking-widest">
                         Ainda não tem uma conta?
                     </p>
-                    <NuxtLink to="/auth/cadastro" class="inline-block text-[10px] font-black uppercase tracking-widest text-white/80 bg-white/5 border border-white/10 px-8 py-4 rounded-lg hover:bg-white/10 hover:text-white transition-all">
+                    <NuxtLink to="/auth/cadastro" class="inline-block text-[10px] font-black uppercase tracking-widest text-text/80 bg-div-30 border border-divider px-8 py-4 rounded-lg hover:bg-div-15 hover:text-text transition-all">
                         Criar conta / Inscrever-se
                     </NuxtLink>
                 </div>
@@ -298,7 +306,7 @@ const handleLogin = async () => {
                         <Icon name="ph:envelope-bold" class="w-5 h-5" />
                         Enviar Código
                     </button>
-                    <button @click="showCriarSenha = false" class="w-full text-[10px] font-bold text-secondary/40 hover:text-white transition-colors">
+                    <button @click="showCriarSenha = false" class="w-full text-[10px] font-bold text-secondary/40 hover:text-text transition-colors">
                         Voltar
                     </button>
                 </div>
@@ -318,7 +326,7 @@ const handleLogin = async () => {
                             type="text"
                             maxlength="6"
                             placeholder="000000"
-                            class="w-full mt-1 bg-white/5 border border-white/10 rounded-lg px-5 py-4 text-lg font-black text-white text-center tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                            class="w-full mt-1 bg-field border border-field-border rounded-lg px-5 py-4 text-lg font-black text-field-text text-center tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
                             style="font-family: monospace;"
                         />
                     </div>
@@ -329,9 +337,9 @@ const handleLogin = async () => {
                                 v-model="novaSenha"
                                 :type="showNovaSenha ? 'text' : 'password'"
                                 placeholder="Mínimo 6 caracteres"
-                                class="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 pr-12 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                                class="w-full bg-field border border-field-border rounded-lg px-5 py-4 pr-12 text-sm font-bold text-field-text focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
                             />
-                            <button type="button" @click="showNovaSenha = !showNovaSenha" class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary/40 hover:text-white transition-colors">
+                            <button type="button" @click="showNovaSenha = !showNovaSenha" class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary/40 hover:text-text transition-colors">
                                 <Icon :name="showNovaSenha ? 'ph:eye-closed-light' : 'ph:eye-light'" class="w-4 h-4" />
                             </button>
                         </div>
@@ -343,9 +351,9 @@ const handleLogin = async () => {
                                 v-model="confirmarSenha"
                                 :type="showConfirmarSenha ? 'text' : 'password'"
                                 placeholder="Repita a senha"
-                                class="w-full bg-white/5 border border-white/10 rounded-lg px-5 py-4 pr-12 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                                class="w-full bg-field border border-field-border rounded-lg px-5 py-4 pr-12 text-sm font-bold text-field-text focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
                             />
-                            <button type="button" @click="showConfirmarSenha = !showConfirmarSenha" class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary/40 hover:text-white transition-colors">
+                            <button type="button" @click="showConfirmarSenha = !showConfirmarSenha" class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary/40 hover:text-text transition-colors">
                                 <Icon :name="showConfirmarSenha ? 'ph:eye-closed-light' : 'ph:eye-light'" class="w-4 h-4" />
                             </button>
                         </div>
@@ -364,7 +372,7 @@ const handleLogin = async () => {
                         <span>Criar Conta e Entrar</span>
                     </button>
 
-                    <button @click="codigoEnviado = false" class="w-full text-[10px] font-bold text-secondary/40 hover:text-white transition-colors">
+                    <button @click="codigoEnviado = false" class="w-full text-[10px] font-bold text-secondary/40 hover:text-text transition-colors">
                         Reenviar Código
                     </button>
                 </div>

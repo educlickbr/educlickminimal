@@ -1,2 +1,7 @@
 SUPABASE_URL=https://uipgyvlmcvvvadguyjsa.supabase.co
 SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpcGd5dmxtY3Z2dmFkZ3V5anNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczNjU1MzAsImV4cCI6MjA3Mjk0MTUzMH0.ubzyxVyRhUj-5hNLds1n927PwKGMbk1p6d7A3xHpCmw
+
+# Dev — força qual entidade renderiza como ativa no localhost (ver branding/permissões)
+# Em localhost: vazio = educlick_modelo (default); preencha outro id para testar outra entidade.
+# Fora de localhost: o domínio/url resolve a entidade (este valor é ignorado).
+EDUCLICK_FALLBACK_ENTIDADE_ID=00ca60ea-6667-482d-8a96-09b877707b08

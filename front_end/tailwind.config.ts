@@ -15,6 +15,11 @@ export default <Partial<Config>> {
                 "danger": "var(--color-danger)",
                 "success": "var(--color-success)",
                 "warning": "var(--color-warning)",
+                "divider": "var(--color-divider)",
+                "field": "var(--field-bg)",
+                "field-border": "var(--field-border)",
+                "field-text": "var(--field-text)",
+                "field-placeholder": "var(--field-placeholder)",
             },
             fontFamily: {
                 "sans": [

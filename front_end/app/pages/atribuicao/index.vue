@@ -23,3 +23,7 @@ onMounted(async () => {
 <template>
   <AtribuicaoPage :ctx="ctx" :idEntidade="idEntidade()" />
 </template>
+
+<style scoped>
+/* SFC Style */
+</style>

@@ -10,34 +10,33 @@
                     class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"
                 />
                 <span
-                    class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
+                    class="text-[10px] font-black text-secondary/50 uppercase tracking-widest"
                     >Carregando formulários...</span
                 >
             </div>
 
             <div
                 v-else-if="listaCtx.formulariosSalvos.value.length === 0"
-                class="empty-state"
+                class="ds-empty"
             >
-                <div class="empty-icon">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        fill="currentColor"
-                        viewBox="0 0 256 256"
-                    >
-                        <path
-                            d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160Zm40,164.69H56V40h88V88a8,8,0,0,0,8,8h48Z"
-                        />
-                    </svg>
-                </div>
-                <p class="empty-title">Nenhum formulário configurado</p>
-                <p class="empty-subtitle">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    fill="currentColor"
+                    viewBox="0 0 256 256"
+                    class="mb-2 text-secondary"
+                >
+                    <path
+                        d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160Zm40,164.69H56V40h88V88a8,8,0,0,0,8,8h48Z"
+                    />
+                </svg>
+                <p class="ds-name">Nenhum formulário configurado</p>
+                <p class="ds-desc text-center">
                     Crie seu primeiro formulário para configurar os campos de
                     inscrição.
                 </p>
-                <button @click="novoFormulario" class="empty-cta mt-4">
+                <button @click="novoFormulario" class="ds-btn-primary mt-4">
                     Criar Primeiro Formulário
                 </button>
             </div>
@@ -49,7 +48,7 @@
                 <div
                     v-for="(f, idx) in listaCtx.formulariosSalvos.value"
                     :key="idx"
-                    class="form-card group"
+                    class="form-card group bg-div-15 border border-divider hover:border-primary/40"
                     @click="abrirFormulario(f)"
                 >
                     <div class="form-card-accent" />
@@ -67,7 +66,7 @@
                         </svg>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs font-black text-white truncate">
+                        <p class="text-xs font-black text-text truncate">
                             {{ f.contexto_nome || "Sem nome" }}
                         </p>
                         <div class="flex items-center gap-2 mt-1 flex-wrap">
@@ -82,7 +81,7 @@
                             }}</span>
                         </div>
                         <p
-                            class="text-[9px] text-secondary/40 mt-2 font-semibold"
+                            class="text-[9px] text-secondary/50 mt-2 font-semibold"
                         >
                             {{ f.total_campos }} campo{{
                                 f.total_campos !== 1 ? "s" : ""
@@ -140,7 +139,7 @@
                         Banco de Perguntas
                     </h4>
                     <div
-                        class="text-[10px] text-secondary/50 mb-4 font-semibold pb-4 border-b border-white/5"
+                        class="text-[10px] text-secondary/50 mb-4 font-semibold pb-4 border-b border-divider"
                     >
                         Arraste os campos abaixo para o quadro ao lado.
                     </div>
@@ -170,7 +169,7 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-0.5">
                                     <p
-                                        class="text-xs font-bold text-white truncate"
+                                        class="text-xs font-bold text-text truncate"
                                     >
                                         {{ p.label }}
                                     </p>
@@ -197,7 +196,7 @@
                 <!-- Main -->
                 <div class="builder-main">
                     <div
-                        class="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] rounded-xl p-5 mb-6"
+                        class="bg-div-15 border border-divider rounded-xl p-5 mb-6"
                     >
                         <div class="flex items-center justify-between mb-4">
                             <h4
@@ -208,7 +207,7 @@
                             <button
                                 @click="builderCtx.saveFormConfig"
                                 :disabled="builderCtx.savingBuilder.value"
-                                class="px-5 py-2.5 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#8b5cf6] border border-[rgba(139,92,246,0.4)] text-white text-[11px] font-black uppercase tracking-widest hover:from-[#6d28d9] hover:to-[#7c3aed] hover:shadow-lg hover:shadow-[rgba(139,92,246,0.45)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                                class="ds-btn-primary"
                             >
                                 {{
                                     builderCtx.savingBuilder.value
@@ -219,95 +218,77 @@
                         </div>
                         <div class="flex flex-wrap gap-6 items-end">
                             <div class="flex-1 min-w-[200px]">
-                                <label
-                                    class="block text-[10px] font-bold text-secondary/60 mb-1.5 uppercase"
-                                    >Tipo de Candidato:</label
-                                >
-                                <select
+                                <BaseField
                                     v-model="builderCtx.selectedTipoCand.value"
-                                    class="w-full text-sm p-2.5 rounded-lg bg-[var(--field-bg)] border border-[var(--field-border)] text-white"
-                                >
-                                    <option value="estudante">Estudante</option>
-                                    <option value="docente">Docente</option>
-                                    <option value="externo">Externo</option>
-                                </select>
+                                    type="select"
+                                    label="Tipo de Candidato"
+                                    empty-label="Selecione o tipo"
+                                    :options="[
+                                        { value: 'estudante', label: 'Estudante' },
+                                        { value: 'docente', label: 'Docente' },
+                                        { value: 'externo', label: 'Externo' },
+                                    ]"
+                                />
                             </div>
                             <div class="flex-1 min-w-[200px]">
-                                <label
-                                    class="block text-[10px] font-bold text-secondary/60 mb-1.5 uppercase"
-                                    >Escopo:</label
-                                >
-                                <select
+                                <BaseField
                                     v-model="builderCtx.contextType.value"
-                                    class="w-full text-sm p-2.5 rounded-lg bg-[var(--field-bg)] border border-[var(--field-border)] text-white"
-                                    :disabled="builderCtx.selectedTipoCand.value === 'docente'"
-                                >
-                                    <option value="area">
-                                        Área
-                                    </option>
-                                    <option value="programa">
-                                        Programa
-                                    </option>
-                                    <option value="global"
-                                        >Global (Instituição)</option
-                                    >
-                                </select>
+                                    type="select"
+                                    label="Escopo"
+                                    empty-label="Selecione o escopo"
+                                    :disabled="
+                                        builderCtx.selectedTipoCand.value ===
+                                        'docente'
+                                    "
+                                    :options="[
+                                        { value: 'area', label: 'Área' },
+                                        { value: 'programa', label: 'Programa' },
+                                        {
+                                            value: 'global',
+                                            label: 'Global (Instituição)',
+                                        },
+                                    ]"
+                                />
                             </div>
                             <div
                                 v-if="builderCtx.contextType.value !== 'global'"
                                 class="flex-1 min-w-[200px]"
                             >
-                                <label
-                                    class="block text-[10px] font-bold text-secondary/60 mb-1.5 uppercase"
-                                    >Selecione:</label
-                                >
-                                <select
+                                <BaseField
                                     v-model="builderCtx.selectedContextId.value"
-                                    class="w-full text-sm p-2.5 rounded-lg bg-[var(--field-bg)] border border-[var(--field-border)] text-white"
-                                >
-                                    <option value="" disabled>
-                                        Selecione...
-                                    </option>
-                                    <template
-                                        v-if="
-                                            builderCtx.contextType.value ===
-                                            'area'
-                                        "
-                                    >
-                                        <option
-                                            v-for="a in listaCtx.areas.value"
-                                            :key="a.id"
-                                            :value="a.id"
-                                        >
-                                            {{ a.nome_area }}
-                                        </option>
-                                    </template>
-                                    <template v-else>
-                                        <option
-                                            v-for="p in listaCtx.programas
-                                                .value"
-                                            :key="p.id"
-                                            :value="p.id"
-                                        >
-                                            {{ p.descricao }}
-                                        </option>
-                                    </template>
-                                </select>
+                                    type="select"
+                                    label="Selecione"
+                                    :options="[
+                                        { value: '', label: 'Selecione...' },
+                                        ...(builderCtx.contextType.value ===
+                                        'area'
+                                            ? listaCtx.areas.value.map((a) => ({
+                                                  value: a.id,
+                                                  label: a.nome_area,
+                                              }))
+                                            : listaCtx.programas.value.map(
+                                                  (p) => ({
+                                                      value: p.id,
+                                                      label: p.descricao,
+                                                  }),
+                                              )),
+                                    ]"
+                                />
                             </div>
                             <div class="flex-1 min-w-[200px]">
-                                <label
-                                    class="block text-[10px] font-bold text-secondary/60 mb-1.5 uppercase"
-                                    >Tipo de Processo:</label
-                                >
-                                <select
+                                <BaseField
                                     v-model="builderCtx.selectedTipoProc.value"
-                                    class="w-full text-sm p-2.5 rounded-lg bg-[var(--field-bg)] border border-[var(--field-border)] text-white"
-                                >
-                                    <option value="matricula">Matrícula</option>
-                                    <option value="seletivo">
-                                        Processo Seletivo
-                                    </option>
-                                </select>
+                                    type="select"
+                                    label="Tipo de Processo"
+                                    empty-label="Selecione o tipo"
+                                    :options="[
+                                        { value: 'matricula', label: 'Matrícula' },
+                                        {
+                                            value: 'seletivo',
+                                            label: 'Processo Seletivo',
+                                        },
+                                    ]"
+                                />
                             </div>
                         </div>
                     </div>
@@ -327,7 +308,7 @@
                             :class="
                                 builderCtx.activeBuilderBlocoIndex.value === idx
                                     ? 'bg-primary border-primary shadow-lg shadow-primary/20 text-white'
-                                    : 'bg-white/5 border-white/5 text-secondary hover:text-white'
+                                    : 'bg-div-15 border-divider text-secondary hover:text-text'
                             "
                         >
                             {{ bloco }}
@@ -356,7 +337,7 @@
                         </button>
                         <button
                             @click="builderCtx.abrirModalNovoBloco"
-                            class="px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-dashed border-white/20 text-white/50 hover:text-white hover:border-white/50 transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                            class="px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-dashed border-divider text-secondary hover:text-text hover:border-secondary/50 transition-colors flex items-center gap-1.5 whitespace-nowrap"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -404,16 +385,16 @@
                                 <div class="canvas-item-inner">
                                     <div class="flex-1 min-w-0">
                                         <div
-                                            class="text-[10px] uppercase font-black text-white/50 tracking-wider mb-1 flex items-center gap-2"
+                                            class="text-[10px] uppercase font-black text-secondary/60 tracking-wider mb-1 flex items-center gap-2"
                                         >
                                             {{ base.label }}
                                             <span
-                                                class="bg-white/5 text-white/40 border border-white/10 px-1.5 py-0.5 rounded flex items-center gap-1 text-[8px]"
+                                                class="bg-div-15 text-secondary border border-divider px-1.5 py-0.5 rounded flex items-center gap-1 text-[8px]"
                                                 >🔒 Fixo</span
                                             >
                                         </div>
                                         <div
-                                            class="h-8 rounded bg-white/5 border border-white/5 w-full flex items-center px-3 text-xs text-white/30 truncate"
+                                            class="h-8 rounded bg-div-15 border border-divider w-full flex items-center px-3 text-xs text-secondary/70 truncate"
                                         >
                                             Padrão do sistema
                                         </div>
@@ -512,7 +493,7 @@
                                             >
                                         </div>
                                         <div
-                                            class="h-8 rounded bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] w-full flex items-center px-3 text-xs text-white/30 truncate"
+                                            class="h-8 rounded bg-div-15 border border-divider w-full flex items-center px-3 text-xs text-secondary/70 truncate"
                                         >
                                             {{
                                                 item.placeholder ||
@@ -632,10 +613,10 @@
                         <div
                             v-if="builderCtx.builderItems.value.length === 0"
                             style="grid-column: span 2 / span 2"
-                            class="py-10 flex text-center flex-col items-center justify-center border-2 border-dashed border-[rgba(255,255,255,0.1)] rounded-xl bg-white/5"
+                            class="py-10 flex text-center flex-col items-center justify-center border-2 border-dashed border-divider rounded-xl bg-div-15"
                         >
                             <span
-                                class="text-[11px] font-bold text-white/50 uppercase tracking-widest"
+                                class="text-[11px] font-bold text-secondary uppercase tracking-widest"
                                 >Arraste os campos para cá</span
                             >
                         </div>
@@ -646,40 +627,58 @@
             <!-- Modal Novo Bloco -->
             <div
                 v-if="builderCtx.showModalBloco.value"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                class="ds-modal-overlay"
+                @click.self="builderCtx.showModalBloco.value = false"
             >
-                <div
-                    class="bg-background border border-white/10 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden"
-                >
-                    <div class="p-6">
-                        <h3
-                            class="text-lg font-black text-white mb-2 tracking-tight"
+                <div class="ds-modal-panel">
+                    <div class="ds-modal-accent-bar"></div>
+                    <div class="ds-modal-header">
+                        <div class="ds-modal-header-icon">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                fill="currentColor"
+                                viewBox="0 0 256 256"
+                            >
+                                <path
+                                    d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"
+                                />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col gap-0.5 flex-1">
+                            <h3 class="ds-modal-title">Novo Bloco</h3>
+                            <p class="ds-modal-subtitle">
+                                Agrupe perguntas em seções lógicas.
+                            </p>
+                        </div>
+                        <button
+                            @click="builderCtx.showModalBloco.value = false"
+                            class="ds-modal-close-btn"
                         >
-                            Novo Bloco
-                        </h3>
-                        <p class="text-xs text-secondary/60 mb-6 font-semibold">
-                            Agrupe perguntas em seções lógicas.
-                        </p>
-                        <input
+                            &times;
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <BaseField
                             v-model="builderCtx.novoBlocoNome.value"
                             placeholder="Ex: Dados Pessoais"
-                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm mb-4 text-white"
                             @keyup.enter="builderCtx.confirmarNovoBloco"
                         />
-                        <div class="flex items-center gap-3">
-                            <button
-                                @click="builderCtx.showModalBloco.value = false"
-                                class="flex-1 px-4 py-3 rounded-xl border border-white/10 text-xs font-black uppercase tracking-widest"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                @click="builderCtx.confirmarNovoBloco"
-                                class="flex-1 px-4 py-3 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest"
-                            >
-                                Criar
-                            </button>
-                        </div>
+                    </div>
+                    <div class="ds-modal-footer">
+                        <button
+                            @click="builderCtx.showModalBloco.value = false"
+                            class="ds-btn-cancel"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            @click="builderCtx.confirmarNovoBloco"
+                            class="ds-btn-save"
+                        >
+                            Criar
+                        </button>
                     </div>
                 </div>
             </div>
@@ -768,8 +767,8 @@ defineExpose({
     align-items: start;
 }
 .builder-sidebar {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--field-border);
     border-radius: 1rem;
     padding: 1.25rem;
 }
@@ -779,8 +778,8 @@ defineExpose({
     gap: 0.75rem;
     padding: 0.625rem 0.75rem;
     border-radius: 0.625rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--field-border);
     cursor: grab;
     transition: all 0.15s;
 }
@@ -798,12 +797,12 @@ defineExpose({
 }
 .canvas-item {
     border-radius: 0.75rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--field-border);
     transition: all 0.15s;
 }
 .canvas-item:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--color-secondary-surface-hover);
 }
 .canvas-item.locked {
     opacity: 0.5;
@@ -823,23 +822,23 @@ defineExpose({
     border-radius: 0.375rem;
     border: 1px solid transparent;
     background: none;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--color-secondary);
     cursor: pointer;
     font-size: 11px;
 }
 .action-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-text);
 }
 .action-remove:hover {
     color: #ef4444;
 }
 .drop-slot {
     padding: 1rem;
-    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border: 2px dashed var(--field-border);
     border-radius: 0.75rem;
     text-align: center;
-    color: rgba(255, 255, 255, 0.2);
+    color: var(--color-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -848,16 +847,16 @@ defineExpose({
 .drop-slot--active {
     border-color: rgba(139, 92, 246, 0.5);
     background: rgba(139, 92, 246, 0.05);
-    color: #a78bfa;
+    color: var(--color-primary);
 }
 .canvas-item--drag-top {
-    border-top: 2px solid #a78bfa;
+    border-top: 2px solid var(--color-primary);
 }
 .canvas-item--drag-bottom {
-    border-bottom: 2px solid #a78bfa;
+    border-bottom: 2px solid var(--color-primary);
 }
 .canvas-item--drag-over {
-    border-color: #a78bfa;
+    border-color: var(--color-primary);
 }
 .canvas-item--split-left::before {
     content: "";
@@ -866,7 +865,7 @@ defineExpose({
     top: 0;
     bottom: 0;
     width: 3px;
-    background: #a78bfa;
+    background: var(--color-primary);
     border-radius: 3px 0 0 3px;
 }
 .canvas-item--split-right::after {
@@ -876,7 +875,7 @@ defineExpose({
     top: 0;
     bottom: 0;
     width: 3px;
-    background: #a78bfa;
+    background: var(--color-primary);
     border-radius: 0 3px 3px 0;
 }
 .form-card {
@@ -885,16 +884,12 @@ defineExpose({
     gap: 1rem;
     padding: 1.25rem;
     border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
     cursor: pointer;
     transition: all 0.15s;
     position: relative;
     overflow: hidden;
 }
 .form-card:hover {
-    background: rgba(139, 92, 246, 0.06);
-    border-color: rgba(139, 92, 246, 0.15);
     transform: translateY(-1px);
 }
 .form-card-accent {
@@ -903,7 +898,7 @@ defineExpose({
     left: 0;
     width: 100%;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #a78bfa, transparent);
+    background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
     opacity: 0;
     transition: opacity 0.3s;
 }
@@ -918,7 +913,7 @@ defineExpose({
     justify-content: center;
     border-radius: 0.625rem;
     background: rgba(139, 92, 246, 0.08);
-    color: #a78bfa;
+    color: var(--color-primary);
     flex-shrink: 0;
 }
 .form-badge {
@@ -955,45 +950,16 @@ defineExpose({
     gap: 0.375rem;
     font-size: 0.75rem;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--color-secondary);
     background: none;
     border: none;
     cursor: pointer;
 }
 .form-breadcrumb-back:hover {
-    color: #a78bfa;
+    color: var(--color-primary);
 }
 .form-breadcrumb-sep {
-    color: rgba(255, 255, 255, 0.2);
-}
-.empty-state,
-.empty-icon,
-.empty-title,
-.empty-subtitle,
-.empty-cta {
-    text-align: center;
-}
-.empty-title {
-    font-size: 1rem;
-    font-weight: 800;
-    color: white;
-    margin: 0.5rem 0 0.25rem;
-}
-.empty-subtitle {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.3);
-}
-.empty-cta {
-    padding: 0.5rem 1.25rem;
-    border-radius: 0.625rem;
-    background: rgba(139, 92, 246, 0.15);
-    color: #a78bfa;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    border: none;
-    cursor: pointer;
-    margin-top: 1rem;
+    color: var(--color-secondary);
 }
 .scrollbar-hide::-webkit-scrollbar {
     display: none;

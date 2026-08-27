@@ -1,29 +1,18 @@
 <template>
-    <div class="modal-overlay" @click.self="$emit('close')">
-        <div class="modal-panel modal-panel--md">
-            <div class="modal-accent-bar" />
+    <div class="ds-modal-overlay" @click.self="$emit('close')">
+        <div class="ds-modal-panel max-w-md">
+            <div class="ds-modal-accent-bar" />
 
             <!-- Header -->
-            <div class="modal-header">
-                <div class="modal-header-icon">
-                    <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <path
-                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                        />
-                    </svg>
+            <div class="ds-modal-header">
+                <div class="ds-modal-header-icon text-primary">
+                    <Icon name="ph:package-bold" class="w-5 h-5" />
                 </div>
-                <div class="modal-header-text">
-                    <h3 class="modal-title">
+                <div class="flex flex-col gap-0.5 flex-1">
+                    <h3 class="ds-modal-title">
                         {{ produto ? "Editar Produto" : "Novo Produto" }}
                     </h3>
-                    <p class="modal-subtitle">
+                    <p class="ds-modal-subtitle">
                         {{
                             produto
                                 ? "Altere os dados do produto"
@@ -31,89 +20,79 @@
                         }}
                     </p>
                 </div>
-                <button class="modal-close-btn" @click="$emit('close')">
-                    ✕
+                <button class="ds-modal-close-btn" @click="$emit('close')">
+                    &times;
                 </button>
             </div>
 
-            <!-- Form -->
-            <div class="modal-body">
-                <div v-if="errorMessage" class="modal-error">
+            <!-- Form Body -->
+            <div class="p-6 flex flex-col gap-5">
+                <div v-if="errorMessage" class="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-bold">
                     {{ errorMessage }}
                 </div>
 
                 <!-- Programa -->
-                <div class="form-field">
-                    <label class="form-label"
-                        >Programa <span class="text-red-400">*</span></label
-                    >
-                    <select v-model="form.id_programa" class="form-input">
-                        <option value="" disabled>
-                            Selecione o programa...
-                        </option>
-                        <option
-                            v-for="p in programas"
-                            :key="p.id"
-                            :value="p.id"
-                        >
-                            {{ p.descricao || "—" }} ({{
-                                p.nome_curso || "Sem curso"
-                            }})
-                        </option>
-                    </select>
-                </div>
+                <BaseSelect
+                    v-model="form.id_programa"
+                    label="Programa"
+                    required
+                    placeholder="Selecione o programa..."
+                    :options="programasOptions"
+                />
 
                 <!-- Nome -->
-                <div class="form-field">
-                    <label class="form-label"
-                        >Nome do Produto
-                        <span class="text-red-400">*</span></label
-                    >
-                    <input
-                        v-model="form.nome_produto"
-                        type="text"
-                        class="form-input"
-                        placeholder="Ex: Curso Completo, Mentoria Premium"
-                    />
-                </div>
+                <BaseField
+                    v-model="form.nome_produto"
+                    label="Nome do Produto"
+                    required
+                    placeholder="Ex: Curso Completo, Mentoria Premium"
+                />
 
                 <!-- Descrição -->
-                <div class="form-field">
-                    <label class="form-label">Descrição</label>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-black text-secondary/60 uppercase tracking-widest px-1">
+                        Descrição
+                    </label>
                     <textarea
                         v-model="form.descricao"
-                        class="form-input form-textarea"
+                        class="w-full rounded-xl px-4 py-3 text-sm font-bold bg-field-bg border border-field-border text-field-text placeholder-secondary/30 focus:outline-none focus:border-primary/50 transition-all resize-none"
                         placeholder="Descrição opcional do produto"
                         rows="2"
                     />
                 </div>
 
                 <!-- Ativo -->
-                <div class="form-field">
-                    <label class="form-checkbox">
-                        <input v-model="form.is_ativo" type="checkbox" />
-                        <span>Produto ativo</span>
+                <div class="flex items-center gap-3 p-3 bg-div-15 border border-divider rounded-xl">
+                    <input
+                        v-model="form.is_ativo"
+                        type="checkbox"
+                        id="chk-ativo"
+                        class="accent-primary w-4 h-4 cursor-pointer"
+                    />
+                    <label for="chk-ativo" class="text-xs font-bold text-text cursor-pointer select-none">
+                        Produto ativo para comercialização
                     </label>
                 </div>
             </div>
 
             <!-- Footer -->
-            <div class="modal-footer">
-                <button class="modal-btn-cancel" @click="$emit('close')">
+            <div class="ds-modal-footer">
+                <button class="ds-btn-cancel" @click="$emit('close')">
                     Cancelar
                 </button>
                 <button
-                    class="modal-btn-save"
+                    class="ds-btn-save"
                     :disabled="!canSave || saving"
                     @click="handleSave"
                 >
-                    {{
+                    <div v-if="saving" class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>{{
                         saving
                             ? "Salvando..."
                             : produto
                               ? "Salvar"
                               : "Criar Produto"
-                    }}
+                    }}</span>
                 </button>
             </div>
         </div>
@@ -141,6 +120,13 @@ const form = reactive({
     nome_produto: "",
     descricao: "",
     is_ativo: true,
+});
+
+const programasOptions = computed(() => {
+    return props.programas.map((p) => ({
+        id: p.id,
+        nome: `${p.descricao || "—"} (${p.nome_curso || "Sem curso"})`,
+    }));
 });
 
 onMounted(() => {
@@ -185,195 +171,9 @@ async function handleSave() {
 </script>
 
 <style scoped>
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: rgba(0, 0, 0, 0.85);
+.ds-modal-panel {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-.modal-panel {
-    background: #13131a;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    width: 100%;
-    max-width: 560px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
-}
-.modal-accent-bar {
-    height: 3px;
-    border-radius: 20px 20px 0 0;
-    background: linear-gradient(90deg, #7c3aed, #a78bfa);
-}
-.modal-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 20px 24px 0;
-}
-.modal-header-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    flex-shrink: 0;
-    background: rgba(139, 92, 246, 0.12);
-    color: #a78bfa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.modal-header-text {
-    flex: 1;
-}
-.modal-title {
-    font-size: 15px;
-    font-weight: 900;
-    color: rgba(255, 255, 255, 0.92);
-}
-.modal-subtitle {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.3);
-    margin-top: 2px;
-}
-.modal-close-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    border: none;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.3);
-    font-size: 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-}
-.modal-close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
-
-.modal-body {
-    padding: 20px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-.modal-error {
-    padding: 10px 14px;
-    border-radius: 10px;
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    color: #f87171;
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.form-label {
-    font-size: 9px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: rgba(255, 255, 255, 0.35);
-}
-.form-input {
-    width: 100%;
-    padding: 11px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(232, 230, 240, 0.9);
-    font-size: 13px;
-    font-weight: 700;
-    outline: none;
-    transition: border-color 0.15s ease;
-    font-family: inherit;
-}
-.form-input:focus {
-    border-color: rgba(139, 92, 246, 0.45);
-}
-.form-textarea {
-    resize: vertical;
-    min-height: 60px;
-}
-
-.form-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.6);
-    cursor: pointer;
-}
-.form-checkbox input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-    accent-color: #8b5cf6;
-}
-
-.grid.grid-cols-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 16px 24px 20px;
-}
-.modal-btn-cancel {
-    padding: 10px 20px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: transparent;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-.modal-btn-cancel:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.modal-btn-save {
-    padding: 10px 24px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-    border: 1px solid rgba(139, 92, 246, 0.4);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    cursor: pointer;
-    transition: all 0.15s;
-    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
-}
-.modal-btn-save:hover {
-    background: linear-gradient(135deg, #6d28d9, #7c3aed);
-}
-.modal-btn-save:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
 }
 </style>
+
+

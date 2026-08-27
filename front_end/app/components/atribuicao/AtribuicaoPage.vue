@@ -82,9 +82,7 @@ function showToast(msg: string, type: 'success' | 'error') {
                 {{ as.nome }}
               </option>
             </select>
-            <svg class="filter-caret" width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <Icon name="ph:caret-down-bold" class="filter-caret w-3 h-3" />
           </div>
         </div>
 
@@ -102,9 +100,7 @@ function showToast(msg: string, type: 'success' | 'error') {
                 {{ p.descricao }}
               </option>
             </select>
-            <svg class="filter-caret" width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <Icon name="ph:caret-down-bold" class="filter-caret w-3 h-3" />
           </div>
         </div>
 
@@ -123,11 +119,7 @@ function showToast(msg: string, type: 'success' | 'error') {
     <!-- Sem programa -->
     <div v-else-if="!ctx.programaSelecionado.value" class="empty-state">
       <div class="empty-icon-wrap">
-        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H5c-1.1 0-2 .9-2 2v2" />
-          <circle cx="8.5" cy="7" r="4" />
-          <polyline points="17 11 19 13 23 9" />
-        </svg>
+        <Icon name="ph:users-three-duotone" class="w-8 h-8 text-secondary/40" />
       </div>
       <p class="empty-title">Selecione um programa</p>
       <p class="empty-sub">Escolha uma oferta para atribuir docentes aos componentes</p>
@@ -141,9 +133,7 @@ function showToast(msg: string, type: 'success' | 'error') {
     <!-- Ciclos vazios -->
     <div v-else-if="ctx.ciclos.value.length === 0" class="empty-state">
       <div class="empty-icon-wrap">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-          <path d="M3 7h18M3 12h18M3 17h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
+        <Icon name="ph:folder-simple-dashed-duotone" class="w-8 h-8 text-secondary/40" />
       </div>
       <p class="empty-title">Nenhum ciclo encontrado</p>
       <p class="empty-sub">Este programa não possui ciclos com módulos e componentes</p>
@@ -167,8 +157,8 @@ function showToast(msg: string, type: 'success' | 'error') {
           v-if="toastVisible"
           class="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl text-xs font-bold shadow-2xl border"
           :class="toastType === 'success'
-            ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-            : 'bg-red-500/15 border-red-500/30 text-red-300'"
+            ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-500'
+            : 'bg-red-500/15 border-red-500/30 text-red-500'"
         >{{ toastMsg }}</div>
       </Transition>
     </Teleport>
@@ -196,23 +186,24 @@ function showToast(msg: string, type: 'success' | 'error') {
 
 /* ── Filtros ─────────────────────────────────────────── */
 .filter-group { display: flex; flex-direction: column; gap: 5px; min-width: 140px; }
-.filter-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.16em; color: rgba(255,255,255,0.3); }
+.filter-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.16em; color: var(--color-secondary); opacity: 0.8; }
 .filter-select-wrap { position: relative; }
 .filter-select {
   width: 100%; padding: 9px 32px 9px 12px;
-  border-radius: 10px; border: 1px solid rgba(255,255,255,0.07);
-  background: rgba(255,255,255,0.03); color: rgba(232,230,240,0.85);
+  border-radius: 10px; border: 1px solid var(--field-border);
+  background: var(--field-bg); color: var(--field-text);
   font-size: 11px; font-weight: 700; outline: none; cursor: pointer;
   appearance: none; transition: border-color 0.15s ease;
 }
-.filter-select:hover { border-color: rgba(139,92,246,0.25); }
-.filter-select:focus { border-color: rgba(139,92,246,0.45); }
+.filter-select:hover { border-color: rgba(139,92,246,0.3); }
+.filter-select:focus { border-color: rgba(139,92,246,0.5); }
 .filter-caret {
   position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
-  pointer-events: none; color: rgba(255,255,255,0.15);
+  pointer-events: none; color: var(--color-secondary); opacity: 0.5;
 }
 .filter-counter {
-  font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.25);
+  font-size: 10px; font-weight: 700; color: var(--color-secondary);
+  opacity: 0.5;
   text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
   padding-bottom: 10px;
 }
@@ -220,8 +211,8 @@ function showToast(msg: string, type: 'success' | 'error') {
 /* ── Spinner ─────────────────────────────────────────── */
 .mini-spinner {
   width: 22px; height: 22px;
-  border: 2px solid rgba(255,255,255,0.06);
-  border-top-color: rgba(139,92,246,0.6);
+  border: 2px solid var(--color-divider);
+  border-top-color: var(--color-primary);
   border-radius: 50%; animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -230,16 +221,20 @@ function showToast(msg: string, type: 'success' | 'error') {
 .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px; }
 .empty-icon-wrap {
   width: 60px; height: 60px;
-  border-radius: 16px; border: 1px solid rgba(255,255,255,0.06);
-  background: rgba(255,255,255,0.02);
+  border-radius: 16px; border: 1px solid var(--color-divider);
+  background: var(--color-secondary-surface);
   display: flex; align-items: center; justify-content: center;
-  color: rgba(255,255,255,0.12); margin-bottom: 16px;
+  margin-bottom: 16px;
 }
-.empty-title { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.25); }
-.empty-sub { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.12); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.empty-title { font-size: 13px; font-weight: 700; color: var(--color-secondary); opacity: 0.8; }
+.empty-sub { font-size: 10px; font-weight: 600; color: var(--color-secondary); opacity: 0.5; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
 
 /* ── Toast ───────────────────────────────────────────── */
 .toast-slide-enter-active, .toast-slide-leave-active { transition: all 0.3s ease; }
 .toast-slide-enter-from { opacity: 0; transform: translateY(1rem); }
 .toast-slide-leave-to { opacity: 0; transform: translateY(0.5rem); }
+
+/* ── Scrollbar ───────────────────────────────────────── */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.12); border-radius: 4px; }
 </style>

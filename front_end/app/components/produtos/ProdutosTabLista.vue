@@ -24,17 +24,13 @@
                         title="Novo Produto"
                         @click.stop="$emit('novo-produto', prog.id)"
                     >
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                            <path d="M5 0v10M0 5h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                        </svg>
+                        <Icon name="ph:plus-bold" class="w-3 h-3 text-primary shrink-0" />
                         Novo Produto
                     </button>
-                    <svg
+                    <Icon
+                        name="ph:caret-down-bold"
                         :class="['prog-chevron', { 'prog-chevron--open': expandidos[prog.id] }]"
-                        width="14" height="14" viewBox="0 0 14 14" fill="none"
-                    >
-                        <path d="M4 5l3 3 3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    />
                 </div>
             </div>
 
@@ -43,15 +39,13 @@
 
                 <!-- Carregando produtos -->
                 <div v-if="prog.carregando" class="level-loading">
-                    <div class="mini-spinner" />
+                    <div class="w-4 h-4 border-2 border-secondary/20 border-t-primary rounded-full animate-spin" />
                     <span>Carregando produtos...</span>
                 </div>
 
                 <!-- Sem produtos -->
                 <div v-else-if="prog.produtos && prog.produtos.length === 0" class="level-empty">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-white/15">
-                        <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
+                    <Icon name="ph:package-bold" class="w-5 h-5 text-secondary/30" />
                     <span>Nenhum produto vinculado a este programa</span>
                 </div>
 
@@ -82,26 +76,19 @@
                                     title="Nova Oferta"
                                     @click.stop="$emit('nova-oferta', prod.id)"
                                 >
-                                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                                        <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.3"/>
-                                        <path d="M4 6h4M6 4v4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                                    </svg>
+                                    <Icon name="ph:plus-circle-bold" class="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                     class="action-btn action-btn--edit"
                                     title="Editar Produto"
                                     @click.stop="$emit('editar-produto', prod)"
                                 >
-                                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                                        <path d="M8.5 1.5L10.5 3.5L4 10H2V8L8.5 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-                                    </svg>
+                                    <Icon name="ph:pencil-simple-bold" class="w-3.5 h-3.5" />
                                 </button>
-                                <svg
+                                <Icon
+                                    name="ph:caret-down-bold"
                                     :class="['prod-chevron', { 'prod-chevron--open': produtosExpandidos[prod.id] }]"
-                                    width="12" height="12" viewBox="0 0 12 12" fill="none"
-                                >
-                                    <path d="M4 4l2.5 3L9 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
+                                />
                             </div>
                         </div>
 
@@ -110,7 +97,7 @@
 
                             <!-- Carregando ofertas -->
                             <div v-if="carregandoOfertas[prod.id]" class="level-loading level-loading--sm">
-                                <div class="mini-spinner mini-spinner--sm" />
+                                <div class="w-3.5 h-3.5 border-2 border-secondary/20 border-t-primary rounded-full animate-spin" />
                                 <span>Carregando ofertas...</span>
                             </div>
 
@@ -119,9 +106,7 @@
                                 v-else-if="ofertasDoProduto(prod.id).length === 0"
                                 class="level-empty level-empty--sm"
                             >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="text-white/15">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7l5-8v4h4l-5 8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
+                                <Icon name="ph:tag-bold" class="w-4 h-4 text-secondary/30" />
                                 <span>Nenhuma oferta para este produto</span>
                             </div>
 
@@ -172,9 +157,7 @@
                                         title="Editar oferta"
                                         @click.stop="$emit('editar-oferta', of, prod.id)"
                                     >
-                                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                                            <path d="M8.5 1.5L10.5 3.5L4 10H2V8L8.5 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-                                        </svg>
+                                        <Icon name="ph:pencil-simple-bold" class="w-3.5 h-3.5" />
                                     </button>
                                 </div>
                             </div>
@@ -236,21 +219,20 @@ function formatValor(centavos: number): string {
 ═══════════════════════════════════════════════════ */
 .prog-card {
     position: relative;
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--color-divider);
     border-radius: 14px;
     overflow: hidden;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .prog-card:hover {
-    border-color: rgba(139, 92, 246, 0.22);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+    border-color: rgba(139, 92, 246, 0.3);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
-/* Accent bar violet — LATERAL esquerda (mesmo padrão dos sub-níveis) */
 .prog-accent-bar {
     position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-    background: linear-gradient(180deg, #7c3aed, #a78bfa);
+    background: var(--color-primary);
     opacity: 0; transition: opacity 0.2s ease;
     z-index: 1;
 }
@@ -265,7 +247,7 @@ function formatValor(centavos: number): string {
     gap: 12px;
     transition: background 0.15s ease;
 }
-.prog-header:hover { background: rgba(139, 92, 246, 0.03); }
+.prog-header:hover { background: var(--color-secondary-surface-hover); }
 
 .prog-header-left {
     display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;
@@ -278,52 +260,51 @@ function formatValor(centavos: number): string {
 .prog-avatar {
     width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
     background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);
-    color: #a78bfa; font-size: 14px; font-weight: 900;
+    color: var(--color-primary); font-size: 14px; font-weight: 900;
     display: flex; align-items: center; justify-content: center;
 }
 .prog-name {
-    font-size: 13px; font-weight: 900; color: rgba(232, 230, 240, 0.92); line-height: 1.3;
+    font-size: 13px; font-weight: 900; color: var(--color-text); line-height: 1.3;
 }
 .prog-curso {
-    font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.3); margin-top: 1px;
+    font-size: 10px; font-weight: 600; color: var(--color-secondary); opacity: 0.6; margin-top: 1px;
 }
 .prog-chevron {
-    color: rgba(255, 255, 255, 0.25); transition: transform 0.2s ease; flex-shrink: 0;
+    color: var(--color-secondary); opacity: 0.5; transition: transform 0.2s ease; flex-shrink: 0; width: 14px; height: 14px;
 }
-.prog-chevron--open { transform: rotate(180deg); color: #a78bfa; }
+.prog-chevron--open { transform: rotate(180deg); color: var(--color-primary); opacity: 1; }
 
 .prog-btn-add {
     display: flex; align-items: center; gap: 5px;
     padding: 5px 10px; border-radius: 7px; border: none;
-    background: rgba(139, 92, 246, 0.07); border: 1px solid rgba(139, 92, 246, 0.15);
-    color: #a78bfa; font-size: 9px; font-weight: 900; text-transform: uppercase;
+    background: rgba(139, 92, 246, 0.07); border: 1px solid rgba(139, 92, 246, 0.18);
+    color: var(--color-primary); font-size: 9px; font-weight: 900; text-transform: uppercase;
     letter-spacing: 0.08em; cursor: pointer; transition: all 0.15s ease;
     opacity: 0;
 }
 .prog-card:hover .prog-btn-add { opacity: 1; }
-.prog-btn-add:hover { background: rgba(139, 92, 246, 0.16); border-color: rgba(139, 92, 246, 0.3); }
+.prog-btn-add:hover { background: rgba(139, 92, 246, 0.16); border-color: rgba(139, 92, 246, 0.35); }
 
 .prog-body {
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid var(--color-divider);
     padding: 10px 14px 14px;
 }
 
 /* ═══════════════════════════════════════════════════
    NÍVEL 2 — PRODUTO
 ═══════════════════════════════════════════════════ */
-.prod-list { display: flex; flex-direction: column; gap: 5px; }
+.prod-list { display: flex; flex-direction: column; gap: 6px; }
 
 .prod-item {
     position: relative;
-    background: rgba(255, 255, 255, 0.018);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--color-divider);
     border-radius: 10px;
     overflow: hidden;
     transition: border-color 0.15s ease;
 }
-.prod-item:hover { border-color: rgba(99, 102, 241, 0.25); }
+.prod-item:hover { border-color: rgba(99, 102, 241, 0.3); background: var(--color-secondary-surface-hover); }
 
-/* Accent bar azul-índigo na LATERAL esquerda — diferencia do violet do prog */
 .prod-level-bar {
     position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
     background: linear-gradient(180deg, #6366f1, #818cf8);
@@ -338,22 +319,22 @@ function formatValor(centavos: number): string {
 }
 .prod-icon {
     width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
-    background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.15);
-    color: #818cf8; font-size: 11px; font-weight: 900;
+    background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2);
+    color: #6366f1; font-size: 11px; font-weight: 900;
     display: flex; align-items: center; justify-content: center;
 }
 .prod-info { flex: 1; min-width: 0; }
-.prod-name { font-size: 12px; font-weight: 800; color: rgba(232, 230, 240, 0.85); }
+.prod-name { font-size: 12px; font-weight: 800; color: var(--color-text); }
 .prod-desc {
-    font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.25);
+    font-size: 10px; font-weight: 600; color: var(--color-secondary); opacity: 0.6;
     margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .prod-badges { display: flex; gap: 4px; flex-shrink: 0; }
 .prod-actions { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
 .prod-chevron {
-    color: rgba(255,255,255,0.2); transition: transform 0.2s ease; flex-shrink: 0;
+    color: var(--color-secondary); opacity: 0.4; transition: transform 0.2s ease; flex-shrink: 0; width: 12px; height: 12px;
 }
-.prod-chevron--open { transform: rotate(180deg); color: #818cf8; }
+.prod-chevron--open { transform: rotate(180deg); color: #6366f1; opacity: 1; }
 
 .action-btn {
     width: 24px; height: 24px; border-radius: 6px; border: none;
@@ -364,43 +345,42 @@ function formatValor(centavos: number): string {
 .prod-item:hover .action-btn { opacity: 1; }
 
 .action-btn--oferta {
-    background: rgba(16, 185, 129, 0.06); color: rgba(52, 211, 153, 0.6);
+    background: rgba(16, 185, 129, 0.08); color: #10b981;
 }
-.action-btn--oferta:hover { background: rgba(16, 185, 129, 0.14); color: #34d399; }
+.action-btn--oferta:hover { background: rgba(16, 185, 129, 0.2); }
 
 .action-btn--edit {
-    background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3);
+    background: var(--color-secondary-surface-hover); color: var(--color-secondary);
 }
-.action-btn--edit:hover { background: rgba(99, 102, 241, 0.14); color: #818cf8; }
+.action-btn--edit:hover { background: rgba(99, 102, 241, 0.15); color: #6366f1; }
 
 /* ═══════════════════════════════════════════════════
    NÍVEL 3 — OFERTA
 ═══════════════════════════════════════════════════ */
 .oferta-section {
-    border-top: 1px solid rgba(255, 255, 255, 0.03);
-    background: rgba(0, 0, 0, 0.12);
+    border-top: 1px solid var(--color-divider);
+    background: var(--color-div-15);
 }
 .oferta-list {
-    display: flex; flex-direction: column; gap: 3px;
+    display: flex; flex-direction: column; gap: 4px;
     padding: 6px 12px 8px 16px;
 }
 
 .oferta-card {
     position: relative;
-    background: rgba(255, 255, 255, 0.012);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    border-radius: 7px;
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: 8px;
     padding: 8px 10px 8px 12px;
     display: flex; align-items: center; gap: 8px;
     transition: border-color 0.15s ease, background 0.15s ease;
     overflow: hidden;
 }
 .oferta-card:hover {
-    border-color: rgba(96, 165, 250, 0.18);
-    background: rgba(96, 165, 250, 0.03);
+    border-color: rgba(96, 165, 250, 0.3);
+    background: var(--color-secondary-surface-hover);
 }
 
-/* Accent bar azul claro — diferencia dos dois níveis anteriores */
 .oferta-level-bar {
     position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
     background: linear-gradient(180deg, #3b82f6, #60a5fa);
@@ -409,32 +389,32 @@ function formatValor(centavos: number): string {
 .oferta-card:hover .oferta-level-bar { opacity: 1; }
 
 .oferta-idx {
-    font-size: 9px; font-weight: 900; color: rgba(96, 165, 250, 0.35);
+    font-size: 9px; font-weight: 900; color: var(--color-secondary); opacity: 0.5;
     font-variant-numeric: tabular-nums; flex-shrink: 0; width: 16px; text-align: center;
 }
 .oferta-card-body {
-    flex: 1; display: flex; flex-direction: column; gap: 5px;
+    flex: 1; display: flex; flex-direction: column; gap: 4px;
 }
 .oferta-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .oferta-slug {
     font-size: 11px; font-weight: 900;
-    color: rgba(96, 165, 250, 0.7); font-family: monospace;
+    color: var(--color-primary); font-family: monospace;
 }
 .oferta-nome {
-    font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.3);
+    font-size: 10px; font-weight: 600; color: var(--color-secondary); opacity: 0.7;
 }
 .oferta-valor {
-    font-size: 13px; font-weight: 900; color: rgba(232, 230, 240, 0.9);
+    font-size: 12.5px; font-weight: 900; color: var(--color-text);
 }
 .oferta-edit-btn {
-    width: 22px; height: 22px; border-radius: 5px; border: none; flex-shrink: 0;
-    background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.2);
+    width: 24px; height: 24px; border-radius: 6px; border: none; flex-shrink: 0;
+    background: var(--color-secondary-surface-hover); color: var(--color-secondary);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: all 0.15s ease;
     opacity: 0;
 }
 .oferta-card:hover .oferta-edit-btn { opacity: 1; }
-.oferta-edit-btn:hover { background: rgba(96, 165, 250, 0.14); color: #60a5fa; }
+.oferta-edit-btn:hover { background: rgba(96, 165, 250, 0.15); color: #3b82f6; }
 
 /* ═══════════════════════════════════════════════════
    ESTADOS COMUNS
@@ -443,26 +423,18 @@ function formatValor(centavos: number): string {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     padding: 20px;
     font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.1em; color: rgba(255,255,255,0.2);
+    letter-spacing: 0.1em; color: var(--color-secondary); opacity: 0.6;
 }
 .level-loading--sm { padding: 12px; }
 
 .level-empty {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     padding: 20px; border-radius: 8px;
-    background: rgba(255,255,255,0.01); border: 1px dashed rgba(255,255,255,0.05);
+    background: var(--color-secondary-surface); border: 1px dashed var(--color-divider);
     font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.1em; color: rgba(255,255,255,0.2);
+    letter-spacing: 0.1em; color: var(--color-secondary); opacity: 0.6;
 }
 .level-empty--sm { padding: 10px; font-size: 9px; }
-
-.mini-spinner {
-    width: 16px; height: 16px; border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.06); border-top-color: #8b5cf6;
-    animation: spin 0.7s linear infinite;
-}
-.mini-spinner--sm { width: 12px; height: 12px; border-top-color: #818cf8; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ═══════════════════════════════════════════════════
    BADGES
@@ -472,13 +444,13 @@ function formatValor(centavos: number): string {
     font-size: 8px; font-weight: 900; text-transform: uppercase;
     letter-spacing: 0.1em; padding: 3px 7px; border-radius: 20px;
 }
-.badge--gratuito   { background: rgba(52, 211, 153, 0.1);   border: 1px solid rgba(52,211,153,0.25);  color: #34d399; }
-.badge--pago       { background: rgba(251, 191, 36, 0.1);   border: 1px solid rgba(251,191,36,0.25);  color: #fbbf24; }
-.badge--ativo      { background: rgba(52, 211, 153, 0.08);  border: 1px solid rgba(52,211,153,0.2);   color: #34d399; }
-.badge--inativo    { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255,255,255,0.1);  color: rgba(255,255,255,0.3); }
-.badge--publica    { background: rgba(96, 165, 250, 0.08);  border: 1px solid rgba(96,165,250,0.2);   color: #60a5fa; }
-.badge--oculta     { background: rgba(168, 85, 247, 0.08);  border: 1px solid rgba(168,85,247,0.2);   color: #c4b5fd; }
-.badge--recorrencia{ background: rgba(251, 191, 36, 0.08);  border: 1px solid rgba(251,191,36,0.2);   color: #fbbf24; }
-.badge--unico      { background: rgba(52, 211, 153, 0.08);  border: 1px solid rgba(52,211,153,0.2);   color: #34d399; }
+.badge--gratuito   { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: #10b981; }
+.badge--pago       { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); color: #f59e0b; }
+.badge--ativo      { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: #10b981; }
+.badge--inativo    { background: var(--color-secondary-surface-hover); border: 1px solid var(--color-divider); color: var(--color-secondary); }
+.badge--publica    { background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.25); color: #0284c7; }
+.badge--oculta     { background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.25); color: var(--color-primary); }
+.badge--recorrencia{ background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); color: #f59e0b; }
+.badge--unico      { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: #10b981; }
 .prog-badges { display: flex; gap: 6px; flex-wrap: wrap; }
 </style>

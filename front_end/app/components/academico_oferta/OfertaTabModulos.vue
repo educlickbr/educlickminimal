@@ -2,10 +2,10 @@
     <div class="flex flex-col gap-6">
         <div class="flex items-center justify-between">
             <span
-                class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
+                class="text-[10px] font-black text-secondary/50 uppercase tracking-widest"
                 >{{ loading ? "..." : modulos.length + " módulo(s)" }}</span
             >
-            <button @click="openNovo" class="add-btn">
+            <button @click="openNovo" class="ds-btn-primary">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                     <path
                         d="M6 1v10M1 6h10"
@@ -27,20 +27,20 @@
                 class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"
             />
             <span
-                class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
+                class="text-[10px] font-black text-secondary/50 uppercase tracking-widest"
                 >Carregando...</span
             >
         </div>
 
         <!-- Grid -->
         <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div v-if="modulos.length === 0" class="col-span-full empty-state">
+            <div v-if="modulos.length === 0" class="col-span-full ds-empty">
                 <svg
                     width="32"
                     height="32"
                     viewBox="0 0 24 24"
                     fill="none"
-                    class="mb-2 text-white/20"
+                    class="mb-2 text-secondary/40"
                 >
                     <rect
                         x="3"
@@ -79,11 +79,11 @@
                         stroke-width="1.5"
                     />
                 </svg>
-                <p class="text-sm font-bold text-white/30">
+                <p class="text-sm font-bold text-secondary/60">
                     Nenhum módulo cadastrado
                 </p>
                 <p
-                    class="text-[10px] font-bold text-white/15 mt-1 uppercase tracking-widest"
+                    class="text-[10px] font-bold text-secondary/40 mt-1 uppercase tracking-widest"
                 >
                     Clique em "Novo Módulo" para começar
                 </p>
@@ -92,17 +92,17 @@
             <div
                 v-for="m in modulos"
                 :key="m.id"
-                class="mod-card"
+                class="ds-card"
                 @click="openEditar(m)"
             >
                 <div class="mod-accent-bar" />
-                <div class="mod-card-inner">
+                <div class="ds-card-inner">
                     <!-- Header: avatar + ações -->
-                    <div class="mod-card-header">
-                        <div class="mod-avatar">
+                    <div class="flex items-center gap-2">
+                        <div class="ds-avatar">
                             {{ (m.nome_modulo || "?")[0].toUpperCase() }}
                         </div>
-                        <div class="mod-card-actions" @click.stop>
+                        <div class="ml-auto flex items-center gap-1.5" @click.stop>
                             <button
                                 @click="openEditar(m)"
                                 class="action-btn action-edit"
@@ -121,7 +121,7 @@
                     </div>
 
                     <!-- Nome -->
-                    <p class="mod-name">{{ m.nome_modulo || "—" }}</p>
+                    <p class="ds-name">{{ m.nome_modulo || "—" }}</p>
 
                     <!-- Divider -->
                     <div class="mod-divider" />
@@ -281,185 +281,48 @@ onMounted(() => fetchModulos());
 </script>
 
 <style scoped>
-/* ── Card ──────────────────────────────────────── */
-.mod-card {
-    position: relative;
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 14px;
-    overflow: hidden;
-    cursor: pointer;
-    transition:
-        border-color 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
-.mod-card:hover {
-    border-color: rgba(139, 92, 246, 0.28);
-    transform: translateY(-2px);
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.35),
-        0 0 0 1px rgba(139, 92, 246, 0.12);
-}
 .mod-accent-bar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: linear-gradient(180deg, #7c3aed, #a78bfa);
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--color-primary);
+    opacity: 0; transition: opacity 0.2s ease;
 }
-.mod-card:hover .mod-accent-bar {
-    opacity: 1;
-}
-
-.mod-card-inner {
-    padding: 18px 18px 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-/* ── Header ─────────────────────────────────────── */
-.mod-card-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.mod-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 9px;
-    flex-shrink: 0;
-    background: rgba(139, 92, 246, 0.1);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    color: #a78bfa;
-    font-size: 14px;
-    font-weight: 900;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mod-card-actions {
-    margin-left: auto;
-    display: flex;
-    gap: 6px;
-    opacity: 0;
-    transition: opacity 0.15s ease;
-}
-.mod-card:hover .mod-card-actions {
-    opacity: 1;
-}
+.ds-card:hover .mod-accent-bar { opacity: 1; }
 
 .action-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    border: none;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.15s ease;
+    width: 28px; height: 28px; border-radius: 8px; border: none;
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-secondary);
+    font-size: 12px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s ease;
 }
-.action-edit:hover {
-    background: rgba(139, 92, 246, 0.18);
-    color: #c4b5fd;
-}
-.action-delete:hover {
-    background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-}
+.action-edit:hover   { background: rgba(139,92,246,0.18); color: var(--color-primary); }
+.action-delete:hover { background: rgba(239,68,68,0.15); color: var(--color-danger); }
 
-/* ── Content ─────────────────────────────────────── */
-.mod-name {
-    font-size: 13px;
-    font-weight: 900;
-    color: rgba(232, 230, 240, 0.92);
-    line-height: 1.3;
-    margin-top: 2px;
-}
+/* ── Badges de módulo ──────────────────────────── */
 .mod-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--color-divider);
     margin: 2px 0;
 }
-
 .mod-badges {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
 }
-
-.mod-badge-comp {
+.mod-badge-comp, .mod-badge-planos {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 9px;
+    gap: 4px;
+    font-size: 8px;
     font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 4px 10px;
-    border-radius: 20px;
-    background: rgba(139, 92, 246, 0.14);
-    border: 1px solid rgba(139, 92, 246, 0.25);
-    color: #c4b5fd;
-}
-.mod-badge-planos {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 9px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 4px 10px;
-    border-radius: 20px;
-    background: rgba(139, 92, 246, 0.07);
-    border: 1px solid rgba(139, 92, 246, 0.15);
-    color: #a78bfa;
-}
-
-/* ── Empty state ─────────────────────────────────── */
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 52px 24px;
-    background: rgba(255, 255, 255, 0.015);
-    border-radius: 14px;
-    border: 1px dashed rgba(255, 255, 255, 0.07);
-}
-
-/* ── Add button ──────────────────────────────────── */
-.add-btn {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 9px 18px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-    border: 1px solid rgba(139, 92, 246, 0.4);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
-}
-.add-btn:hover {
-    background: linear-gradient(135deg, #6d28d9, #7c3aed);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.45);
-    transform: translateY(-1px);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--color-divider);
+    background: var(--color-secondary-surface);
+    color: var(--color-secondary);
 }
 </style>
+

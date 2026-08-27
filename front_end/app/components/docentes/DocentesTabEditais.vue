@@ -31,7 +31,7 @@ function formatDate(d: string) {
             </span>
             <button
                 @click="emit('novo-edital')"
-                class="px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all flex items-center gap-2"
+                class="ds-btn-primary"
             >
                 <Icon name="ph:plus-bold" class="w-3.5 h-3.5" />
                 Novo Edital
@@ -54,11 +54,11 @@ function formatDate(d: string) {
                 v-else-if="ctx.editais.value.length === 0"
                 class="empty-state"
             >
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="mb-3 text-white/20">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="mb-3 text-secondary/40">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
-                <p class="text-sm font-bold text-white/30">Nenhum edital criado</p>
-                <p class="text-[10px] font-bold text-white/15 mt-1 uppercase tracking-widest">Crie editais para selecionar novos docentes</p>
+                <p class="text-sm font-bold text-secondary/60">Nenhum edital criado</p>
+                <p class="text-[10px] font-bold text-secondary/40 mt-1 uppercase tracking-widest">Crie editais para selecionar novos docentes</p>
                 <button
                     @click="emit('novo-edital')"
                     class="mt-5 px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all"
@@ -85,7 +85,7 @@ function formatDate(d: string) {
                                     :class="
                                         edital.status === 'ativo'
                                             ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                                            : 'bg-white/[0.04] border-white/10 text-white/40'
+                                            : 'bg-div-15 border border-divider text-secondary'
                                     "
                                 >
                                     {{ edital.status === 'ativo' ? '● Ativo' : '○ Inativo' }}
@@ -97,7 +97,7 @@ function formatDate(d: string) {
                             </p>
 
                             <div class="flex items-center gap-4 mt-1">
-                                <span class="text-[10px] text-secondary/40 font-bold uppercase tracking-wider flex items-center gap-1">
+                                <span class="text-[10px] text-secondary/50 font-bold uppercase tracking-wider flex items-center gap-1">
                                     <Icon name="ph:calendar-light" class="w-3 h-3" />
                                     {{ formatDate(edital.data_ini) }} — {{ formatDate(edital.data_fim) }}
                                 </span>
@@ -139,23 +139,23 @@ function formatDate(d: string) {
     align-items: center;
     justify-content: center;
     padding: 5rem 2rem;
-    background: rgba(255,255,255,0.015);
-    border: 2px dashed rgba(255,255,255,0.08);
+    background: var(--color-secondary-surface);
+    border: 2px dashed var(--color-divider);
     border-radius: 1rem;
     text-align: center;
 }
 
 /* ── Card ──────────────────────────────────────────── */
 .card-item {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--color-divider);
     border-radius: 14px;
     padding: 14px 16px;
     transition: all 0.15s ease;
 }
 .card-item:hover {
     border-color: rgba(139,92,246,0.3);
-    background: rgba(139,92,246,0.03);
+    background: var(--color-secondary-surface-hover);
     transform: translateX(2px);
 }
 .card-btn-icon {
@@ -164,7 +164,7 @@ function formatDate(d: string) {
     border-radius: 8px;
     border: none;
     background: transparent;
-    color: rgba(255,255,255,0.25);
+    color: var(--color-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -172,11 +172,11 @@ function formatDate(d: string) {
     transition: all 0.15s;
 }
 .card-btn-icon:hover {
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.6);
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-text);
 }
 
 /* ── Scrollbar ────────────────────────────────────── */
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.12); border-radius: 4px; }
 </style>

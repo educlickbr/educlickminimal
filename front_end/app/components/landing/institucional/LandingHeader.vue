@@ -63,3 +63,7 @@ const scrollTo = (id: string) => {
         </div>
     </nav>
 </template>
+
+<style scoped>
+/* SFC Style */
+</style>

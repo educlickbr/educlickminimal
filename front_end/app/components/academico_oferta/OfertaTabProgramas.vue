@@ -2,10 +2,10 @@
     <div class="flex flex-col gap-6">
         <div class="flex items-center justify-between">
             <span
-                class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
+                class="text-[10px] font-black text-secondary/50 uppercase tracking-widest"
                 >{{ loading ? "..." : programas.length + " programa(s)" }}</span
             >
-            <button @click="openNovo" class="add-btn">
+            <button @click="openNovo" class="ds-btn-primary">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                     <path
                         d="M6 1v10M1 6h10"
@@ -26,7 +26,7 @@
                 class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"
             />
             <span
-                class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
+                class="text-[10px] font-black text-secondary/50 uppercase tracking-widest"
                 >Carregando...</span
             >
         </div>
@@ -34,14 +34,14 @@
         <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div
                 v-if="programas.length === 0"
-                class="col-span-full empty-state"
+                class="col-span-full ds-empty"
             >
                 <svg
                     width="32"
                     height="32"
                     viewBox="0 0 24 24"
                     fill="none"
-                    class="mb-2 text-white/20"
+                    class="mb-2 text-secondary/40"
                 >
                     <path
                         d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"
@@ -55,11 +55,11 @@
                         stroke-width="1.5"
                     />
                 </svg>
-                <p class="text-sm font-bold text-white/30">
+                <p class="text-sm font-bold text-secondary/60">
                     Nenhum programa cadastrado
                 </p>
                 <p
-                    class="text-[10px] font-bold text-white/15 mt-1 uppercase tracking-widest"
+                    class="text-[10px] font-bold text-secondary/40 mt-1 uppercase tracking-widest"
                 >
                     Clique em "Novo Programa" para começar
                 </p>
@@ -68,17 +68,17 @@
             <div
                 v-for="p in programas"
                 :key="p.id"
-                class="prog-card"
+                class="ds-card"
                 @click="openEditar(p)"
             >
                 <div class="prog-accent-bar" />
-                <div class="prog-card-inner">
+                <div class="ds-card-inner">
                     <!-- Header: avatar + curso + ações -->
-                    <div class="prog-card-header">
-                        <div class="prog-avatar">
+                    <div class="flex items-center gap-2">
+                        <div class="ds-avatar">
                             {{ (p.descricao || "?")[0].toUpperCase() }}
                         </div>
-                        <div class="prog-card-actions" @click.stop>
+                        <div class="ml-auto flex items-center gap-1.5" @click.stop>
                             <button
                                 @click="openEditar(p)"
                                 class="action-btn action-edit"
@@ -90,7 +90,7 @@
                     </div>
 
                     <!-- Nome -->
-                    <p class="prog-name">{{ p.descricao || "—" }}</p>
+                    <p class="ds-name">{{ p.descricao || "—" }}</p>
 
                     <!-- Curso -->
                     <p class="prog-curso" v-if="p.nome_curso">
@@ -209,214 +209,86 @@ onMounted(() => fetchProgramas());
 </script>
 
 <style scoped>
-/* ── Card ──────────────────────────────────────── */
-.prog-card {
-    position: relative;
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 14px;
-    overflow: hidden;
-    cursor: pointer;
-    transition:
-        border-color 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
-.prog-card:hover {
-    border-color: rgba(139, 92, 246, 0.28);
-    transform: translateY(-2px);
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.35),
-        0 0 0 1px rgba(139, 92, 246, 0.12);
-}
 .prog-accent-bar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: linear-gradient(180deg, #7c3aed, #a78bfa);
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--color-primary);
+    opacity: 0; transition: opacity 0.2s ease;
 }
-.prog-card:hover .prog-accent-bar {
-    opacity: 1;
-}
-
-.prog-card-inner {
-    padding: 18px 18px 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-/* ── Header ─────────────────────────────────────── */
-.prog-card-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.prog-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 9px;
-    flex-shrink: 0;
-    background: rgba(139, 92, 246, 0.1);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    color: #a78bfa;
-    font-size: 14px;
-    font-weight: 900;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.prog-card-actions {
-    margin-left: auto;
-    display: flex;
-    gap: 6px;
-    opacity: 0;
-    transition: opacity 0.15s ease;
-}
-.prog-card:hover .prog-card-actions {
-    opacity: 1;
-}
+.ds-card:hover .prog-accent-bar { opacity: 1; }
 
 .action-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    border: none;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.15s ease;
+    width: 28px; height: 28px; border-radius: 8px; border: none;
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-secondary);
+    font-size: 12px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s ease;
 }
-.action-edit:hover {
-    background: rgba(139, 92, 246, 0.18);
-    color: #c4b5fd;
-}
+.action-edit:hover   { background: rgba(139,92,246,0.18); color: var(--color-primary); }
+.action-delete:hover { background: rgba(239,68,68,0.15); color: var(--color-danger); }
 
-/* ── Content ─────────────────────────────────────── */
-.prog-name {
-    font-size: 13px;
-    font-weight: 900;
-    color: rgba(232, 230, 240, 0.92);
-    line-height: 1.3;
-    margin-top: 2px;
+/* ── Badges de programa ──────────────────────────── */
+.prog-divider {
+    height: 1px;
+    background: var(--color-divider);
+    margin: 2px 0;
 }
 .prog-curso {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.35);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-secondary);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
 }
 .prog-curso-label {
     font-size: 8px;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba(139, 92, 246, 0.6);
-    background: rgba(139, 92, 246, 0.07);
-    padding: 2px 6px;
-    border-radius: 4px;
+    letter-spacing: 0.08em;
+    color: var(--color-secondary);
+    opacity: 0.6;
 }
-.prog-divider {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.05);
-    margin: 2px 0;
-}
-
 .prog-badges {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-}
-.prog-badge-ciclos {
-    display: inline-flex;
-    align-items: center;
     gap: 5px;
-    font-size: 9px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 4px 10px;
-    border-radius: 20px;
-    background: rgba(139, 92, 246, 0.1);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    color: #a78bfa;
+    margin-top: 2px;
 }
-
-.prog-badge {
+/* badge base */
+.prog-badge, .prog-badge-ciclos {
     display: inline-flex;
     align-items: center;
+    gap: 4px;
     font-size: 8px;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     padding: 3px 8px;
-    border-radius: 20px;
+    border-radius: 6px;
+    border: 1px solid var(--color-divider);
+    background: var(--color-secondary-surface);
+    color: var(--color-secondary);
 }
+/* semânticos — mantêm nos dois temas */
 .prog-badge--gratuito {
-    background: rgba(52, 211, 153, 0.1);
-    border: 1px solid rgba(52, 211, 153, 0.25);
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.2);
     color: #34d399;
 }
 .prog-badge--pago {
-    background: rgba(251, 191, 36, 0.1);
-    border: 1px solid rgba(251, 191, 36, 0.25);
+    background: rgba(245, 158, 11, 0.08);
+    border-color: rgba(245, 158, 11, 0.2);
     color: #fbbf24;
 }
 .prog-badge--selecao {
-    background: rgba(248, 113, 113, 0.1);
-    border: 1px solid rgba(248, 113, 113, 0.25);
-    color: #f87171;
+    background: rgba(139, 92, 246, 0.08);
+    border-color: rgba(139, 92, 246, 0.2);
+    color: var(--color-primary);
 }
 .prog-badge--direta {
-    background: rgba(96, 165, 250, 0.1);
-    border: 1px solid rgba(96, 165, 250, 0.25);
-    color: #60a5fa;
-}
-
-/* ── Empty state ─────────────────────────────────── */
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 52px 24px;
-    background: rgba(255, 255, 255, 0.015);
-    border-radius: 14px;
-    border: 1px dashed rgba(255, 255, 255, 0.07);
-}
-
-/* ── Add button ──────────────────────────────────── */
-.add-btn {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 9px 18px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-    border: 1px solid rgba(139, 92, 246, 0.4);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
-}
-.add-btn:hover {
-    background: linear-gradient(135deg, #6d28d9, #7c3aed);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.45);
-    transform: translateY(-1px);
+    background: rgba(56, 189, 248, 0.08);
+    border-color: rgba(56, 189, 248, 0.2);
+    color: #38bdf8;
 }
 </style>
+

@@ -1,13 +1,13 @@
 <template>
     <div
         v-if="modelValue"
-        class="modal-overlay"
+        class="ds-modal-overlay"
         @click.self="$emit('update:modelValue', false)"
     >
-        <div class="modal-panel modal-panel--lg">
-            <div class="modal-accent-bar"></div>
-            <div class="modal-header">
-                <div class="modal-header-icon">
+        <div class="ds-modal-panel ds-modal-panel--lg">
+            <div class="ds-modal-accent-bar"></div>
+            <div class="ds-modal-header">
+                <div class="ds-modal-header-icon">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="18"
@@ -20,11 +20,11 @@
                         />
                     </svg>
                 </div>
-                <div class="modal-header-text">
-                    <h3 class="modal-title">
+                <div class="flex flex-col gap-0.5 flex-1">
+                    <h3 class="ds-modal-title">
                         {{ isEdit ? "Editar" : "Novo" }} Módulo
                     </h3>
-                    <p class="modal-subtitle">
+                    <p class="ds-modal-subtitle">
                         Configuração pedagógica
                         <span
                             v-if="totalCargaModulo > 0"
@@ -35,7 +35,7 @@
                 </div>
                 <button
                     @click="$emit('update:modelValue', false)"
-                    class="modal-close-btn"
+                    class="ds-modal-close-btn"
                 >
                     &times;
                 </button>
@@ -66,13 +66,10 @@
                 <div v-if="activeTab === 'geral'" class="flex flex-col gap-5">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="flex flex-col gap-2 md:col-span-2">
-                            <label
-                                class="text-[10px] font-black text-secondary/60 uppercase tracking-widest"
-                                >Nome do Módulo</label
-                            ><input
+                            <BaseField
                                 v-model="formModulo.nome_modulo"
+                                label="Nome do Módulo"
                                 placeholder="Ex: Fundamentos de IA"
-                                class="w-full px-4 py-3 rounded-lg border border-secondary/10 bg-background text-sm font-bold text-primary focus:border-primary/50 transition-all outline-none"
                             />
                         </div>
                         <div class="flex flex-col gap-2">
@@ -84,11 +81,10 @@
                                     >(Calculado)</span
                                 ></label
                             >
-                            <div
-                                class="w-full px-4 py-3 rounded-lg border border-secondary/10 bg-div-10 text-sm font-black text-primary tabular-nums opacity-80 cursor-not-allowed"
-                            >
-                                {{ toHHMM(totalCargaModulo) || "00:00" }}
-                            </div>
+                            <BaseField
+                                type="display"
+                                :model-value="toHHMM(totalCargaModulo) || '00:00'"
+                            />
                             <p
                                 class="text-[9px] text-secondary/40 font-bold px-1 italic"
                             >
@@ -135,17 +131,17 @@
                     @delete-plano="confirmDeletePlano"
                 />
             </div>
-            <div v-if="activeTab === 'geral'" class="modal-footer">
+            <div v-if="activeTab === 'geral'" class="ds-modal-footer">
                 <button
                     @click="$emit('update:modelValue', false)"
-                    class="modal-btn-cancel"
+                    class="ds-btn-cancel"
                 >
                     Cancelar
                 </button>
                 <button
                     @click="handleSaveModulo"
                     :disabled="loadingModulo"
-                    class="modal-btn-save"
+                    class="ds-btn-save"
                 >
                     {{ loadingModulo ? "Processando..." : "Salvar Módulo" }}
                 </button>
@@ -434,120 +430,15 @@ select option {
     background: var(--field-bg-option) !important;
     color: var(--field-text) !important;
 }
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.85);
-    padding: 16px;
-    animation: fadeIn 0.15s ease;
-}
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-.modal-panel {
-    position: relative;
-    background: #0f0f17;
-    border: 1px solid rgba(139, 92, 246, 0.18);
-    border-radius: 16px;
-    width: 100%;
-    max-width: 680px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow:
-        0 24px 80px rgba(0, 0, 0, 0.7),
-        0 0 0 1px rgba(139, 92, 246, 0.1);
-    animation: slideUp 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
-}
-.modal-panel--lg {
+.ds-modal-panel--lg {
     max-width: 900px;
     max-height: 92vh;
-}
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(16px) scale(0.98);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-.modal-accent-bar {
-    height: 3px;
-    background: linear-gradient(90deg, #7c3aed, #a78bfa, #7c3aed);
-    flex-shrink: 0;
-}
-.modal-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    flex-shrink: 0;
-}
-.modal-header-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: rgba(139, 92, 246, 0.12);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    color: #a78bfa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.modal-header-text {
-    flex: 1;
-}
-.modal-title {
-    font-size: 13px;
-    font-weight: 800;
-    color: #e8e6f0;
-    letter-spacing: 0.01em;
-}
-.modal-subtitle {
-    font-size: 10px;
-    font-weight: 600;
-    color: rgba(139, 92, 246, 0.55);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-top: 2px;
-}
-.modal-close-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: none;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 18px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-.modal-close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
 }
 .modal-tabs {
     display: flex;
     gap: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--field-border);
+    background: var(--color-secondary-surface);
     padding: 0 20px;
     flex-shrink: 0;
 }
@@ -557,7 +448,7 @@ select option {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--color-secondary);
     background: transparent;
     border: none;
     border-bottom: 2px solid transparent;
@@ -568,70 +459,18 @@ select option {
     gap: 6px;
 }
 .modal-tab-btn:hover {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--color-text);
 }
 .modal-tab-btn--active {
-    color: #a78bfa;
-    border-bottom-color: #8b5cf6;
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
 }
 .modal-tab-badge {
     font-size: 9px;
     font-weight: 900;
     background: rgba(139, 92, 246, 0.18);
-    color: #a78bfa;
+    color: var(--color-primary);
     padding: 1px 6px;
     border-radius: 999px;
-}
-.modal-footer {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 16px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(0, 0, 0, 0.2);
-    flex-shrink: 0;
-}
-.modal-btn-cancel {
-    padding: 10px 22px;
-    border-radius: 9px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.45);
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-.modal-btn-cancel:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.7);
-}
-.modal-btn-save {
-    padding: 10px 28px;
-    border-radius: 9px;
-    border: none;
-    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.modal-btn-save:hover {
-    background: linear-gradient(135deg, #6d28d9, #7c3aed);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-}
-.modal-btn-save:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 </style>

@@ -310,9 +310,9 @@ defineEmits<{
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--color-secondary);
     padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--color-divider);
 }
 
 /* ── Alerts ──────────────────────────────────────── */
@@ -357,13 +357,13 @@ defineEmits<{
     width: 100%;
     padding: 10px 14px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--field-border);
+    background: var(--color-secondary-surface);
     cursor: pointer;
     transition: all 0.15s ease;
     font-size: 13px;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--color-secondary);
     text-align: left;
 }
 .toggle-btn:hover {
@@ -372,14 +372,14 @@ defineEmits<{
 .toggle-btn--active {
     border-color: rgba(139, 92, 246, 0.4);
     background: rgba(139, 92, 246, 0.06);
-    color: #c4b5fd;
+    color: var(--color-primary);
 }
 .toggle-dot {
     width: 20px;
     height: 20px;
     border-radius: 50%;
     flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-secondary-surface-hover);
     transition: all 0.15s ease;
     position: relative;
 }
@@ -391,11 +391,11 @@ defineEmits<{
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--color-secondary);
     transition: all 0.15s ease;
 }
 .toggle-dot--right::after {
-    background: #8b5cf6;
+    background: var(--color-primary);
     box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
 }
 .toggle-text {
@@ -412,22 +412,22 @@ defineEmits<{
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--color-secondary);
 }
 .step-input {
     width: 100%;
     padding: 11px 14px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(232, 230, 240, 0.9);
+    border: 1px solid var(--field-border);
+    background: var(--field-bg);
+    color: var(--field-text);
     font-size: 13px;
     font-weight: 700;
     outline: none;
     transition: border-color 0.15s ease;
 }
 .step-input:focus {
-    border-color: rgba(139, 92, 246, 0.45);
+    border-color: var(--field-border-focus);
 }
 .step-input--disabled {
     opacity: 0.4;
@@ -436,11 +436,11 @@ defineEmits<{
 .step-input-readonly {
     padding: 11px 14px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--field-border);
     font-size: 12px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--color-secondary);
     font-style: italic;
 }
 
@@ -451,8 +451,8 @@ defineEmits<{
     gap: 12px;
     padding: 14px 16px;
     border-radius: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.07);
-    background: rgba(255, 255, 255, 0.025);
+    border: 2px solid var(--field-border);
+    background: var(--color-secondary-surface);
     cursor: pointer;
     transition: all 0.15s ease;
 }
@@ -474,14 +474,14 @@ defineEmits<{
     border-radius: 50%;
     flex-shrink: 0;
     margin-top: 1px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid var(--color-divider);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.15s;
 }
 .radio-dot--active {
-    border-color: #8b5cf6;
+    border-color: var(--color-primary);
 }
 .radio-dot--orange.radio-dot--active-orange {
     border-color: #f97316;
@@ -490,7 +490,7 @@ defineEmits<{
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #8b5cf6;
+    background: var(--color-primary);
 }
 .radio-dot-inner--orange {
     background: #f97316;
@@ -502,7 +502,7 @@ defineEmits<{
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #c4b5fd;
+    color: var(--color-primary);
     margin-bottom: 2px;
 }
 .estrategia-title--orange {
@@ -511,7 +511,7 @@ defineEmits<{
 .estrategia-desc {
     font-size: 10px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--color-secondary);
 }
 
 /* ── Nome múltiplo ───────────────────────────────── */
@@ -521,8 +521,8 @@ defineEmits<{
     gap: 6px;
     padding: 12px 14px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--field-border);
 }
 .step-nome-ciclo-tag {
     font-size: 9px;

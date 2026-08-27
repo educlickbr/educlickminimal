@@ -41,6 +41,8 @@
   - [9.4 Recomendação de Centralização](#94-recomendação-de-centralização)
 - [10. Histórico de Revisão](#10-histórico-de-revisão)
 
+> **Permissões/controle de sessão:** ver `documentacao/arquitetura/permissoes.md` (modelo de permissões por entidade × papel × produto, catálogo de ilhas/botões, fluxo de sessão por domínio).
+
 ---
 
 ## 1. Stack e Visão Geral
@@ -868,6 +870,7 @@ import type { Area } from "~/types/aca";
 
 | Data | Descrição |
 |---|---|
+| 2026-08-21 | Criado `documentacao/arquitetura/permissoes.md` (permissões por entidade × papel, catálogo de recursos, fluxo de sessão) e feito o plano de multientidade para a Fase A |
 | 2026-07-24 | Criado `documentacao/arquitetura/design_system.md` como referência canônica do Design System premium (cards, accent bars, pills, filtros, modais, hierarquia de aninhamento) |
 | 2026-07-23 | Consolidação dos documentos: `UX_DESIGN.md`, `contrato-visual.md`, `rotas.md`, `tipos.md` em documento único de arquitetura front-end |
 

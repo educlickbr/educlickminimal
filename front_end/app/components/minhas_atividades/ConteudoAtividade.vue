@@ -2,9 +2,9 @@
     <div class="flex flex-col gap-4 p-6 overflow-y-auto custom-scrollbar flex-1">
         <!-- Cabeçalho -->
         <div class="flex flex-col gap-1">
-            <span class="text-[10px] font-black text-secondary/40 uppercase tracking-widest">Atividade</span>
-            <h2 class="text-lg font-black text-white/90">{{ item.titulo }}</h2>
-            <p v-if="item.descricao" class="text-xs font-semibold text-white/40 leading-relaxed whitespace-pre-wrap">{{ item.descricao }}</p>
+            <span class="text-[10px] font-black text-secondary/60 uppercase tracking-widest">Atividade</span>
+            <h2 class="text-lg font-black text-text">{{ item.titulo }}</h2>
+            <p v-if="item.descricao" class="text-xs font-semibold text-secondary leading-relaxed whitespace-pre-wrap">{{ item.descricao }}</p>
         </div>
 
         <!-- Status -->
@@ -26,14 +26,11 @@
         <!-- Arquivo de referência -->
         <div v-if="item.id_arquivo" class="file-card">
             <div class="file-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                </svg>
+                <Icon name="ph:file-text-bold" class="w-5 h-5 text-primary" />
             </div>
             <div class="flex flex-col gap-0.5 flex-1 min-w-0">
-                <span class="text-xs font-bold text-white/75">Arquivo de referência</span>
-                <span class="text-[10px] font-semibold text-white/30">Clique para abrir</span>
+                <span class="text-xs font-bold text-text">Arquivo de referência</span>
+                <span class="text-[10px] font-semibold text-secondary/60">Clique para abrir</span>
             </div>
             <button @click="abrirArquivo(item.id_arquivo)" class="open-btn">Abrir</button>
         </div>
@@ -68,25 +65,28 @@
 
         <!-- Já entregue -->
         <div v-else-if="item.atividade_status === 'entregue'" class="entregue-card">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <span class="text-sm font-black text-white/80">Atividade entregue!</span>
-            <span class="text-[11px] font-semibold text-white/30">Aguardando correção do professor</span>
+            <Icon name="ph:check-circle-bold" class="w-7 h-7 text-emerald-500" />
+            <span class="text-sm font-black text-text">Atividade entregue!</span>
+            <span class="text-[11px] font-semibold text-secondary/60">{{ temNota ? 'Corrigida pelo professor' : 'Aguardando correção do professor' }}</span>
+        </div>
+
+        <!-- Feedback do professor -->
+        <div v-if="item.atividade_status === 'entregue' && item.atividade_comentario" class="feedback-card">
+            <span class="feedback-titulo">Feedback do professor</span>
+            <p class="feedback-texto">{{ item.atividade_comentario }}</p>
+            <span v-if="item.atividade_corrigido_por_nome || item.atividade_corrigido_em" class="feedback-meta">
+                Corrigido{{ item.atividade_corrigido_por_nome ? ' por ' + item.atividade_corrigido_por_nome : '' }}{{ item.atividade_corrigido_em ? ' · ' + formatarDataHora(item.atividade_corrigido_em) : '' }}
+            </span>
         </div>
 
         <!-- Bloqueado -->
         <div v-else class="bloqueado-card">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-            <span class="text-sm font-black text-white/60">Atividade indisponível</span>
-            <span v-if="item.status_visibilidade === 'agendado'" class="text-[11px] font-semibold text-white/25">
+            <Icon name="ph:lock-bold" class="w-7 h-7 text-secondary/40" />
+            <span class="text-sm font-black text-secondary">Atividade indisponível</span>
+            <span v-if="item.status_visibilidade === 'agendado'" class="text-[11px] font-semibold text-secondary/60">
                 Disponível a partir de {{ formatData(item.data_disponivel) }}
             </span>
-            <span v-else class="text-[11px] font-semibold text-white/25">Prazo encerrado</span>
+            <span v-else class="text-[11px] font-semibold text-secondary/60">Prazo encerrado</span>
         </div>
     </div>
 </template>
@@ -125,6 +125,11 @@ const arquivo = computed({
 
 const temNota = computed(() => props.item.atividade_nota !== null && props.item.atividade_nota !== undefined);
 
+function formatarDataHora(iso: string): string {
+    const d = new Date(iso);
+    return d.toLocaleDateString("pt-BR") + " às " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+}
+
 function formatData(d: string | null): string {
     if (!d) return "";
     return new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -133,34 +138,39 @@ function formatData(d: string | null): string {
 
 <style scoped>
 .status-pill { font-size: 10px; font-weight: 800; padding: 4px 12px; border-radius: 8px; }
-.status--agendado { background: rgba(251,191,36,0.08); color: #fbbf24; border: 1px solid rgba(251,191,36,0.15); }
-.status--prazo { background: rgba(239,68,68,0.08); color: #f87171; border: 1px solid rgba(239,68,68,0.15); }
-.status--prazo-lite { background: rgba(148,163,184,0.08); color: #94a3b8; border: 1px solid rgba(148,163,184,0.15); }
-.status--rascunho { background: rgba(148,163,184,0.1); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.2); }
-.status--ok { background: rgba(52,211,153,0.08); color: #6ee7b7; border: 1px solid rgba(52,211,153,0.15); }
-.status--nota { background: rgba(139,92,246,0.1); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.2); }
+.status--agendado { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); }
+.status--prazo { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+.status--prazo-lite { background: var(--color-secondary-surface-hover); color: var(--color-secondary); border: 1px solid var(--color-divider); }
+.status--rascunho { background: var(--color-secondary-surface-hover); color: var(--color-secondary); border: 1px solid var(--color-divider); }
+.status--ok { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.25); }
+.status--nota { background: rgba(139,92,246,0.12); color: var(--color-primary); border: 1px solid rgba(139,92,246,0.25); }
 
-.file-card { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); }
-.file-icon { width: 38px; height: 38px; border-radius: 10px; background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.16); color: #a78bfa; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.open-btn { padding: 8px 18px; border-radius: 9px; border: none; background: linear-gradient(135deg, #7c3aed, #8b5cf6); color: white; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+.file-card { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 12px; border: 1px solid var(--color-divider); background: var(--color-secondary-surface); }
+.file-icon { width: 38px; height: 38px; border-radius: 10px; background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.open-btn { padding: 8px 18px; border-radius: 9px; border: none; background: var(--color-primary); color: white; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
 .open-btn:hover { transform: translateY(-1px); }
 
-.field-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.35); }
-.field-input { width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.02); color: rgba(232,230,240,0.8); font-size: 12px; font-weight: 600; outline: none; transition: all 0.15s; }
-.field-input:focus { border-color: rgba(139,92,246,0.35); box-shadow: 0 0 0 2px rgba(139,92,246,0.08); }
+.field-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-secondary); }
+.field-input { width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--field-border); background: var(--field-bg); color: var(--field-text); font-size: 12px; font-weight: 600; outline: none; transition: all 0.15s; }
+.field-input:focus { border-color: rgba(139,92,246,0.5); box-shadow: 0 0 0 2px rgba(139,92,246,0.1); }
 .field-textarea { resize: vertical; min-height: 90px; font-family: inherit; }
 
-.btn-draft { padding: 9px 18px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s; }
-.btn-draft:hover:not(:disabled) { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.2); }
+.btn-draft { padding: 9px 18px; border-radius: 9px; border: 1px solid var(--color-divider); background: var(--color-secondary-surface); color: var(--color-secondary); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s; }
+.btn-draft:hover:not(:disabled) { color: var(--color-text); background: var(--color-secondary-surface-hover); }
 .btn-draft:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.btn-submit { padding: 9px 22px; border-radius: 9px; border: none; background: linear-gradient(135deg, #7c3aed, #8b5cf6); color: white; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.15s; box-shadow: 0 4px 14px rgba(139,92,246,0.35); }
-.btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139,92,246,0.45); }
+.btn-submit { padding: 9px 22px; border-radius: 9px; border: none; background: var(--color-primary); color: white; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.15s; box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.35); }
+.btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.45); }
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.entregue-card, .bloqueado-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 48px 24px; border-radius: 14px; border: 1px solid rgba(52,211,153,0.15); background: rgba(52,211,153,0.03); color: #6ee7b7; }
-.bloqueado-card { border-color: rgba(148,163,184,0.12); background: rgba(148,163,184,0.02); color: #94a3b8; }
+.entregue-card, .bloqueado-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 48px 24px; border-radius: 14px; border: 1px solid rgba(16,185,129,0.2); background: rgba(16,185,129,0.04); }
+.bloqueado-card { border-color: var(--color-divider); background: var(--color-secondary-surface); }
+
+.feedback-card { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px; border-radius: 12px; border: 1px solid rgba(139,92,246,0.2); background: rgba(139,92,246,0.05); }
+.feedback-titulo { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-primary); }
+.feedback-texto { font-size: 12px; font-weight: 600; color: var(--color-text); line-height: 1.6; white-space: pre-wrap; }
+.feedback-meta { font-size: 9.5px; font-weight: 700; color: var(--color-secondary); }
 
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--color-divider); border-radius: 4px; }
 </style>

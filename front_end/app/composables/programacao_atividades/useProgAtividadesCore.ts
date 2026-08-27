@@ -11,6 +11,11 @@ export function useProgAtividadesCore() {
   const store = useAppStore()
 
   function getEntidadeAtivaId(): string | null {
+    // Preferência: entidade ativa resolvida pela sessão (Fase B/C)
+    const ativa = (store as any).entidade_ativa?.id
+    if (ativa) return ativa
+
+    // Fallback legado (dev/localhost sem entidade resolvida por domínio)
     const entidades = (store as any).entidades || []
     for (const ent of entidades) {
       if (ent.tipo === "empresa" && Array.isArray(ent.produtos)) {

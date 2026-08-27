@@ -12,15 +12,14 @@ const emit = defineEmits<{
 
 function getDocenteNome(doc: any): string {
   if (!doc) return '—'
-  // Tenta todos os nomes possíveis retornados pelas RPCs
   return doc.docente_nome || doc.nome_completo || doc.nome || '—'
 }
 
 function tipoConfig(tipo: string) {
   switch (tipo) {
-    case 'titular':    return { cls: 'tipo--titular',    dot: '#34d399', label: 'Titular' }
-    case 'substituto': return { cls: 'tipo--substituto', dot: '#fbbf24', label: 'Substituto' }
-    case 'auxiliar':   return { cls: 'tipo--auxiliar',   dot: '#38bdf8', label: 'Auxiliar' }
+    case 'titular':    return { cls: 'tipo--titular',    dot: '#10b981', label: 'Titular' }
+    case 'substituto': return { cls: 'tipo--substituto', dot: '#f59e0b', label: 'Substituto' }
+    case 'auxiliar':   return { cls: 'tipo--auxiliar',   dot: '#0284c7', label: 'Auxiliar' }
     default:           return { cls: 'tipo--outro',      dot: '#888',    label: tipo }
   }
 }
@@ -39,10 +38,7 @@ function formatDate(dateStr: string) {
     <!-- Header do ciclo -->
     <div class="ciclo-header">
       <div class="ciclo-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-        </svg>
+        <Icon name="ph:book-bookmark-duotone" class="w-4 h-4 text-primary" />
       </div>
       <div class="ciclo-header-info">
         <h3 class="ciclo-modulo-nome">{{ ciclo.modulo_nome }}</h3>
@@ -64,7 +60,7 @@ function formatDate(dateStr: string) {
         :key="comp.id_modulo_componente"
         class="comp-row"
       >
-        <!-- Indicador de nível (indigo lateral) -->
+        <!-- Indicador de nível -->
         <div class="comp-level-bar" />
 
         <!-- Info do componente -->
@@ -73,8 +69,8 @@ function formatDate(dateStr: string) {
           <p class="comp-meta">
             <span v-if="comp.carga_horaria">{{ comp.carga_horaria }} min</span>
             <span v-if="comp.carga_horaria && (comp.obrigatorio !== undefined)"> · </span>
-            <span v-if="comp.obrigatorio" class="text-emerald-400/70">Obrigatório</span>
-            <span v-else class="text-amber-400/60">Eletivo</span>
+            <span v-if="comp.obrigatorio" class="text-emerald-500 font-medium">Obrigatório</span>
+            <span v-else class="text-amber-500 font-medium">Eletivo</span>
           </p>
         </div>
 
@@ -96,9 +92,7 @@ function formatDate(dateStr: string) {
                 class="doc-badge-remove"
                 title="Remover atribuição"
               >
-                <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
-                  <path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
+                <Icon name="ph:x-bold" class="w-2.5 h-2.5" />
               </button>
             </div>
           </template>
@@ -108,10 +102,8 @@ function formatDate(dateStr: string) {
         <!-- Botão atribuir -->
         <div class="comp-actions">
           <button @click="emit('atribuir', ciclo, comp)" class="btn-atribuir">
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-              <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-            Atribuir
+            <Icon name="ph:plus-bold" class="w-3 h-3" />
+            <span>Atribuir</span>
           </button>
         </div>
       </div>
@@ -121,15 +113,15 @@ function formatDate(dateStr: string) {
 
 <style scoped>
 .ciclo-card {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--color-secondary-surface);
+  border: 1px solid var(--color-divider);
   border-radius: 14px;
   overflow: hidden;
 }
 
 .ciclo-accent-bar {
   height: 3px;
-  background: linear-gradient(90deg, rgba(139,92,246,0.7), rgba(139,92,246,0.15));
+  background: var(--color-primary);
 }
 
 .ciclo-header {
@@ -137,45 +129,46 @@ function formatDate(dateStr: string) {
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--color-divider);
 }
 
 .ciclo-icon {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: rgba(139,92,246,0.08);
-  border: 1px solid rgba(139,92,246,0.15);
+  background: rgba(139,92,246,0.10);
+  border: 1px solid rgba(139,92,246,0.20);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(139,92,246,0.6);
   flex-shrink: 0;
 }
 
 .ciclo-header-info { flex: 1; min-width: 0; }
-.ciclo-modulo-nome { font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.75); }
-.ciclo-descricao { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.3); margin-top: 1px; }
+.ciclo-modulo-nome { font-size: 12px; font-weight: 800; color: var(--color-text); }
+.ciclo-descricao { font-size: 10px; font-weight: 600; color: var(--color-secondary); opacity: 0.6; margin-top: 1px; }
 
 .ciclo-count-badge {
   font-size: 9px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(255,255,255,0.18);
+  color: var(--color-secondary);
+  opacity: 0.5;
   white-space: nowrap;
 }
-
-/* ── Componentes ───────────────────────────── */
-.componentes-list { }
 
 .comp-row {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--color-divider);
   flex-wrap: wrap;
+  transition: background 0.15s ease;
+}
+.comp-row:hover {
+  background: var(--color-secondary-surface-hover);
 }
 .comp-row:last-child { border-bottom: none; }
 
@@ -183,13 +176,13 @@ function formatDate(dateStr: string) {
   width: 3px;
   height: 28px;
   border-radius: 2px;
-  background: rgba(99,102,241,0.25);
+  background: rgba(139,92,246,0.3);
   flex-shrink: 0;
 }
 
 .comp-info { flex: 1; min-width: 140px; }
-.comp-nome { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.65); }
-.comp-meta { font-size: 10px; color: rgba(255,255,255,0.28); margin-top: 2px; }
+.comp-nome { font-size: 12px; font-weight: 700; color: var(--color-text); }
+.comp-meta { font-size: 10px; color: var(--color-secondary); opacity: 0.6; margin-top: 2px; }
 
 .comp-docentes {
   display: flex;
@@ -203,12 +196,12 @@ function formatDate(dateStr: string) {
 .comp-sem-docente {
   font-size: 10px;
   font-style: italic;
-  color: rgba(255,255,255,0.15);
+  color: var(--color-secondary);
+  opacity: 0.5;
 }
 
 .comp-actions { flex-shrink: 0; }
 
-/* ── Badges ────────────────────────────────── */
 .doc-badge {
   display: inline-flex;
   align-items: center;
@@ -231,40 +224,41 @@ function formatDate(dateStr: string) {
   text-transform: uppercase;
   font-size: 8px;
   letter-spacing: 0.04em;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 .doc-badge-remove {
   margin-left: 2px;
-  opacity: 0.4;
+  opacity: 0.6;
   transition: opacity 0.15s;
   display: flex;
   padding: 2px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
 }
-.doc-badge-remove:hover { opacity: 0.9; }
+.doc-badge-remove:hover { opacity: 1; }
 
-/* ── Tipos ─────────────────────────────────── */
 .tipo--titular {
-  background: rgba(52,211,153,0.08);
-  border-color: rgba(52,211,153,0.15);
-  color: rgba(52,211,153,0.85);
+  background: rgba(16,185,129,0.10);
+  border-color: rgba(16,185,129,0.25);
+  color: #10b981;
 }
 .tipo--substituto {
-  background: rgba(251,191,36,0.08);
-  border-color: rgba(251,191,36,0.15);
-  color: rgba(251,191,36,0.85);
+  background: rgba(245,158,11,0.10);
+  border-color: rgba(245,158,11,0.25);
+  color: #f59e0b;
 }
 .tipo--auxiliar {
-  background: rgba(56,189,248,0.08);
-  border-color: rgba(56,189,248,0.15);
-  color: rgba(56,189,248,0.85);
+  background: rgba(2,132,199,0.10);
+  border-color: rgba(2,132,199,0.25);
+  color: #0284c7;
 }
 .tipo--outro {
-  background: rgba(255,255,255,0.03);
-  border-color: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.35);
+  background: var(--color-secondary-surface-hover);
+  border-color: var(--color-divider);
+  color: var(--color-secondary);
 }
 
-/* ── Botão Atribuir ────────────────────────── */
 .btn-atribuir {
   display: flex;
   align-items: center;
@@ -276,10 +270,10 @@ function formatDate(dateStr: string) {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   background: rgba(139,92,246,0.1);
-  color: rgba(139,92,246,0.75);
-  border: none;
+  color: var(--color-primary);
+  border: 1px solid rgba(139,92,246,0.2);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s;
 }
-.btn-atribuir:hover { background: rgba(139,92,246,0.18); }
+.btn-atribuir:hover { background: rgba(139,92,246,0.2); }
 </style>

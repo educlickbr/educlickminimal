@@ -29,6 +29,9 @@
     --color-text: #e8e6e8;
     --color-background: #0a0a0c;
 
+    /* Divisor (linhas de separação) — leve no escuro */
+    --color-divider: rgba(255, 255, 255, 0.08);
+
     /* Rounding (Design Tokens) */
     --radius-xs: 2px;
     --radius-sm: 4px;
@@ -155,3 +158,199 @@ textarea:disabled {
 .vi-field:hover  { background: var(--field-bg-hover) !important; }
 .vi-field:focus  { border-color: var(--field-border-focus) !important; box-shadow: var(--field-shadow-focus) !important; outline: none !important; }
 .vi-field::placeholder { color: var(--field-placeholder) !important; }
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — COMPONENTES BASE (theme-aware)
+   Classes globais que seguem o tema (escuro/claro).
+   Usar nos componentes em vez de <style scoped> com cores fixas.
+   ─────────────────────────────────────────────────────────────── */
+
+/* Card genérico: superfície elevada + borda divisória + hover */
+.ds-card {
+    position: relative;
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--field-border);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.ds-card:hover {
+    border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 0 0 1px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+.ds-card-inner { padding: 18px 18px 16px 20px; display: flex; flex-direction: column; gap: 8px; }
+
+/* Nome / título do card + descrição */
+.ds-name { font-size: 13px; font-weight: 900; color: var(--color-text); line-height: 1.3; margin-top: 2px; }
+.ds-desc { font-size: 11px; font-weight: 600; color: var(--color-secondary); line-height: 1.5; }
+
+/* Avatar (inicial) */
+.ds-avatar {
+    width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+    background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);
+    color: var(--color-primary); font-size: 14px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* Navegação por abas */
+.ds-tabs-nav {
+    display: flex; gap: 0.25rem;
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--field-border);
+    border-radius: 0.75rem;
+    padding: 0.25rem;
+}
+.ds-tab-btn {
+    padding: 0.5rem 1.25rem; border-radius: 0.625rem;
+    font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--color-secondary);
+    transition: all 0.15s; border: none; background: none; cursor: pointer;
+}
+.ds-tab-btn:hover { color: var(--color-text); }
+.ds-tab-btn--active {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+/* Botão primário (sólido na cor de marca) */
+.ds-btn-primary {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 18px; border-radius: 12px;
+    background: var(--color-primary);
+    border: 1px solid;
+    border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+    color: #fff;
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+    cursor: pointer; transition: all 0.15s ease;
+    box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.25);
+}
+.ds-btn-primary:hover {
+    background: var(--color-primary-hover);
+    box-shadow: 0 6px 20px rgba(var(--color-primary-rgb), 0.4); transform: translateY(-1px);
+}
+
+/* Empty state */
+.ds-empty {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 52px 24px;
+    background: var(--color-secondary-surface); border-radius: 14px;
+    border: 1px dashed var(--field-border);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL (theme-aware) — padrão usado em todos os modais do app
+   ─────────────────────────────────────────────────────────────── */
+.ds-modal-overlay {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 16px;
+    animation: dsFadeIn 0.15s ease;
+}
+.ds-modal-panel {
+    position: relative;
+    background: var(--color-background);
+    border: 1px solid rgba(139, 92, 246, 0.18);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+    animation: dsSlideUp 0.2s cubic-bezier(0.34,1.2,0.64,1);
+}
+.ds-modal-accent-bar { height: 3px; background: var(--color-primary); flex-shrink: 0; }
+.ds-modal-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--field-border);
+    flex-shrink: 0;
+}
+.ds-modal-header-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
+    color: var(--color-primary);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.ds-modal-title { font-size: 13px; font-weight: 800; color: var(--color-text); }
+.ds-modal-subtitle {
+    font-size: 10px; font-weight: 700; color: var(--color-primary);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px;
+}
+.ds-modal-close-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: none;
+    background: var(--color-secondary-surface); color: var(--color-secondary);
+    font-size: 18px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: all 0.15s ease; margin-left: auto;
+}
+.ds-modal-close-btn:hover { background: var(--color-secondary-surface-hover); color: var(--color-text); }
+.ds-modal-footer {
+    display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+    padding: 16px 24px; border-top: 1px solid var(--field-border);
+    background: rgba(0,0,0,0.02); flex-shrink: 0;
+}
+.ds-btn-cancel {
+    padding: 10px 22px; border-radius: 9px;
+    border: 1px solid var(--field-border);
+    background: var(--color-secondary-surface); color: var(--color-secondary);
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+    cursor: pointer; transition: all 0.15s ease;
+}
+.ds-btn-cancel:hover { background: var(--color-secondary-surface-hover); color: var(--color-text); }
+.ds-btn-save {
+    padding: 10px 28px; border-radius: 9px; border: none;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+    cursor: pointer; transition: all 0.15s ease;
+    box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.35);
+    display: flex; align-items: center; gap: 8px;
+}
+.ds-btn-save:hover {
+    background: var(--color-primary-hover);
+}
+.ds-btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@keyframes dsFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dsSlideUp {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEMA CLARO — sobrescreve os tokens no final (cascata)
+   Deve ficar DEPOIS de todos os :root para vencer no empate de
+   especificidade quando data-theme="light" estiver presente.
+   ─────────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+    --color-text: #1f2430;
+    --color-background: #e7e9ee;
+
+    /* Divisor em claro — usa a cor do texto (cinza-escuro) com leve opacidade */
+    --color-divider: rgba(31, 36, 48, 0.20);
+
+    /* Secundária em claro tem mais contraste */
+    --color-secondary: #5b6472;
+    --color-secondary-hover: #3f4651;
+    /* Superfícies (div-15 / div-30): branco-gelo quase cinza, suaves sobre o fundo */
+    --color-secondary-surface: #f1f3f6;
+    --color-secondary-surface-hover: #e9ecf1;
+
+    /* Campos (formulários) — superfícies claras */
+    --field-bg:           #f9fafb;
+    --field-bg-select:    #ffffff;
+    --field-bg-option:    #ffffff;
+    --field-bg-hover:     rgba(139, 92, 246, 0.05);
+    --field-bg-select-hover: #ffffff;
+    --field-border:       rgba(31, 36, 48, 0.14);
+    --field-border-focus: rgba(139, 92, 246, 0.55);
+    --field-text:         rgba(31, 36, 48, 0.92);
+    --field-placeholder:  rgba(31, 36, 48, 0.42);
+    --field-shadow-focus: 0 0 0 3px rgba(139, 92, 246, 0.16);
+}

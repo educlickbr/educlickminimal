@@ -224,7 +224,7 @@ onMounted(() => {
                 <button
                     @click="gerarLink"
                     :disabled="generatingLink"
-                    class="px-4 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-secondary hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 disabled:opacity-50"
+                    class="px-4 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-div-15 border border-divider text-secondary hover:text-text hover:bg-div-30 transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                     <div v-if="generatingLink" class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     <Icon v-else name="ph:link-light" class="w-3.5 h-3.5" />
@@ -232,7 +232,7 @@ onMounted(() => {
                 </button>
                 <button
                     @click="emit('novo-docente')"
-                    class="px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all flex items-center gap-2"
+                    class="ds-btn-primary"
                 >
                     <Icon name="ph:user-plus-bold" class="w-3.5 h-3.5" />
                     Cadastrar
@@ -268,11 +268,11 @@ onMounted(() => {
                 v-else-if="ctx.docentes.value.length === 0"
                 class="empty-state"
             >
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="mb-3 text-white/20">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="mb-3 text-secondary/40">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
-                <p class="text-sm font-bold text-white/30">Nenhum docente cadastrado</p>
-                <p class="text-[10px] font-bold text-white/15 mt-1 uppercase tracking-widest">Cadastre docentes manualmente ou aguarde inscrições em editais</p>
+                <p class="text-sm font-bold text-secondary/60">Nenhum docente cadastrado</p>
+                <p class="text-[10px] font-bold text-secondary/40 mt-1 uppercase tracking-widest">Cadastre docentes manualmente ou aguarde inscrições em editais</p>
             </div>
 
             <!-- Cards -->
@@ -298,7 +298,7 @@ onMounted(() => {
                                         :class="
                                             docente.ativo
                                                 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                                                : 'bg-white/[0.04] border-white/10 text-white/40'
+                                                : 'bg-div-15 border border-divider text-secondary'
                                         "
                                     >
                                         {{ docente.ativo ? '● Ativo' : '○ Inativo' }}
@@ -314,14 +314,14 @@ onMounted(() => {
                                     {{ docente.email || "—" }}
                                 </span>
                                 <div class="flex items-center gap-2 mt-1 flex-wrap">
-                                    <span class="text-[9px] text-secondary/40">
+                                    <span class="text-[9px] text-secondary/50">
                                         Cadastro: {{ formatDate(docente.criado_em) }}
                                     </span>
 
                                     <!-- Valor Hora/Aula -->
-                                    <span class="text-[9px] text-secondary/30">|</span>
+                                    <span class="text-[9px] text-secondary/50">|</span>
                                     <div class="flex items-center gap-1">
-                                        <span class="text-[9px] text-secondary/40 uppercase tracking-wider">
+                                        <span class="text-[9px] text-secondary/50 uppercase tracking-wider">
                                             Hora/aula:
                                         </span>
                                         <div v-if="editandoValor === docente.id" class="flex items-center gap-1">
@@ -329,7 +329,7 @@ onMounted(() => {
                                                 v-model="editValorInput"
                                                 type="text"
                                                 placeholder="0,00"
-                                                class="w-16 bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-[10px] font-bold text-text text-right outline-none focus:border-primary/40"
+                                                class="w-16 bg-field-bg border border-field-border rounded px-1.5 py-0.5 text-[10px] font-bold text-text text-right outline-none focus:border-primary/40"
                                                 @keyup.enter="salvarValor(docente.id)"
                                                 @keyup.escape="editandoValor = null"
                                                 @blur="salvarValor(docente.id)"
@@ -340,7 +340,7 @@ onMounted(() => {
                                         <button
                                             v-else
                                             @click="iniciarEdicaoValor(docente)"
-                                            class="text-[10px] font-bold text-primary/70 hover:text-primary transition-all cursor-pointer bg-transparent border-none p-0"
+                                            class="text-[10px] font-bold text-primary hover:underline transition-all cursor-pointer bg-transparent border-none p-0"
                                             title="Clique para editar"
                                         >
                                             {{ formatarValor(docente.valor_hora_aula) }}
@@ -348,8 +348,8 @@ onMounted(() => {
                                     </div>
 
                                     <template v-if="docente.componentes?.length > 0">
-                                        <span class="text-[9px] text-secondary/30">|</span>
-                                        <span class="text-[9px] text-primary/60 font-bold truncate max-w-[200px]">
+                                        <span class="text-[9px] text-secondary/50">|</span>
+                                        <span class="text-[9px] text-primary font-bold truncate max-w-[200px]">
                                             {{ docente.componentes.map((c: any) => c.nome_componente || c.nome || c).join(", ") }}
                                         </span>
                                     </template>
@@ -398,7 +398,7 @@ onMounted(() => {
         <!-- Paginação -->
         <div
             v-if="ctx.totalPaginas.value > 1"
-            class="flex items-center justify-center gap-2 shrink-0 pt-3 pb-1 border-t border-white/5 mt-3"
+            class="flex items-center justify-center gap-2 shrink-0 pt-3 pb-1 border-t border-divider mt-3"
         >
             <button
                 :disabled="ctx.pagina.value <= 1"
@@ -407,7 +407,7 @@ onMounted(() => {
             >
                 Anterior
             </button>
-            <span class="text-[10px] text-secondary/40 font-bold px-2">
+            <span class="text-[10px] text-secondary/50 font-bold px-2">
                 {{ ctx.pagina.value }} / {{ ctx.totalPaginas.value }}
             </span>
             <button
@@ -423,49 +423,38 @@ onMounted(() => {
     <!-- Modal: Informar Email para Convite -->
     <div
         v-if="showLinkForm"
-        class="modal-overlay"
+        class="ds-modal-overlay"
         @click.self="showLinkForm = false"
     >
-        <div class="modal-panel" style="max-width: 420px;">
-            <div class="modal-accent-bar" />
+        <div class="ds-modal-panel max-w-[420px]">
+            <div class="ds-modal-accent-bar" />
 
-            <div class="modal-header">
-                <div class="modal-header-icon">
+            <div class="ds-modal-header">
+                <div class="ds-modal-header-icon">
                     <Icon name="ph:envelope-light" class="w-5 h-5" />
                 </div>
-                <div class="modal-header-text flex-1">
-                    <h3 class="modal-title">Enviar Convite</h3>
-                    <p class="modal-subtitle">Informe os dados para enviar o link</p>
+                <div class="flex flex-col gap-0.5 flex-1">
+                    <h3 class="ds-modal-title">Enviar Convite</h3>
+                    <p class="ds-modal-subtitle">Informe os dados para enviar o link</p>
                 </div>
-                <button @click="showLinkForm = false" class="modal-close-btn">
+                <button @click="showLinkForm = false" class="ds-modal-close-btn">
                     &times;
                 </button>
             </div>
 
-            <div class="modal-body flex flex-col gap-4">
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60">
-                        Email do docente
-                    </label>
-                    <input
-                        v-model="linkEmail"
-                        type="email"
-                        placeholder="docente@email.com"
-                        class="field-input"
-                    />
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-secondary/60">
-                        Nome do docente
-                    </label>
-                    <input
-                        v-model="linkNome"
-                        type="text"
-                        placeholder="Nome completo"
-                        class="field-input"
-                    />
-                </div>
-                <p class="text-[10px] text-secondary/40">
+            <div class="p-6 flex flex-col gap-4">
+                <BaseField
+                    v-model="linkEmail"
+                    label="Email do docente"
+                    type="email"
+                    placeholder="docente@email.com"
+                />
+                <BaseField
+                    v-model="linkNome"
+                    label="Nome do docente"
+                    placeholder="Nome completo"
+                />
+                <p class="text-[10px] text-secondary/50">
                     Se informar o email, o link será enviado automaticamente.
                     Se deixar em branco, só gera o link para copiar.
                 </p>
@@ -477,12 +466,12 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div class="modal-footer">
-                <button @click="showLinkForm = false" class="modal-btn-cancel">Cancelar</button>
+            <div class="ds-modal-footer">
+                <button @click="showLinkForm = false" class="ds-btn-cancel">Cancelar</button>
                 <button
                     @click="confirmarGerarLink"
                     :disabled="generatingLink"
-                    class="px-4 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all disabled:opacity-50 flex items-center gap-2"
+                    class="ds-btn-save"
                 >
                     <div v-if="generatingLink" class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     <Icon v-else name="ph:link-light" class="w-3.5 h-3.5" />
@@ -495,26 +484,26 @@ onMounted(() => {
     <!-- Modal: Código de Verificação -->
     <div
         v-if="showCodigoModal"
-        class="modal-overlay"
+        class="ds-modal-overlay"
         @click.self="showCodigoModal = false"
     >
-        <div class="modal-panel" style="max-width: 400px;">
-            <div class="modal-accent-bar" />
+        <div class="ds-modal-panel max-w-[400px]">
+            <div class="ds-modal-accent-bar" />
 
-            <div class="modal-header">
-                <div class="modal-header-icon">
+            <div class="ds-modal-header">
+                <div class="ds-modal-header-icon">
                     <Icon name="ph:shield-check-light" class="w-5 h-5" />
                 </div>
-                <div class="modal-header-text flex-1">
-                    <h3 class="modal-title">Código de Verificação</h3>
-                    <p class="modal-subtitle">{{ codigoDocenteNome }}</p>
+                <div class="flex flex-col gap-0.5 flex-1">
+                    <h3 class="ds-modal-title">Código de Verificação</h3>
+                    <p class="ds-modal-subtitle">{{ codigoDocenteNome }}</p>
                 </div>
-                <button @click="showCodigoModal = false" class="modal-close-btn">
+                <button @click="showCodigoModal = false" class="ds-modal-close-btn">
                     &times;
                 </button>
             </div>
 
-            <div class="modal-body flex flex-col gap-4 text-center">
+            <div class="p-6 flex flex-col gap-4 text-center">
                 <p class="text-xs text-secondary/60">
                     Informe este código ao docente. Ele expira às
                     <strong class="text-text">{{ codigoExpira }}</strong>.
@@ -537,10 +526,10 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div class="modal-footer justify-center">
+            <div class="ds-modal-footer justify-center">
                 <button
                     @click="showCodigoModal = false"
-                    class="modal-btn-cancel"
+                    class="ds-btn-cancel"
                 >
                     Fechar
                 </button>
@@ -551,32 +540,32 @@ onMounted(() => {
     <!-- Modal: Link de Autocadastro -->
     <div
         v-if="showLinkModal"
-        class="modal-overlay"
+        class="ds-modal-overlay"
         @click.self="showLinkModal = false"
     >
-        <div class="modal-panel" style="max-width: 480px;">
-            <div class="modal-accent-bar" />
+        <div class="ds-modal-panel max-w-[480px]">
+            <div class="ds-modal-accent-bar" />
 
-            <div class="modal-header">
-                <div class="modal-header-icon">
+            <div class="ds-modal-header">
+                <div class="ds-modal-header-icon">
                     <Icon name="ph:link-light" class="w-5 h-5" />
                 </div>
-                <div class="modal-header-text flex-1">
-                    <h3 class="modal-title">Link de Autocadastro</h3>
-                    <p class="modal-subtitle">Compartilhe este link com o docente</p>
+                <div class="flex flex-col gap-0.5 flex-1">
+                    <h3 class="ds-modal-title">Link de Autocadastro</h3>
+                    <p class="ds-modal-subtitle">Compartilhe este link com o docente</p>
                 </div>
-                <button @click="showLinkModal = false" class="modal-close-btn">
+                <button @click="showLinkModal = false" class="ds-modal-close-btn">
                     &times;
                 </button>
             </div>
 
-            <div class="modal-body flex flex-col gap-4">
+            <div class="p-6 flex flex-col gap-4">
                 <p class="text-xs text-secondary/60">
                     O docente vai criar a própria conta preenchendo os dados
                     e definindo uma senha.
                 </p>
 
-                <div class="flex items-center gap-2 p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                <div class="flex items-center gap-2 p-3 rounded-xl bg-div-15 border border-divider">
                     <input
                         :value="generatedLink"
                         readonly
@@ -601,7 +590,7 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div class="modal-footer">
+            <div class="ds-modal-footer">
                 <span
                     v-if="inviteSent"
                     class="text-[10px] font-bold text-emerald-400 flex items-center gap-1 mr-auto"
@@ -611,13 +600,13 @@ onMounted(() => {
                 </span>
                 <span
                     v-else-if="linkEmail"
-                    class="text-[10px] text-secondary/40 mr-auto"
+                    class="text-[10px] text-secondary/50 mr-auto"
                 >
                     Link gerado (email não enviado)
                 </span>
                 <button
                     @click="showLinkModal = false"
-                    class="modal-btn-cancel"
+                    class="ds-btn-cancel"
                 >
                     Fechar
                 </button>
@@ -627,7 +616,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-@import "~/assets/modal-styles.css";
 /* ── Filter bar ───────────────────────────────────── */
 .filter-bar {
     display: flex;
@@ -636,8 +624,8 @@ onMounted(() => {
     gap: 8px;
     margin-bottom: 14px;
     padding: 10px 14px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--color-divider);
     border-radius: 12px;
     flex-shrink: 0;
 }
@@ -648,16 +636,17 @@ onMounted(() => {
     letter-spacing: 0.06em;
     padding: 8px 12px;
     border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.07);
-    background: rgba(255,255,255,0.04);
-    color: rgba(255,255,255,0.8);
+    border: 1px solid var(--field-border);
+    background: var(--field-bg);
+    color: var(--field-text);
     outline: none;
     transition: border-color 0.15s;
     flex: 1;
     min-width: 200px;
 }
 .filter-input::placeholder {
-    color: rgba(255,255,255,0.2);
+    color: var(--color-secondary);
+    opacity: 0.5;
     text-transform: none;
 }
 .filter-input:focus {
@@ -668,7 +657,8 @@ onMounted(() => {
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.25);
+    color: var(--color-secondary);
+    opacity: 0.5;
     white-space: nowrap;
     margin-left: auto;
 }
@@ -680,23 +670,23 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     padding: 5rem 2rem;
-    background: rgba(255,255,255,0.015);
-    border: 2px dashed rgba(255,255,255,0.08);
+    background: var(--color-secondary-surface);
+    border: 2px dashed var(--color-divider);
     border-radius: 1rem;
     text-align: center;
 }
 
 /* ── Card ──────────────────────────────────────────── */
 .card-item {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--color-secondary-surface);
+    border: 1px solid var(--color-divider);
     border-radius: 14px;
     padding: 14px 16px;
     transition: all 0.15s ease;
 }
 .card-item:hover {
     border-color: rgba(139,92,246,0.3);
-    background: rgba(139,92,246,0.03);
+    background: var(--color-secondary-surface-hover);
     transform: translateX(2px);
 }
 .card-avatar {
@@ -705,7 +695,7 @@ onMounted(() => {
     border-radius: 11px;
     background: rgba(139,92,246,0.1);
     border: 1px solid rgba(139,92,246,0.2);
-    color: #a78bfa;
+    color: var(--color-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -719,7 +709,7 @@ onMounted(() => {
     border-radius: 8px;
     border: none;
     background: transparent;
-    color: rgba(255,255,255,0.25);
+    color: var(--color-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -727,8 +717,8 @@ onMounted(() => {
     transition: all 0.15s;
 }
 .card-btn-icon:hover {
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.6);
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-text);
 }
 
 /* ── Paginação ────────────────────────────────────── */
@@ -739,41 +729,22 @@ onMounted(() => {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07);
-    color: rgba(255,255,255,0.45);
+    background: transparent;
+    border: 1px solid var(--color-divider);
+    color: var(--color-secondary);
     cursor: pointer;
     transition: all 0.15s;
 }
 .paginate-btn:hover:not(:disabled) {
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.7);
+    background: var(--color-secondary-surface-hover);
+    color: var(--color-text);
 }
 .paginate-btn:disabled {
     opacity: 0.25;
     cursor: not-allowed;
 }
 
-/* ── Field input (replicado para modais) ─────────── */
-.field-input {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 9px;
-    padding: 10px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(232, 230, 240, 0.9);
-    outline: none;
-    transition: all 0.15s ease;
-}
-.field-input:focus {
-    border-color: rgba(139, 92, 246, 0.45);
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-}
-.field-input::placeholder { color: rgba(255, 255, 255, 0.22); }
-
 /* ── Scrollbar ────────────────────────────────────── */
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.12); border-radius: 4px; }
 </style>

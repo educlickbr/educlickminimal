@@ -245,6 +245,7 @@ server/api/
 | `programas.get.ts` | GET | Programas (compartilhado) |
 | `programas.post.ts` | POST | Criar/atualizar programa |
 | `me.get.ts` | GET | Sessão do usuário logado |
+| `entidade/dominio.get.ts` | GET | Resolve a entidade pelo domínio (BFF → RPC DEFINER). Usado em páginas DESLOGADAS para aplicar tema/branding da entidade. Sem exposição ao client. |
 | `odoo-lead.post.ts` | POST | Integração com Odoo (leads) |
 | `r2/sign.get.ts` | GET | Signed URL para Cloudflare R2 |
 | `debug.ts` | GET | Debug |

@@ -37,3 +37,7 @@
         </p>
     </footer>
 </template>
+
+<style scoped>
+/* SFC Style */
+</style>

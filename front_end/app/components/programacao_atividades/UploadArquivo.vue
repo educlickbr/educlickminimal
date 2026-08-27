@@ -6,10 +6,8 @@
 
         <!-- Estado: sem arquivo -->
         <div v-if="!fileId && !uploading" class="upload-zone" @click="triggerInput">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" class="text-white/30">
-                <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            <span class="text-[11px] font-bold text-white/30">{{ placeholder }}</span>
+            <Icon name="ph:paperclip-bold" class="w-4 h-4 text-secondary/40" />
+            <span class="text-[11px] font-bold text-secondary/60">{{ placeholder }}</span>
             <input
                 ref="fileInput"
                 type="file"
@@ -21,30 +19,22 @@
 
         <!-- Uploading -->
         <div v-else-if="uploading" class="upload-zone uploading">
-            <div class="w-4 h-4 border-2 border-white/30 border-t-primary rounded-full animate-spin" />
-            <span class="text-[11px] font-bold text-white/40">Enviando...</span>
+            <div class="w-4 h-4 border-2 border-secondary/10 border-t-primary rounded-full animate-spin" />
+            <span class="text-[11px] font-bold text-secondary/60">Enviando...</span>
         </div>
 
         <!-- Arquivo selecionado -->
         <div v-else class="upload-file">
             <div class="upload-file-info">
-                <!-- Ícone de arquivo clicável -->
                 <button @click="abrirArquivo" class="file-icon-btn" title="Visualizar arquivo">
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path d="M5 2h5l4 4v10a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3" fill="rgba(139,92,246,0.08)"/>
-                        <path d="M10 2v4h4" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
-                        <path d="M6 8h6M6 11h6M6 14h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                    </svg>
+                    <Icon name="ph:file-bold" class="w-4 h-4 text-primary" />
                 </button>
-                <!-- Nome do arquivo clicável -->
                 <button @click="abrirArquivo" class="file-name-btn" :title="'Visualizar: ' + fileName">
                     {{ fileName }}
                 </button>
             </div>
             <button @click="removerArquivo" class="file-remove-btn" title="Remover arquivo">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
+                <Icon name="ph:x-bold" class="w-3.5 h-3.5" />
             </button>
         </div>
     </div>
@@ -81,7 +71,6 @@ watch(
     },
 );
 
-// Se já tem um arquivo ao montar, busca o nome
 onMounted(() => {
     if (fileId.value) fetchFileName(fileId.value);
 });
@@ -173,19 +162,19 @@ async function removerArquivo() {
 .upload-zone {
     display: flex; align-items: center; gap: 8px;
     padding: 12px 16px;
-    border: 1px dashed rgba(255,255,255,0.12);
+    border: 1px dashed var(--color-divider);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.15s;
-    background: rgba(255,255,255,0.015);
+    background: var(--color-secondary-surface);
 }
-.upload-zone:hover { border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.03); }
+.upload-zone:hover { border-color: rgba(139,92,246,0.4); background: rgba(139,92,246,0.03); }
 .upload-zone.uploading { cursor: wait; opacity: 0.7; }
 
 .upload-file {
     display: flex; align-items: center; justify-content: space-between;
     padding: 8px 12px;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid var(--color-divider);
     border-radius: 10px;
     background: rgba(139,92,246,0.04);
     transition: border-color 0.15s;
@@ -200,29 +189,29 @@ async function removerArquivo() {
 .file-icon-btn {
     width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
     border: none; background: rgba(139,92,246,0.1);
-    color: #a78bfa; cursor: pointer;
+    color: var(--color-primary); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: all 0.15s;
 }
-.file-icon-btn:hover { background: rgba(139,92,246,0.18); color: #c4b5fd; }
+.file-icon-btn:hover { background: rgba(139,92,246,0.18); }
 
 .file-name-btn {
     background: none; border: none; padding: 0;
-    font-size: 12px; font-weight: 700; color: rgba(232,230,240,0.8);
+    font-size: 12px; font-weight: 700; color: var(--color-text);
     cursor: pointer; text-align: left;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     transition: color 0.15s;
 }
-.file-name-btn:hover { color: #a78bfa; text-decoration: underline; }
+.file-name-btn:hover { color: var(--color-primary); text-decoration: underline; }
 
 .file-remove-btn {
     width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
     border: none; background: transparent;
-    color: rgba(255,255,255,0.25); cursor: pointer;
+    color: var(--color-secondary); opacity: 0.6; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: all 0.15s;
 }
-.file-remove-btn:hover { background: rgba(239,68,68,0.12); color: #fca5a5; }
+.file-remove-btn:hover { background: rgba(239,68,68,0.12); color: #ef4444; opacity: 1; }
 
 .hidden { display: none; }
 </style>

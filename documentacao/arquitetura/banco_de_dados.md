@@ -183,6 +183,8 @@ erDiagram
 - **Refactoring**: Todas as tabelas acadêmicas (`aca_*`) agora utilizam `id_entidade` como chave estrangeira principal.
 - **Roteamento por URL**: A tabela `entidade_produto` armazena a `url_acesso`, permitindo que URLs diferentes levem a contextos diferentes de Produto + Entidade.
 
+> **Permissões:** o modelo de permissões por entidade × papel × produto (`app_permissoes`, enriquecimento de `user_entidades`, papel por entidade em `user_papeis_auth`) está em `documentacao/arquitetura/permissoes.md`.
+
 ---
 
 ## 3. Gestão de Sessão (BFF)
@@ -254,6 +256,7 @@ Foram implementados os primeiros CRUDs utilizando o padrão de RPCs com retorno 
 
 | Data | Descrição |
 |---|---|
+| 2026-08-21 | Adicionada referência ao modelo de permissões (`documentacao/arquitetura/permissoes.md`) — Fase A de multientidade |
 | 2026-07-23 | Consolidação dos documentos: `SUPABASE_SETUP.md`, `SUPABASE_WORKFLOW.md`, `arquitetura_sistema.md`, `jwt.md` (vazio/placeholder) em documento único de arquitetura de banco de dados |
 
 ---

@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-1">
     <!-- Toolbar -->
-    <div class="flex gap-1 px-3 py-2 border-t border-l border-r border-b-0 rounded-t-lg" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.07);">
+    <div class="flex gap-1 px-3 py-2 border-t border-l border-r border-b-0 rounded-t-lg" style="background: var(--field-bg); border-color: var(--field-border);">
       <button 
         type="button"
         @click="editor?.chain().focus().toggleBold().run()" 
@@ -52,7 +52,7 @@
     <!-- Editor Area -->
     <div 
       class="w-full min-h-[200px] px-4 py-3 rounded-b-lg border text-sm cursor-text overflow-y-auto transition-all"
-      style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.07); color: rgba(232,230,240,0.88);"
+      style="background: var(--field-bg); border-color: var(--field-border); color: var(--field-text);"
       @click="editor?.commands.focus()"
     >
       <editor-content :editor="editor" class="prose-editor outline-none" />

@@ -1,20 +1,14 @@
 <template>
     <div class="flex flex-col h-full p-6">
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-4">
-                <h1 class="text-lg font-black text-white/90">
-                    Produtos Comerciais
-                </h1>
-                <span
-                    class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
-                >
-                    {{
-                        core.isLoadingProgramas.value
-                            ? "..."
-                            : core.programas.value.length + " programa(s)"
-                    }}
-                </span>
-            </div>
+        <!-- Top bar: apenas contador, sem título redundante -->
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-[10px] font-black text-secondary/60 uppercase tracking-widest">
+                {{
+                    core.isLoadingProgramas.value
+                        ? "Carregando..."
+                        : core.programas.value.length + " programa(s) comercial(ais)"
+                }}
+            </span>
         </div>
 
         <div
@@ -30,26 +24,11 @@
             v-else-if="core.programas.value.length === 0"
             class="flex-1 flex flex-col items-center justify-center gap-3 empty-state"
         >
-            <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                class="text-white/20"
-            >
-                <path
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                />
-            </svg>
-            <p class="text-sm font-bold text-white/30">
+            <Icon name="ph:package-bold" class="w-8 h-8 text-secondary/30" />
+            <p class="text-sm font-bold text-text/80">
                 Nenhum programa cadastrado
             </p>
-            <p
-                class="text-[10px] font-bold text-white/15 uppercase tracking-widest"
-            >
+            <p class="text-[10px] font-bold text-secondary/50 uppercase tracking-widest">
                 Crie programas no módulo acadêmico primeiro
             </p>
         </div>
@@ -162,8 +141,8 @@ onMounted(async () => {
 
 <style scoped>
 .empty-state {
-    background: rgba(255, 255, 255, 0.015);
+    background: var(--color-secondary-surface);
     border-radius: 14px;
-    border: 1px dashed rgba(255, 255, 255, 0.07);
+    border: 1px dashed var(--color-divider);
 }
 </style>

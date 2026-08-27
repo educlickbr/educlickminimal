@@ -2,8 +2,8 @@
     <div class="flex flex-col gap-5">
 
         <!-- Estado: curso ainda não salvo -->
-        <div v-if="!savedCursoId" class="grade-pending">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="mb-3 text-white/15">
+        <div v-if="!savedCursoId" class="ds-empty">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="mb-3 text-secondary/25">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
                 <path d="M12 8v4M12 16v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
@@ -26,22 +26,15 @@
                 </h4>
                 <div class="grade-form-row">
                     <div class="grade-field" style="flex: 3">
-                        <label class="grade-label">Módulo Acadêmico</label>
-                        <select v-model="formCM.id_modulo" class="grade-select">
-                            <option :value="null" disabled>Selecione um módulo disponível...</option>
-                            <option v-for="m in modulosDisponiveis" :key="m.id" :value="m.id">
-                                {{ m.nome_modulo }}
-                            </option>
-                        </select>
+                        <BaseField v-model="formCM.id_modulo" type="select" empty-label="Selecione o módulo" :options="modulosDisponiveis" optionValueKey="id" optionLabelKey="nome_modulo" label="Módulo Acadêmico" />
                     </div>
                     <div class="grade-field" style="flex: 1; min-width: 90px">
-                        <label class="grade-label">Posição</label>
-                        <input type="number" v-model="formCM.ordem" class="grade-input" />
+                        <BaseField v-model="formCM.ordem" label="Posição" type="number" />
                     </div>
                     <button
                         @click="$emit('addModulo')"
                         :disabled="loadingCM || !formCM.id_modulo"
-                        class="grade-add-btn"
+                        class="ds-btn-primary"
                     >
                         <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
                             <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -64,9 +57,9 @@
 
                 <div
                     v-else-if="modulosDoCurso.length === 0"
-                    class="grade-empty"
+                    class="ds-empty"
                 >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="mb-2 text-white/15">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="mb-2 text-secondary/25">
                         <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
                         <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
                         <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
@@ -129,15 +122,6 @@ defineEmits<{ addModulo: []; removeModulo: [id_modulo: string] }>();
 </script>
 
 <style scoped>
-/* ── Pending state ───────────────────────────────── */
-.grade-pending {
-    display: flex; flex-direction: column; align-items: center; text-align: center;
-    padding: 48px 24px; border-radius: 12px;
-    background: rgba(255,255,255,0.015); border: 1px dashed rgba(255,255,255,0.07);
-}
-.grade-pending-title { font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.35); margin-bottom: 6px; }
-.grade-pending-desc  { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.2); line-height: 1.5; max-width: 280px; }
-
 /* ── Form card ───────────────────────────────────── */
 .grade-form-card {
     display: flex; flex-direction: column; gap: 14px;
@@ -147,7 +131,7 @@ defineEmits<{ addModulo: []; removeModulo: [id_modulo: string] }>();
 .grade-form-title {
     display: flex; align-items: center; gap: 7px;
     font-size: 10px; font-weight: 900; text-transform: uppercase;
-    letter-spacing: 0.14em; color: #a78bfa;
+    letter-spacing: 0.14em; color: var(--color-primary);
 }
 .grade-form-row {
     display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
@@ -155,59 +139,40 @@ defineEmits<{ addModulo: []; removeModulo: [id_modulo: string] }>();
 .grade-field { display: flex; flex-direction: column; gap: 6px; }
 .grade-label {
     font-size: 9px; font-weight: 900; text-transform: uppercase;
-    letter-spacing: 0.14em; color: rgba(255,255,255,0.3);
+    letter-spacing: 0.14em; color: var(--color-secondary);
 }
 .grade-input, .grade-select {
     width: 100%; padding: 10px 12px; border-radius: 9px;
-    border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.04);
-    color: rgba(232,230,240,0.9); font-size: 12px; font-weight: 700;
+    border: 1px solid var(--field-border); background: var(--field-bg);
+    color: var(--field-text); font-size: 12px; font-weight: 700;
     outline: none; transition: border-color 0.15s;
 }
-.grade-input:focus, .grade-select:focus { border-color: rgba(139,92,246,0.45); }
-
-.grade-add-btn {
-    display: flex; align-items: center; gap: 6px; white-space: nowrap;
-    padding: 10px 16px; border-radius: 9px; border: none; flex-shrink: 0;
-    background: linear-gradient(135deg,#7c3aed,#8b5cf6);
-    color: #fff; font-size: 10px; font-weight: 900;
-    text-transform: uppercase; letter-spacing: 0.08em;
-    cursor: pointer; transition: all 0.15s;
-    box-shadow: 0 3px 10px rgba(139,92,246,0.3); height: 38px;
-}
-.grade-add-btn:hover { background: linear-gradient(135deg,#6d28d9,#7c3aed); }
-.grade-add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.grade-input:focus, .grade-select:focus { border-color: var(--field-border-focus); }
 
 /* ── List ────────────────────────────────────────── */
 .grade-list-header {
     display: flex; align-items: center; gap: 8px;
     font-size: 9px; font-weight: 900; text-transform: uppercase;
-    letter-spacing: 0.14em; color: rgba(255,255,255,0.25); padding: 0 2px;
+    letter-spacing: 0.14em; color: var(--color-secondary); padding: 0 2px;
 }
 .grade-list-count {
     padding: 2px 7px; border-radius: 10px; font-size: 9px; font-weight: 900;
-    background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.15); color: #a78bfa;
+    background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.15); color: var(--color-primary);
 }
 
 .grade-loading { display: flex; justify-content: center; padding: 20px; }
 .grade-spinner {
     width: 20px; height: 20px; border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.06); border-top-color: #8b5cf6;
+    border: 2px solid var(--color-divider); border-top-color: var(--color-primary);
     animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.grade-empty {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 32px 16px; border-radius: 10px;
-    background: rgba(255,255,255,0.015); border: 1px dashed rgba(255,255,255,0.06);
-    font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.2);
-}
-
 /* ── Module row ──────────────────────────────────── */
 .grade-row {
     display: flex; align-items: center; gap: 0;
-    border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);
-    background: rgba(255,255,255,0.02); overflow: hidden;
+    border-radius: 10px; border: 1px solid var(--field-border);
+    background: var(--color-secondary-surface); overflow: hidden;
     transition: border-color 0.15s ease;
 }
 .grade-row:hover { border-color: rgba(139,92,246,0.18); }
@@ -215,30 +180,30 @@ defineEmits<{ addModulo: []; removeModulo: [id_modulo: string] }>();
 .grade-row-ordem {
     width: 40px; min-height: 48px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(139,92,246,0.06); border-right: 1px solid rgba(255,255,255,0.04);
-    font-size: 10px; font-weight: 900; color: rgba(139,92,246,0.5);
+    background: rgba(139,92,246,0.06); border-right: 1px solid var(--color-divider);
+    font-size: 10px; font-weight: 900; color: var(--color-primary);
     font-variant-numeric: tabular-nums;
 }
 
 .grade-row-info {
     flex: 1; min-width: 0; padding: 10px 14px; display: flex; flex-direction: column; gap: 4px;
 }
-.grade-row-nome { font-size: 12px; font-weight: 900; color: rgba(232,230,240,0.88); }
+.grade-row-nome { font-size: 12px; font-weight: 900; color: var(--color-text); }
 .grade-row-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .grade-row-carga {
     display: flex; align-items: center; gap: 4px;
-    font-size: 9px; font-weight: 700; color: rgba(139,92,246,0.6);
+    font-size: 9px; font-weight: 700; color: var(--color-primary);
 }
 .grade-row-desc {
-    font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.2);
+    font-size: 10px; font-weight: 600; color: var(--color-secondary);
     font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px;
 }
 
 .grade-row-remove {
     width: 42px; min-height: 48px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    border: none; background: transparent; border-left: 1px solid rgba(255,255,255,0.04);
-    color: rgba(255,255,255,0.2); cursor: pointer; transition: all 0.15s;
+    border: none; background: transparent; border-left: 1px solid var(--color-divider);
+    color: var(--color-secondary); cursor: pointer; transition: all 0.15s;
 }
-.grade-row-remove:hover { background: rgba(239,68,68,0.08); color: #f87171; }
+.grade-row-remove:hover { background: rgba(239,68,68,0.08); color: var(--color-danger); }
 </style>

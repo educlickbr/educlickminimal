@@ -15,7 +15,9 @@ const fileLinks = ref<Record<string, string>>({});
 const fileNames = ref<Record<string, string>>({});
 const activeTab = ref(0);
 
-function setActiveTab(i: number) { activeTab.value = i; }
+function setActiveTab(i: number) {
+    activeTab.value = i;
+}
 
 function fechar() {
     emit("update:modelValue", false);
@@ -91,18 +93,18 @@ function formatarResposta(valor: any) {
 </script>
 
 <template>
-    <div v-if="modelValue" class="modal-overlay" @click.self="fechar">
-        <div class="modal-panel">
-            <div class="modal-accent-bar" />
+    <div v-if="modelValue" class="ds-modal-overlay" @click.self="fechar">
+        <div class="ds-modal-panel max-w-3xl max-h-[85vh]">
+            <div class="ds-modal-accent-bar" />
 
             <!-- Header -->
-            <div class="modal-header">
-                <div class="modal-header-icon">
+            <div class="ds-modal-header">
+                <div class="ds-modal-header-icon">
                     <Icon name="ph:identification-card-bold" class="w-5 h-5" />
                 </div>
-                <div class="modal-header-text flex-1">
-                    <h3 class="modal-title">Detalhes da Inscrição</h3>
-                    <p class="modal-subtitle">
+                <div class="flex flex-col gap-0.5 flex-1">
+                    <h3 class="ds-modal-title">Detalhes da Inscrição</h3>
+                    <p class="ds-modal-subtitle">
                         <template v-if="dados">
                             {{ dados.inscricao?.usuario?.nome_completo || "—" }}
                             ·
@@ -111,11 +113,11 @@ function formatarResposta(valor: any) {
                         <template v-else>Carregando...</template>
                     </p>
                 </div>
-                <button @click="fechar" class="modal-close-btn">&times;</button>
+                <button @click="fechar" class="ds-modal-close-btn">&times;</button>
             </div>
 
             <!-- Body -->
-            <div class="modal-body">
+            <div class="p-6 overflow-y-auto flex-1">
                 <!-- Loading -->
                 <div
                     v-if="loading"
@@ -125,7 +127,7 @@ function formatarResposta(valor: any) {
                         class="w-6 h-6 border-2 border-secondary/10 border-t-primary rounded-full animate-spin"
                     />
                     <span
-                        class="text-[10px] font-black text-secondary/30 uppercase tracking-widest"
+                        class="text-[10px] font-black text-secondary/50 uppercase tracking-widest"
                     >
                         Carregando formulário...
                     </span>
@@ -147,9 +149,9 @@ function formatarResposta(valor: any) {
                 >
                     <Icon
                         name="ph:clipboard-text-light"
-                        class="w-10 h-10 text-secondary/20 mb-3 mx-auto"
+                        class="w-10 h-10 text-secondary/40 mb-3 mx-auto"
                     />
-                    <p class="text-xs text-secondary/40">
+                    <p class="text-xs text-secondary/50">
                         Nenhum formulário configurado para este processo.
                     </p>
                 </div>
@@ -159,18 +161,14 @@ function formatarResposta(valor: any) {
                     <!-- Tabs dos blocos -->
                     <div
                         v-if="dados.blocos.length > 1"
-                        class="flex gap-2 mb-6 overflow-x-auto pb-1 scrollbar-hide"
+                        class="ds-tabs-nav mb-6 overflow-x-auto scrollbar-hide"
                     >
                         <button
                             v-for="(bloco, i) in dados.blocos"
                             :key="i"
                             @click="setActiveTab(Number(i))"
-                            class="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex-shrink-0"
-                            :class="
-                                activeTab === i
-                                    ? 'bg-primary/20 text-primary border border-primary/30'
-                                    : 'bg-white/[0.02] text-secondary/40 border border-white/5 hover:text-white hover:border-white/10'
-                            "
+                            class="ds-tab-btn whitespace-nowrap"
+                            :class="{ 'ds-tab-btn--active': activeTab === i }"
                         >
                             {{ bloco.bloco }}
                         </button>
@@ -180,7 +178,7 @@ function formatarResposta(valor: any) {
                     <template v-for="(bloco, i) in dados.blocos" :key="i">
                         <div v-show="activeTab === i">
                             <h4
-                                class="text-xs font-black uppercase tracking-widest text-primary/80 mb-4 pb-2 border-b border-white/5"
+                                class="text-xs font-black uppercase tracking-widest text-primary/80 mb-4 pb-2 border-b border-divider"
                             >
                                 {{ bloco.bloco }}
                             </h4>
@@ -191,7 +189,7 @@ function formatarResposta(valor: any) {
                                     class="flex flex-col gap-1"
                                 >
                                     <span
-                                        class="text-[9px] font-black text-secondary/40 uppercase tracking-widest"
+                                        class="text-[9px] font-black text-secondary/50 uppercase tracking-widest"
                                     >
                                         {{ pergunta.label }}
                                     </span>
@@ -218,7 +216,7 @@ function formatarResposta(valor: any) {
                                                         pergunta.pergunta_id
                                                     ]
                                                 "
-                                                class="w-12 h-12 rounded-lg border border-white/10 object-cover"
+                                                class="w-12 h-12 rounded-lg border border-divider object-cover"
                                             />
                                             <a
                                                 :href="
@@ -238,7 +236,7 @@ function formatarResposta(valor: any) {
                                         </div>
                                         <span
                                             v-else
-                                            class="text-[10px] text-secondary/40"
+                                            class="text-[10px] text-secondary/50"
                                             >Não anexado</span
                                         >
                                     </template>
@@ -246,7 +244,7 @@ function formatarResposta(valor: any) {
                                     <!-- Texto -->
                                     <span
                                         v-else
-                                        class="text-[10px] font-bold text-white/80"
+                                        class="text-xs font-bold text-text"
                                     >
                                         {{
                                             formatarResposta(
@@ -264,161 +262,14 @@ function formatarResposta(valor: any) {
             </div>
 
             <!-- Footer -->
-            <div class="modal-footer">
-                <button @click="fechar" class="modal-btn-cancel">Fechar</button>
+            <div class="ds-modal-footer">
+                <button @click="fechar" class="ds-btn-cancel">Fechar</button>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 60;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.85);
-    padding: 16px;
-    animation: fadeIn 0.15s ease;
-}
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-.modal-panel {
-    position: relative;
-    background: #13131a;
-    border: 1px solid rgba(139, 92, 246, 0.18);
-    border-radius: 16px;
-    width: 100%;
-    max-width: 720px;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow:
-        0 24px 80px rgba(0, 0, 0, 0.7),
-        0 0 0 1px rgba(139, 92, 246, 0.1);
-    animation: slideUp 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
-}
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(16px) scale(0.98);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.modal-accent-bar {
-    height: 3px;
-    background: linear-gradient(90deg, #7c3aed, #a78bfa, #7c3aed);
-    flex-shrink: 0;
-}
-
-.modal-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    flex-shrink: 0;
-}
-
-.modal-header-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: rgba(139, 92, 246, 0.12);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    color: #a78bfa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.modal-title {
-    font-size: 14px;
-    font-weight: 900;
-    color: #c4b5fd;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-}
-
-.modal-subtitle {
-    font-size: 10px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.3);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-top: 2px;
-}
-
-.modal-close-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: none;
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 18px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-.modal-close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
-
-.modal-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 24px;
-}
-
-.modal-footer {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 16px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(0, 0, 0, 0.15);
-    flex-shrink: 0;
-}
-
-.modal-btn-cancel {
-    padding: 10px 22px;
-    border-radius: 9px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.45);
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-.modal-btn-cancel:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.7);
-}
-
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
 }

@@ -52,7 +52,7 @@ const userInitial = computed(() => {
     >
         <!-- 1. Header -->
         <header
-            class="bg-transparent md:bg-div-15 px-1 py-2 md:px-4 md:py-3 rounded-lg flex items-center justify-between shadow-none md:shadow-sm border-0 md:border border-secondary/5 shrink-0"
+            class="bg-transparent md:bg-div-15 px-1 py-2 md:px-4 md:py-3 rounded-lg flex items-center justify-between shadow-none md:shadow-sm border-0 md:border border-divider shrink-0"
         >
             <div class="flex items-center gap-3">
                 <div
@@ -114,7 +114,7 @@ const userInitial = computed(() => {
                 class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 pb-8"
             >
                 <!-- ISLAND: Acadêmico -->
-                <div class="space-y-3">
+                <div v-if="store.temIlha('academico')" class="space-y-3">
                     <div class="flex items-center gap-2 px-1">
                         <div
                             class="w-2 h-2 rounded-full bg-violet-500/80 shadow-[0_0_8px_rgba(139,92,246,0.6)]"
@@ -127,11 +127,12 @@ const userInitial = computed(() => {
                     </div>
 
                     <div
-                        class="bg-div-15 border border-secondary/5 rounded-xl overflow-hidden shadow-sm flex flex-col"
+                        class="bg-div-15 border border-divider rounded-xl overflow-hidden shadow-sm flex flex-col"
                     >
                         <button
                             @click="handleNavigation('/academico_oferta')"
                             class="menu-item group"
+                            v-if="store.temPermissao('academico', 'oferta_cursos')"
                             :class="
                                 isActive('/academico_oferta')
                                     ? 'bg-violet-500/5'
@@ -175,6 +176,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/formularios')"
                             class="menu-item group disabled:opacity-50"
+                            v-if="store.temPermissao('academico', 'formularios')"
                         >
                             <div
                                 class="menu-icon bg-violet-500/5 text-violet-400"
@@ -211,6 +213,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/processos')"
                             class="menu-item group"
+                            v-if="store.temPermissao('academico', 'processo_seletivo')"
                             :class="
                                 isActive('/processos') ? 'bg-violet-500/5' : ''
                             "
@@ -252,6 +255,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/matriculas')"
                             class="menu-item group disabled:opacity-50"
+                            v-if="store.temPermissao('academico', 'matriculas')"
                         >
                             <div
                                 class="menu-icon bg-violet-500/5 text-violet-400"
@@ -291,6 +295,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/docentes')"
                             class="menu-item group disabled:opacity-50"
+                            v-if="store.temPermissao('academico', 'docentes')"
                         >
                             <div
                                 class="menu-icon bg-violet-500/5 text-violet-400"
@@ -320,6 +325,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/academico_calendario')"
                             class="menu-item group"
+                            v-if="store.temPermissao('academico', 'calendario_escolar')"
                             :class="
                                 isActive('/academico_calendario')
                                     ? 'bg-violet-500/5'
@@ -368,6 +374,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/calendario-salas')"
                             class="menu-item group disabled:opacity-50"
+                            v-if="store.temPermissao('academico', 'calendario_salas')"
                         >
                             <div
                                 class="menu-icon bg-violet-500/5 text-violet-400"
@@ -419,6 +426,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/atribuicao')"
                             class="menu-item group disabled:opacity-50"
+                            v-if="store.temPermissao('academico', 'atribuicao')"
                         >
                             <div
                                 class="menu-icon bg-violet-500/5 text-violet-400"
@@ -453,6 +461,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/programacao_atividades')"
                             class="menu-item group"
+                            v-if="store.temPermissao('academico', 'programacao_atividades')"
                             :class="
                                 isActive('/programacao_atividades')
                                     ? 'bg-violet-500/5'
@@ -501,6 +510,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/avaliacoes')"
                             class="menu-item group disabled:opacity-50"
+                            v-if="store.temPermissao('academico', 'avaliacoes')"
                         >
                             <div
                                 class="menu-icon bg-violet-500/5 text-violet-400"
@@ -531,6 +541,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/diario_classe')"
                             class="menu-item group disabled:opacity-50"
+                            v-if="store.temPermissao('academico', 'diario_classe')"
                         >
                             <div
                                 class="menu-icon bg-violet-500/5 text-violet-400"
@@ -565,7 +576,7 @@ const userInitial = computed(() => {
                 </div>
 
                 <!-- ISLAND: Comercial -->
-                <div class="space-y-3">
+                <div v-if="store.temIlha('comercial')" class="space-y-3">
                     <div class="flex items-center gap-2 px-1">
                         <div
                             class="w-2 h-2 rounded-full bg-emerald-500/80 shadow-[0_0_8px_rgba(16,185,129,0.6)]"
@@ -578,11 +589,12 @@ const userInitial = computed(() => {
                     </div>
 
                     <div
-                        class="bg-div-15 border border-secondary/5 rounded-xl overflow-hidden shadow-sm flex flex-col"
+                        class="bg-div-15 border border-divider rounded-xl overflow-hidden shadow-sm flex flex-col"
                     >
                         <button
                             @click="handleNavigation('/produtos')"
                             class="menu-item group"
+                            v-if="store.temPermissao('comercial', 'produtos')"
                         >
                             <div
                                 class="menu-icon bg-emerald-500/5 text-emerald-400"
@@ -614,6 +626,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/configuracoes/pagamento')"
                             class="menu-item group"
+                            v-if="store.temPermissao('comercial', 'gateway')"
                         >
                             <div class="menu-icon bg-emerald-500/5 text-emerald-400">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -628,6 +641,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/vendas')"
                             class="menu-item group"
+                            v-if="store.temPermissao('comercial', 'vendas')"
                         >
                             <div
                                 class="menu-icon bg-emerald-500/5 text-emerald-400"
@@ -660,6 +674,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/dashboard_vendas')"
                             class="menu-item group"
+                            v-if="store.temPermissao('comercial', 'dashboard')"
                         >
                             <div
                                 class="menu-icon bg-emerald-500/5 text-emerald-400"
@@ -696,7 +711,7 @@ const userInitial = computed(() => {
                 </div>
 
                 <!-- ISLAND: Portal do Aluno -->
-                <div class="space-y-3">
+                <div v-if="store.temIlha('portal_aluno')" class="space-y-3">
                     <div class="flex items-center gap-2 px-1">
                         <div
                             class="w-2 h-2 rounded-full bg-sky-500/80 shadow-[0_0_8px_rgba(14,165,233,0.6)]"
@@ -709,11 +724,12 @@ const userInitial = computed(() => {
                     </div>
 
                     <div
-                        class="bg-div-15 border border-secondary/5 rounded-xl overflow-hidden shadow-sm flex flex-col"
+                        class="bg-div-15 border border-divider rounded-xl overflow-hidden shadow-sm flex flex-col"
                     >
                         <button
                             @click="handleNavigation('/meus-processos')"
                             class="menu-item group"
+                            v-if="store.temPermissao('portal_aluno', 'meus_processos')"
                         >
                             <div class="menu-icon bg-sky-500/10 text-sky-500">
                                 <svg
@@ -755,6 +771,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/meus-cursos')"
                             class="menu-item group"
+                            v-if="store.temPermissao('portal_aluno', 'meus_cursos')"
                         >
                             <div class="menu-icon bg-sky-500/10 text-sky-500">
                                 <svg
@@ -782,6 +799,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/minhas_atividades')"
                             class="menu-item group"
+                            v-if="store.temPermissao('portal_aluno', 'minhas_atividades')"
                         >
                             <div class="menu-icon bg-sky-500/5 text-sky-400">
                                 <svg
@@ -811,6 +829,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/certificados')"
                             class="menu-item group disabled:opacity-50"
+                            v-if="store.temPermissao('portal_aluno', 'certificados')"
                         >
                             <div class="menu-icon bg-sky-500/5 text-sky-400">
                                 <svg
@@ -845,6 +864,7 @@ const userInitial = computed(() => {
                         <button
                             @click="handleNavigation('/gestao_faltas')"
                             class="menu-item group disabled:opacity-50"
+                            v-if="store.temPermissao('portal_aluno', 'gestao_faltas')"
                         >
                             <div class="menu-icon bg-sky-500/5 text-sky-400">
                                 <svg
@@ -887,11 +907,101 @@ const userInitial = computed(() => {
                         </button>
                     </div>
                 </div>
+
+                <!-- ISLAND: Portal Docente -->
+                <div v-if="store.temIlha('portal_docente')" class="space-y-3">
+                    <div class="flex items-center gap-2 px-1">
+                        <div
+                            class="w-2 h-2 rounded-full bg-amber-500/80 shadow-[0_0_8px_rgba(245,158,11,0.6)]"
+                        ></div>
+                        <h3
+                            class="text-xs font-black text-secondary tracking-[0.2em] uppercase"
+                        >
+                            Portal Docente
+                        </h3>
+                    </div>
+
+                    <div
+                        class="bg-div-15 border border-divider rounded-xl overflow-hidden shadow-sm flex flex-col"
+                    >
+                        <button
+                            @click="handleNavigation('/portal-docente/entregas')"
+                            class="menu-item group"
+                            v-if="store.temPermissao('portal_docente', 'atividades_entregas')"
+                        >
+                            <div class="menu-icon bg-amber-500/10 text-amber-500">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <rect
+                                        x="8"
+                                        y="2"
+                                        width="8"
+                                        height="4"
+                                        rx="1"
+                                        ry="1"
+                                    ></rect>
+                                    <path
+                                        d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+                                    ></path>
+                                    <path
+                                        d="m9 14 2 2 4-4"
+                                    ></path>
+                                </svg>
+                            </div>
+                            <div class="flex flex-col text-left">
+                                <span
+                                    class="text-sm font-bold text-text group-hover:text-amber-500 transition-colors"
+                                    >Atividades e Entregas</span
+                                >
+                            </div>
+                        </button>
+                        <button
+                            @click="handleNavigation('/portal-docente/conta')"
+                            class="menu-item group disabled:opacity-50"
+                            disabled
+                            v-if="store.temPermissao('portal_docente', 'minha_conta')"
+                        >
+                            <div class="menu-icon bg-amber-500/5 text-amber-400">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"
+                                    ></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                            <div class="flex flex-col text-left">
+                                <span
+                                    class="text-sm font-bold text-text group-hover:text-amber-500 transition-colors"
+                                    >Minha Conta</span
+                                >
+                            </div>
+                        </button>
+                    </div>
+                </div>
             </div>
         </main>
 
         <!-- 3. Footer -->
-        <footer class="p-6 text-center border-t border-secondary/5">
+        <footer class="p-6 text-center border-t border-divider">
             <p
                 class="text-[10px] text-secondary/30 font-black tracking-[0.3em] uppercase"
             >

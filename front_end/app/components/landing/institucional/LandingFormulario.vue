@@ -161,3 +161,7 @@ const submitLead = async () => {
     }
 };
 </script>
+
+<style scoped>
+/* SFC Style */
+</style>
