@@ -2,7 +2,7 @@
 
 > **Referência canônica do contrato visual do projeto.**  
 > Aplica-se a **todos** os componentes e páginas — admin e públicas.  
-> Veja também: `documentacao/arquitetura/front_end.md` (seção 7 — legado, mantido para tokens de cores e UX de campos), `.agents/skills/padrao-design-ui/SKILL.md` (skill de implementação rápida) e `documentacao/planos/plano-tema-claro-escuro.md` (checklist e status de conversão dual-theme).
+> Veja também: `documentacao/arquitetura/front_end.md` (seção 7 — legado, mantido para tokens de cores e UX de campos), `.agents/skills/padrao-design-ui/SKILL.md` (skill de implementação rápida) e `documentacao/arquitetura/plano-tema-claro-escuro.md` (checklist e status de conversão dual-theme).
 
 > **⚠️ Dual-theme:** O projeto suporta tema escuro (padrão histórico) e tema claro (`data-theme="light"`). **Nunca usar cores hardcoded** (`rgba(255,255,255,*)`, `text-white`, `bg-[#hex]`) — usar sempre os tokens de `var(--color-*)` e `var(--field-*)`. Ver seção 16.
 

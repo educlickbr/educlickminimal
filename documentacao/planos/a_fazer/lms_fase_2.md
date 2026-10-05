@@ -4,9 +4,11 @@
 
 Evolução do LMS após o fechamento do **v1** (admin: repositório → distribuição → currículo + aluno: `/minhas_atividades`).
 
-**Referência conceitual:** [`arquitetura_lms.md`](./arquitetura_lms.md) — pipeline Blueprint (distribuição) vs. Operação (currículo), modelagem do banco e funil de resolução de conteúdos.
+**Referência conceitual:** [`lms.md`](../../arquitetura/lms.md) — pipeline Blueprint (distribuição) vs. Operação (currículo), modelagem do banco e funil de resolução de conteúdos.
 
-**Estado atual:** v1 fechado + **Fase 2.0, 2.1 e 2.3 implementadas** (aguardando bateria de testes completa). Migrations criadas: `20260819100000` (RLS), `20260819100001` (2.0), `20260819100002` (2.3), `20260819100003` (drop overload).
+**Estado atual:** v1 fechado + **Fases 2.0–2.4 implementadas** (aguardando bateria de testes completa). Migrations criadas: `20260819100000` (RLS), `20260819100001` (2.0), `20260819100002` (2.3), `20260819100003` (drop overload), `20260820100000`–`...00003` (2.4).
+
+> **Bateria de testes:** roteiro executável em [`testes_lms_fase_2.md`](./testes_lms_fase_2.md) — é o que trava o fechamento do LMS antes da 2.5.
 
 ---
 

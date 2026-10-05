@@ -2,7 +2,7 @@ import { serverSupabaseClient } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient(event)
-  const { id_programa, id_entidade, escopo_tipo, escopo_id } = getQuery(event)
+  const { id_programa, id_entidade, escopo_tipo, escopo_id, incluir_catalogo } = getQuery(event)
 
   if (!id_programa || !id_entidade || !escopo_tipo || !escopo_id) {
     throw createError({ statusCode: 400, message: 'id_programa, id_entidade, escopo_tipo e escopo_id são obrigatórios' })
@@ -13,6 +13,7 @@ export default defineEventHandler(async (event) => {
     p_id_entidade: id_entidade,
     p_escopo_tipo: escopo_tipo,
     p_escopo_id: escopo_id,
+    p_incluir_catalogo: incluir_catalogo === 'true' || incluir_catalogo === true,
   })
 
   if (error) throw createError({ statusCode: 500, message: error.message })

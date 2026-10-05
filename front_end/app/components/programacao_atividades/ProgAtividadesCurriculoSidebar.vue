@@ -43,8 +43,8 @@
                 </div>
             </div>
 
-            <!-- Estado do currículo -->
-            <div class="dash-card">
+            <!-- Estado do escopo ativo -->
+            <div v-if="ctx.selectedScopeKey.value" class="dash-card">
                 <span class="dash-title">📊 Estado do currículo</span>
                 <div class="dash-btns">
                     <button class="dash-btn" :class="{ 'dash-btn--on': ctx.filtroEstado.value === 'associados' }" @click="ctx.toggleFiltroEstado('associados')">
@@ -69,6 +69,10 @@
                         <span>Limpar filtro</span>
                     </button>
                 </div>
+            </div>
+            <div v-else class="dash-card">
+                <span class="dash-title">📊 Estado do currículo</span>
+                <p class="dash-text">Abra um escopo e clique em “Adicionar” para consultar o catálogo e o estado das associações daquele escopo.</p>
             </div>
         </template>
     </div>

@@ -1,7 +1,7 @@
 # Dívidas e Frentes Futuras — Multientidade / Permissões
 
 > **Status:** Registro consolidado do que está pendente no escopo de multientidade, com ordem de execução e cortes.
-> **Fonte:** `documentacao/planos/plano-multientidade-permissoes.md` e `documentacao/arquitetura/permissoes.md`.
+> **Fonte:** `plano-multientidade-permissoes.md` e `documentacao/arquitetura/permissoes.md`.
 > **Data:** 2026-08-21 (revisado e reorganizado).
 
 ---

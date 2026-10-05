@@ -1,5 +1,54 @@
-## ***O QUE JÁ TEMOS
-## Gerenciamento de Cursos
+# Arquitetura do LMS — EduClick (Repositório, Distribuição e Currículo)
+
+> Documento-pai da arquitetura do módulo LMS no EduClick.
+> Define o desacoplamento entre o planejamento pedagógico (**Blueprint / Distribuição**) e a execução temporal (**Operação / Currículo**), além do consumo pelo aluno e avaliação docente.
+
+---
+
+## 🗺️ Mapa do LMS — Com quem este documento se conecta
+
+Este é o documento-pai que consolida a visão técnica e conceitual do LMS. As especificações detalhadas, planos de evolução e padrões de interface estão organizados nos seguintes documentos:
+
+### 1. Planos de Implementação e Evolução
+- **Fase 1 (v1 Concluído):**
+  - [`plano-minhas-atividades.md`](../planos/realizados/plano-minhas-atividades.md) — Visão do aluno, consumo de conteúdos e árvore de módulos.
+  - [`plano-camada-comercial.md`](../planos/realizados/plano-camada-comercial.md) — Comercial, produtos, ofertas e checkout integrado.
+- **Fase 2 (Em andamento / Bateria de Testes):**
+  - [`lms_fase_2.md`](../planos/a_fazer/lms_fase_2.md) — Evolução pós-v1 (rascunhos, dashboards laterais, ambiente seguro, autoavaliação e portal docente).
+  - [`testes_lms_fase_2.md`](../planos/a_fazer/testes_lms_fase_2.md) — Roteiro executável de testes do LMS Fase 2.
+- **Próximas Frentes:**
+  - [`plano-multientidade-permissoes.md`](../planos/a_fazer/plano-multientidade-permissoes.md) — Permissões por entidade e domínio (requisito antes da Fase 2.5 de relatórios).
+
+### 2. Documentação de Páginas e Telas
+- [`programacao_atividades.md`](../paginas/programacao_atividades.md) — Tela administrativa central (Repositório, Distribuição e Currículo).
+- [`minhas_atividades.md`](../paginas/minhas_atividades.md) — Interface de consumo do aluno (`/minhas_atividades`).
+- [`portal-docente.md`](../paginas/portal-docente.md) — Portal do professor e fluxo de correção de entregas (`/portal-docente/entregas`).
+
+### 3. Padrões de Recriação (Referência Externa)
+Especificações ponto a ponto de cada componente/dinâmica do LMS:
+- [`plano_inter_projeto_lms.md`](../planos/referencia_externa/plano_inter_projeto_lms.md) — Guia mestre de recriação inter-projeto.
+- [`padrao_curriculo_admin.md`](../planos/referencia_externa/padrao_curriculo_admin.md) — Operação do Currículo e escopos-alvo.
+- [`padrao_subabas_distribuicao.md`](../planos/referencia_externa/padrao_subabas_distribuicao.md) — Navegação independente da Distribuição.
+- [`padrao_selecao_programa_curriculo.md`](../planos/referencia_externa/padrao_selecao_programa_curriculo.md) — Dropdown rico de seleção de programa.
+- [`padrao_minhas_atividades_aluno.md`](../planos/referencia_externa/padrao_minhas_atividades_aluno.md) — Padrão de consumo do aluno.
+- [`padrao_dashboard_aluno.md`](../planos/referencia_externa/padrao_dashboard_aluno.md) — Dashboard e filtros laterais do aluno.
+- [`padrao_dashboard_curriculo.md`](../planos/referencia_externa/padrao_dashboard_curriculo.md) — Dashboard e filtros laterais do currículo.
+- [`padrao_portal_docente_entregas.md`](../planos/referencia_externa/padrao_portal_docente_entregas.md) — Fluxo de correção docente.
+- [`padrao_dashboard_docente.md`](../planos/referencia_externa/padrao_dashboard_docente.md) — Sidebar do portal docente.
+- [`padrao_animacao_yazi_niri.md`](../planos/referencia_externa/padrao_animacao_yazi_niri.md) — Animações e transições deslizantes YAZI/Niri.
+
+### 4. Arquitetura Complementar
+- [`banco_de_dados.md`](./banco_de_dados.md) — Convenções de nomenclatura, schemas e segurança Supabase.
+- [`servidor_ssr_bff.md`](./servidor_ssr_bff.md) — Camada BFF (`server/api/lms/`, `server/api/docente/`).
+- [`front_end.md`](./front_end.md) — Padrão de componentes, composables e orquestradores.
+- [`guia_refatoracao_desacoplamento.md`](./guia_refatoracao_desacoplamento.md) — Padrão de desacoplamento de modais e abas.
+- [`design_system.md`](./design_system.md) e [`plano-tema-claro-escuro.md`](./plano-tema-claro-escuro.md) — Tokens visuais e suporte a temas.
+
+---
+
+## 1. Visão Geral: Blueprint vs. Operação
+
+### Gerenciamento de Cursos
 
 A arquitetura funciona dividindo o sistema em duas grandes macro-camadas: a **Conceitual (Blueprint)** e a **Operacional (Oferta)**. Na camada conceitual, os _Componentes_ (matérias brutas) alimentam os _Módulos_ (grupos de disciplinas com carga horária), que por sua vez são empacotados na tabela _Cursos_, funcionando como o gabarito pedagógico e definitivo do que a instituição vende. Quando o usuário seleciona um _Curso_, o sistema utiliza esse molde para instanciar a camada operacional através dos _Ciclos_, que são a manifestação física e temporal de cada módulo (com dias e horários definidos).
 

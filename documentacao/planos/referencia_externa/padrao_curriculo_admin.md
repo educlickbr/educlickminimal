@@ -21,7 +21,7 @@ Abas Área → Curso → Módulo → Componente (como na Distribuição) com cas
      📚 Programa (conteúdos soltos)
      📁 Componentes (pasta) → cada componente
      📁 Módulos/Ciclos (pasta) → cada módulo → 📅 Aulas do módulo
-3. Abre uma pasta/acordeon → conteúdo carregado SOB DEMANDA (lazy)
+3. Abre uma pasta/acordeon → só os conteúdos daquele escopo são carregados SOB DEMANDA (lazy)
 4. Para INJETAR conteúdo numa pasta: clica em "Adicionar" daquela pasta
    → a pasta vira o ESCOPO ALVO → a árvore recolhe (w-96) e o NAVEGADOR
    de conteúdos surge à direita
@@ -64,8 +64,7 @@ conteudosMap          // Map<chave, ConteudoItem[]> — conteúdos por escopo (l
 expandedSections      // Set<string> — acordeons abertos
 pastaAberta           // { componentes, modulos } — pastas abertas
 selectedScopeKey      // string | null — o ESCOPO ALVO (ex.: 'componente:<id>', 'ciclo:<id>', 'calendario:<id>', 'programa', 'area')
-conteudosDisponiveis  // ConteudoPanel[] — navegador (todos do repositório + estado)
-ativosMap             // Map<id_conteudo, { ativo, op_id, timing }> — linhas operacionais
+conteudosDisponiveis  // ConteudoPanel[] — catálogo do escopo alvo + estado daquele escopo
 ```
 
 **Chaves de escopo da árvore** (o que o `selectedScopeKey`/`expandedSections` guardam):
@@ -85,9 +84,9 @@ ativosMap             // Map<id_conteudo, { ativo, op_id, timing }> — linhas o
 
 | Ação | Função | Chamada BFF |
 |---|---|---|
-| Selecionar programa | `selecionarPrograma(prog)` | `Promise.all([ GET /api/programacao_atividades/curriculo?id_programa=X&id_entidade=E , GET .../curriculo/ativos?id_programa=X&id_entidade=E ])` → `estrutura` + `ativosMap`; depois `GET .../conteudos` (navegador). **Dropdown rico detalhado em `padrao_selecao_programa_curriculo.md`** |
-| Abrir acordeon (lazy) | `toggleSection(key)` | `GET /api/programacao_atividades/curriculo/conteudos?id_programa=X&id_entidade=E&escopo_tipo=<tipo>&escopo_id=<id>` → `{ conteudos: ConteudoItem[] }` (só na primeira vez por chave) |
-| "Adicionar" numa pasta | `definirEscopoAlvo(key)` | (front) seta `selectedScopeKey`; árvore recolhe `w-96`; navegador surge |
+| Selecionar programa | `selecionarPrograma(prog)` | `GET /api/programacao_atividades/curriculo?id_programa=X&id_entidade=E` → somente a casca da árvore. **Nenhum conteúdo nem catálogo é carregado aqui.** |
+| Abrir acordeon (lazy) | `toggleSection(key)` | `GET /api/programacao_atividades/curriculo/conteudos?...` → `{ conteudos }` daquele escopo (só na primeira abertura) |
+| "Adicionar" numa pasta | `definirEscopoAlvo(key)` | Uma chamada ao mesmo endpoint com `incluir_catalogo=true` → `{ conteudos, catalogo }`; árvore e navegador passam a usar o estado do mesmo escopo. |
 | **Associar** (radio) | `toggleAssociacaoPainel(c)` | **exige escopo alvo** (toast se não) — `POST /api/programacao_atividades/curriculo` com body do operacional → cria linha; ou `DELETE` com `{id: op_id}` → remove linha (volta à herança) |
 | **Mostrar/ocultar** (toggle) | `toggleAtivoPainel(c)` | exige escopo alvo — `POST .../curriculo` com `ativo: !ativo` (upsert) → linha com ativo false = oculto do aluno |
 | Ativo/destaque (árvore) | `toggleAtivo(item, key)` / `toggleDestaque(item, key)` | `POST .../curriculo` (herdado ativo → cria linha `ativo:false`; linha `ativo:false` → cria linha `ativo:true`; linha → DELETE) |
@@ -96,11 +95,14 @@ ativosMap             // Map<id_conteudo, { ativo, op_id, timing }> — linhas o
 ### O body do POST (constraint exclusiva — o coração)
 
 ```ts
-// montarBodyOperacional: exatamente UM de (id_programa, id_ciclo, id_calendario)
+// montarBodyOperacional: id_programa é sempre o dono; no máximo um subescopo.
 function escopoKeyToParams(key) {
+  if (key === 'area')                 return { id_area: estrutura.value.area.id };
+  if (key.startsWith('componente:'))  return { id_componente: key.split(':')[1] };
+  if (key.startsWith('modulo:'))      return { id_modulo: key.split(':')[1] };
   if (key.startsWith('ciclo:'))      return { id_ciclo: key.split(':')[1] };
   if (key.startsWith('calendario:')) return { id_calendario: key.split(':')[1] };
-  return {}; // area, componente, modulo, programa → só id_programa
+  return {}; // programa
 }
 
 // POST /api/programacao_atividades/curriculo
@@ -109,7 +111,8 @@ function escopoKeyToParams(key) {
   "id_conteudo": "uuid",
   "ativo": true | false,            // false = oculto do aluno
   "usuario_id": "uuid",
-  "id_programa": "uuid"             // OU "id_ciclo" OU "id_calendario" — nunca 2 juntos
+  "id_programa": "uuid",            // sempre: dono do currículo
+  "id_componente": "uuid"           // opcional: OU área/módulo/ciclo/aula — nunca 2 subescopos
   // opcional: "destaque": true, "data_disponivel": ISO, "data_entrega_limite": ISO,
   //           "duracao_minutos": 60, "tentativas_permitidas": 2, "pontuacao_maxima": 10
 }
@@ -122,8 +125,8 @@ function escopoKeyToParams(key) {
 ## 5. Regras de negócio do Currículo
 
 1. **Associação exige escopo alvo** — sem `selectedScopeKey`, radio/toggle do navegador não funcionam (toast "Selecione primeiro o escopo").
-2. **Escopo único por linha** — o body manda `id_programa` OU `id_ciclo` OU `id_calendario` (constraint `lms_conteudo_operacional_um_escopo`).
-3. **Lazy loading** — cada acordeon carrega conteúdos **na primeira abertura** (cache em `conteudosMap`); a árvore (casca) vem completa, os conteúdos sob demanda.
+2. **Programa + subescopo único por linha** — toda linha pertence a `id_programa` e pode ter, no máximo, um de `id_area`, `id_componente`, `id_modulo`, `id_ciclo` ou `id_calendario` (constraint `lms_conteudo_operacional_um_escopo`).
+3. **Lazy loading** — selecionar programa traz apenas a casca. Cada acordeon busca os seus conteúdos na primeira abertura; o catálogo só é buscado ao clicar em “Adicionar” naquele escopo.
 4. **Ativo na árvore × ativo no navegador** — a árvore mostra o estado real (herdado/ativo/oculto com badge); o navegador tem **radio** (associar/desassociar) e **toggle** (visível/oculto) separados — radio = pertence ou não ao escopo; toggle = aluno vê ou não.
 5. **Timing** — configuração por escopo (linha operacional): `data_disponivel` (agendado), `data_entrega_limite` (prazo), duração, tentativas, pontuação máxima.
 6. **Destaque** — `destaque=true` na linha operacional (estrela na árvore).
@@ -153,7 +156,7 @@ animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 |---|---|---|
 | Aba | 4 sub-abas independentes (Área/Curso/Módulo/Componente) | Sem abas — dropdown de **programa** + acordeons |
 | Seleção | Item da aba → associa direto | **Escopo alvo** (pasta) → navegador → radio/toggle |
-| Alvo da linha | `lms_distribuicao` (blueprint) com escopo área/curso/módulo/componente | `lms_conteudo_operacional` com programa/ciclo/calendario |
+| Alvo da linha | `lms_distribuicao` (blueprint) com escopo área/curso/módulo/componente | `lms_conteudo_operacional` com programa + área/componente/módulo/ciclo/aula opcional |
 | Herança | É a fonte da herança | Consome a herança e pode sobrescrever (ocultar/ajustar) |
 | Controles | Só toggle associa/desassocia | Radio (associar) + toggle (visível) + gear (timing) + estrela (destaque) |
 

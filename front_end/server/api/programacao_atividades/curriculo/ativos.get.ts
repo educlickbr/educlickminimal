@@ -15,6 +15,9 @@ export default defineEventHandler(async (event) => {
     .select('id, id_conteudo, ativo, destaque, data_disponivel, data_entrega_limite, duracao_minutos, tentativas_permitidas, pontuacao_maxima')
     .eq('id_programa', id_programa)
     .eq('id_entidade', id_entidade)
+    .is('id_area', null)
+    .is('id_componente', null)
+    .is('id_modulo', null)
     .is('id_ciclo', null)
     .is('id_calendario', null)
 

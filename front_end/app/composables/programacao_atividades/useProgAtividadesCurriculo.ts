@@ -1,13 +1,12 @@
 /**
- * useProgAtividadesCurriculo
+ * Gestão do Currículo operacional de um programa.
  *
- * Composable para gestão do Currículo (Programa).
- * Layout 2 colunas com lazy loading:
- *   Esquerda: árvore acordeon (carrega estrutura, depois conteúdos sob demanda)
- *   Direita:  navegador de conteúdos com busca/filtros + toggle ativo
+ * A estrutura da árvore é leve; os conteúdos são buscados apenas ao abrir
+ * um escopo. Ao clicar em "Adicionar", a mesma consulta do escopo também
+ * devolve o catálogo com o estado daquele escopo específico.
  */
 
-import { ref, reactive, computed, watch } from "vue";
+import { ref, reactive, computed } from "vue";
 import { useAppStore } from "~~/stores/app";
 
 export interface ProgramaOption {
@@ -22,12 +21,17 @@ export interface ConteudoItem {
   id_conteudo: string;
   titulo: string;
   tipo: string;
-  id_arquivo?: string;
-  url?: string;
+  id_arquivo?: string | null;
+  url?: string | null;
   ativo: boolean;
   destaque: boolean;
   herdado: boolean;
   op_id?: string | null;
+  data_disponivel?: string | null;
+  data_entrega_limite?: string | null;
+  duracao_minutos?: number | null;
+  tentativas_permitidas?: number | null;
+  pontuacao_maxima?: number | null;
 }
 
 export interface ConteudoPanel {
@@ -45,9 +49,18 @@ export interface ConteudoPanel {
   duracao_minutos?: number | null;
   tentativas_permitidas?: number | null;
   pontuacao_maxima?: number | null;
+  criado_por?: string | null;
   criado_por_nome?: string | null;
   criado_em?: string;
 }
+
+type EscopoOperacional = {
+  id_area?: string;
+  id_componente?: string;
+  id_modulo?: string;
+  id_ciclo?: string;
+  id_calendario?: string;
+};
 
 export function useProgAtividadesCurriculo(deps: {
   getEntidadeAtivaId: () => string | null;
@@ -61,82 +74,92 @@ export function useProgAtividadesCurriculo(deps: {
 }) {
   const store = useAppStore();
 
-  // ── Programa ──────────────────────────────────────────
+  // ── Programa e casca da árvore ───────────────────────
   const programas = ref<ProgramaOption[]>([]);
   const loadingProgramas = ref(false);
   const programaSelecionado = ref<ProgramaOption | null>(null);
-
-  // ── Estrutura (casca da árvore) ───────────────────────
   const estrutura = ref<any>(null);
   const loadingEstrutura = ref(false);
 
-  // ── Conteúdos por escopo (lazy) ───────────────────────
-  // Chave: "area" | "componente:<id>" | "modulo:<id>" | "ciclo:<id>" | "calendario:<id>"
+  // ── Conteúdos lazy por escopo ─────────────────────────
   const conteudosMap = ref<Map<string, ConteudoItem[]>>(new Map());
   const loadingConteudosEscopo = ref<Map<string, boolean>>(new Map());
-
-  // ── Acordeon expandido ────────────────────────────────
   const expandedSections = ref<Set<string>>(new Set());
-
-  function toggleSection(key: string) {
-    const s = new Set(expandedSections.value);
-    if (s.has(key)) s.delete(key); else s.add(key);
-    expandedSections.value = s;
-
-    // Lazy: se está expandindo e não tem conteúdos ainda, busca
-    if (s.has(key)) {
-      carregarConteudosSeNecessario(key);
-    }
-  }
 
   function isExpanded(key: string): boolean {
     return expandedSections.value.has(key);
   }
 
-  // ── Mapeia chave do acordeon → escopo para RPC ──────
-  function parseEscopoKey(key: string): Record<string, any> | null {
-    if (key === 'programa') return { tipo: 'programa', id: (programaSelecionado.value?.id || '') as string };
-    if (key === 'area') return { tipo: 'area', id: (estrutura.value?.area?.id || '') as string };
-    if (key.startsWith('componente:')) return { tipo: 'componente', id: key.split(':')[1] as string };
-    if (key.startsWith('modulo:')) return { tipo: 'modulo', id: key.split(':')[1] as string };
-    if (key.startsWith('ciclo:')) return { tipo: 'ciclo', id: key.split(':')[1] as string };
-    if (key.startsWith('calendario:')) return { tipo: 'calendario', id: key.split(':')[1] as string };
+  function parseEscopoKey(key: string): { tipo: string; id: string } | null {
+    if (key === "programa") {
+      return { tipo: "programa", id: programaSelecionado.value?.id || "" };
+    }
+    if (key === "area") return { tipo: "area", id: estrutura.value?.area?.id || "" };
+    if (key.startsWith("componente:")) return { tipo: "componente", id: key.split(":")[1] || "" };
+    if (key.startsWith("modulo:")) return { tipo: "modulo", id: key.split(":")[1] || "" };
+    if (key.startsWith("ciclo:")) return { tipo: "ciclo", id: key.split(":")[1] || "" };
+    if (key.startsWith("calendario:")) return { tipo: "calendario", id: key.split(":")[1] || "" };
     return null;
   }
 
-  async function carregarConteudosSeNecessario(key: string) {
-    // Verifica se já carregou
-    if (conteudosMap.value.has(key)) return;
+  async function carregarConteudos(
+    key: string,
+    incluirCatalogo = false,
+    forcar = false,
+  ) {
+    if (!forcar && !incluirCatalogo && conteudosMap.value.has(key)) return;
 
     const escopo = parseEscopoKey(key);
-    if (!escopo || !escopo.id || !programaSelecionado.value) return;
+    const programa = programaSelecionado.value;
+    if (!escopo?.id || !programa) return;
 
-    const lm = new Map(loadingConteudosEscopo.value);
-    lm.set(key, true);
-    loadingConteudosEscopo.value = lm;
+    const loadingPorEscopo = new Map(loadingConteudosEscopo.value);
+    loadingPorEscopo.set(key, true);
+    loadingConteudosEscopo.value = loadingPorEscopo;
+    if (incluirCatalogo) loadingConteudos.value = true;
 
     try {
       const id_entidade = await deps.garantirEntidade();
       const res = (await $fetch("/api/programacao_atividades/curriculo/conteudos", {
         params: {
-          id_programa: programaSelecionado.value.id,
+          id_programa: programa.id,
           id_entidade,
           escopo_tipo: escopo.tipo,
           escopo_id: escopo.id,
+          incluir_catalogo: incluirCatalogo,
         },
       })) as any;
 
-      const itens = Array.isArray(res?.conteudos) ? res.conteudos : [];
-      const m = new Map(conteudosMap.value);
-      m.set(key, itens);
-      conteudosMap.value = m;
+      const conteudos = Array.isArray(res?.conteudos) ? res.conteudos : [];
+      const mapa = new Map(conteudosMap.value);
+      mapa.set(key, conteudos);
+      conteudosMap.value = mapa;
+
+      // Não deixa uma resposta de escopo anterior substituir o navegador atual.
+      if (incluirCatalogo && selectedScopeKey.value === key) {
+        conteudosDisponiveis.value = Array.isArray(res?.catalogo) ? res.catalogo : [];
+      }
     } catch (e: any) {
       deps.toast.showToast(e?.message || "Erro ao carregar conteúdos", { type: "error" });
     } finally {
-      const lm2 = new Map(loadingConteudosEscopo.value);
-      lm2.set(key, false);
-      loadingConteudosEscopo.value = lm2;
+      const loadingFinal = new Map(loadingConteudosEscopo.value);
+      loadingFinal.set(key, false);
+      loadingConteudosEscopo.value = loadingFinal;
+      if (incluirCatalogo && selectedScopeKey.value === key) loadingConteudos.value = false;
     }
+  }
+
+  function toggleSection(key: string) {
+    const secoes = new Set(expandedSections.value);
+    if (secoes.has(key)) secoes.delete(key);
+    else secoes.add(key);
+    expandedSections.value = secoes;
+
+    if (secoes.has(key)) void carregarConteudos(key);
+  }
+
+  function carregarConteudosSeNecessario(key: string) {
+    return carregarConteudos(key);
   }
 
   function getConteudos(key: string): ConteudoItem[] {
@@ -147,56 +170,66 @@ export function useProgAtividadesCurriculo(deps: {
     return loadingConteudosEscopo.value.get(key) || false;
   }
 
-  // ── Escopo alvo para adicionar conteúdo ───────────────
-  // Quando o usuário clica "Adicionar conteúdo" numa seção da árvore,
-  // define o escopo alvo para o toggle no painel direito.
+  async function recarregarArvoreDoEscopo(key: string) {
+    // Atualiza a lista da árvore sem pedir novamente o catálogo do navegador.
+    return carregarConteudos(key, false, true);
+  }
+
+  // ── Escopo alvo ───────────────────────────────────────
   const selectedScopeKey = ref<string | null>(null);
 
-  function definirEscopoAlvo(key: string | null) {
+  async function definirEscopoAlvo(key: string | null) {
+    if (!key || key === selectedScopeKey.value) {
+      selectedScopeKey.value = null;
+      conteudosDisponiveis.value = [];
+      return;
+    }
+
     selectedScopeKey.value = key;
+    conteudosDisponiveis.value = [];
+    await carregarConteudos(key, true, true);
   }
 
-  // Converte escopoKey para parâmetros do POST
-  function escopoKeyToParams(key: string): { id_ciclo?: string; id_calendario?: string } {
-    if (key.startsWith('ciclo:')) return { id_ciclo: key.split(':')[1] };
-    if (key.startsWith('calendario:')) return { id_calendario: key.split(':')[1] };
-    return {}; // area, componente, modulo → apenas programa
+  function escopoKeyToParams(key: string): EscopoOperacional {
+    if (key === "area") return { id_area: estrutura.value?.area?.id };
+    if (key.startsWith("componente:")) return { id_componente: key.split(":")[1] };
+    if (key.startsWith("modulo:")) return { id_modulo: key.split(":")[1] };
+    if (key.startsWith("ciclo:")) return { id_ciclo: key.split(":")[1] };
+    if (key.startsWith("calendario:")) return { id_calendario: key.split(":")[1] };
+    return {};
   }
 
-  // Monta o body do POST respeitando a constraint exclusiva:
-  // exatamente UM de (id_programa, id_ciclo, id_calendario) preenchido.
-  function montarBodyOperacional(extra: Record<string, any>): Record<string, any> {
-    const paramsEscopo = selectedScopeKey.value
-      ? escopoKeyToParams(selectedScopeKey.value)
-      : {};
+  /**
+   * Todo registro operacional pertence ao programa; o campo opcional abaixo
+   * identifica o nível específico em que o conteúdo foi associado.
+   */
+  function montarBodyOperacional(
+    extra: Record<string, any>,
+    scopeKey = selectedScopeKey.value,
+  ): Record<string, any> {
+    if (!programaSelecionado.value) throw new Error("Selecione um programa primeiro");
+
     const body: Record<string, any> = {
       id_entidade: extra.id_entidade,
       id_conteudo: extra.id_conteudo,
+      id_programa: programaSelecionado.value.id,
       ativo: extra.ativo ?? true,
       usuario_id: extra.usuario_id,
+      ...(scopeKey ? escopoKeyToParams(scopeKey) : {}),
     };
     if (extra.destaque !== undefined) body.destaque = extra.destaque;
-    if (paramsEscopo.id_ciclo) {
-      body.id_ciclo = paramsEscopo.id_ciclo;
-    } else if (paramsEscopo.id_calendario) {
-      body.id_calendario = paramsEscopo.id_calendario;
-    } else {
-      body.id_programa = extra.id_programa || programaSelecionado.value?.id;
-    }
     return body;
   }
 
-  // ── Painel direito: navegador de conteúdos ─────────────
+  // ── Navegador do escopo ativo ─────────────────────────
   const busca = ref("");
   const filtroTipo = ref<string | null>(null);
   const filtroMeus = ref(false);
-  const filtroEstado = ref<string | null>(null); // associados | ocultos | livres
+  const filtroEstado = ref<string | null>(null);
+  const conteudosDisponiveis = ref<ConteudoPanel[]>([]);
+  const loadingConteudos = ref(false);
 
-  // Pastas da árvore (compartilhadas entre página e sidebar)
-  const pastaAberta = reactive({
-    componentes: false,
-    modulos: false,
-  });
+  const pastaAberta = reactive({ componentes: false, modulos: false });
 
   function togglePasta(pasta: "componentes" | "modulos") {
     pastaAberta[pasta] = !pastaAberta[pasta];
@@ -206,21 +239,13 @@ export function useProgAtividadesCurriculo(deps: {
     if (!pastaAberta[pasta]) pastaAberta[pasta] = true;
   }
 
-  const conteudosDisponiveis = ref<ConteudoPanel[]>([]);
-  const loadingConteudos = ref(false);
+  function atualizarConteudoNoPainel(id: string, patch: Partial<ConteudoPanel>) {
+    conteudosDisponiveis.value = conteudosDisponiveis.value.map((conteudo) =>
+      conteudo.id === id ? { ...conteudo, ...patch } : conteudo,
+    );
+  }
 
-  // Mapa: id_conteudo → { ativo, op_id, timing }
-  const ativosMap = ref<Map<string, {
-    ativo: boolean;
-    op_id?: string;
-    data_disponivel?: string | null;
-    data_entrega_limite?: string | null;
-    duracao_minutos?: number | null;
-    tentativas_permitidas?: number | null;
-    pontuacao_maxima?: number | null;
-  }>>(new Map());
-
-  // ── Modal de configuração de exibição (timing) ──────────
+  // ── Modal de timing ───────────────────────────────────
   const showModalTiming = ref(false);
   const timingAlvo = ref<ConteudoPanel | null>(null);
   const formTiming = reactive({
@@ -232,23 +257,21 @@ export function useProgAtividadesCurriculo(deps: {
   });
   const savingTiming = ref(false);
 
-  function abrirConfigTiming(conteudo: ConteudoPanel) {
-    timingAlvo.value = conteudo;
-    const at = ativosMap.value.get(conteudo.id);
-    formTiming.data_disponivel = at?.data_disponivel ? toLocalInput(at.data_disponivel) : "";
-    formTiming.data_entrega_limite = at?.data_entrega_limite ? toLocalInput(at.data_entrega_limite) : "";
-    formTiming.duracao_minutos = at?.duracao_minutos ?? null;
-    formTiming.tentativas_permitidas = at?.tentativas_permitidas ?? null;
-    formTiming.pontuacao_maxima = at?.pontuacao_maxima ?? null;
-    showModalTiming.value = true;
+  function toLocalInput(iso: string): string {
+    const data = new Date(iso);
+    if (Number.isNaN(data.getTime())) return "";
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${data.getFullYear()}-${pad(data.getMonth() + 1)}-${pad(data.getDate())}T${pad(data.getHours())}:${pad(data.getMinutes())}`;
   }
 
-  // Converte ISO para datetime-local (YYYY-MM-DDTHH:mm)
-  function toLocalInput(iso: string): string {
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return "";
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  function abrirConfigTiming(conteudo: ConteudoPanel) {
+    timingAlvo.value = conteudo;
+    formTiming.data_disponivel = conteudo.data_disponivel ? toLocalInput(conteudo.data_disponivel) : "";
+    formTiming.data_entrega_limite = conteudo.data_entrega_limite ? toLocalInput(conteudo.data_entrega_limite) : "";
+    formTiming.duracao_minutos = conteudo.duracao_minutos ?? null;
+    formTiming.tentativas_permitidas = conteudo.tentativas_permitidas ?? null;
+    formTiming.pontuacao_maxima = conteudo.pontuacao_maxima ?? null;
+    showModalTiming.value = true;
   }
 
   function limparTiming() {
@@ -260,16 +283,19 @@ export function useProgAtividadesCurriculo(deps: {
   }
 
   async function salvarTiming() {
-    if (!timingAlvo.value || !programaSelecionado.value) return;
+    const conteudo = timingAlvo.value;
+    const scopeKey = selectedScopeKey.value;
+    if (!conteudo || !scopeKey) return;
+
     savingTiming.value = true;
     try {
       const id_entidade = await deps.garantirEntidade();
       const body = montarBodyOperacional({
         id_entidade,
-        id_conteudo: timingAlvo.value.id,
-        ativo: timingAlvo.value.ativo,
+        id_conteudo: conteudo.id,
+        ativo: conteudo.ativo,
         usuario_id: store.user_expandido_id,
-      });
+      }, scopeKey);
       body.data_disponivel = formTiming.data_disponivel ? new Date(formTiming.data_disponivel).toISOString() : null;
       body.data_entrega_limite = formTiming.data_entrega_limite ? new Date(formTiming.data_entrega_limite).toISOString() : null;
       body.duracao_minutos = formTiming.duracao_minutos || null;
@@ -279,37 +305,29 @@ export function useProgAtividadesCurriculo(deps: {
       const res = (await $fetch("/api/programacao_atividades/curriculo", {
         method: "POST", body,
       })) as any;
-      if (res?.id) {
-        const c = timingAlvo.value;
-        c.data_disponivel = body.data_disponivel;
-        c.data_entrega_limite = body.data_entrega_limite;
-        c.duracao_minutos = body.duracao_minutos;
-        c.tentativas_permitidas = body.tentativas_permitidas;
-        c.pontuacao_maxima = body.pontuacao_maxima;
-        ativosMap.value.set(c.id, {
-          ativo: c.ativo, op_id: c.op_id || res.id,
-          data_disponivel: body.data_disponivel,
-          data_entrega_limite: body.data_entrega_limite,
-          duracao_minutos: body.duracao_minutos,
-          tentativas_permitidas: body.tentativas_permitidas,
-          pontuacao_maxima: body.pontuacao_maxima,
-        });
-        deps.toast.showToast("Configuração salva!", { type: "success" });
-      }
+      if (!res?.id) throw new Error(res?.message || "Não foi possível salvar a configuração");
+
+      const patch = {
+        op_id: conteudo.op_id || res.id,
+        data_disponivel: body.data_disponivel,
+        data_entrega_limite: body.data_entrega_limite,
+        duracao_minutos: body.duracao_minutos,
+        tentativas_permitidas: body.tentativas_permitidas,
+        pontuacao_maxima: body.pontuacao_maxima,
+      };
+      atualizarConteudoNoPainel(conteudo.id, patch);
+      timingAlvo.value = { ...conteudo, ...patch };
+      await recarregarArvoreDoEscopo(scopeKey);
+      deps.toast.showToast("Configuração salva!", { type: "success" });
       showModalTiming.value = false;
     } catch (e: any) {
-      deps.toast.showToast(e.message || "Erro ao salvar", { type: "error" });
+      deps.toast.showToast(e?.message || "Erro ao salvar", { type: "error" });
     } finally {
       savingTiming.value = false;
     }
   }
 
-  // ── Watch ──────────────────────────────────────────────
-  watch(busca, () => { if (programaSelecionado.value) fetchConteudosRepositorio(); });
-  watch(filtroTipo, () => { if (programaSelecionado.value) fetchConteudosRepositorio(); });
-  watch(filtroMeus, () => { if (programaSelecionado.value) fetchConteudosRepositorio(); });
-
-  // ── Fetch programas ────────────────────────────────────
+  // ── Programa ──────────────────────────────────────────
   async function fetchProgramas() {
     loadingProgramas.value = true;
     try {
@@ -325,55 +343,27 @@ export function useProgAtividadesCurriculo(deps: {
     }
   }
 
-  // ── Selecionar programa ────────────────────────────────
   async function selecionarPrograma(prog: ProgramaOption) {
     programaSelecionado.value = prog;
+    estrutura.value = null;
     expandedSections.value = new Set();
     conteudosMap.value = new Map();
+    loadingConteudosEscopo.value = new Map();
+    selectedScopeKey.value = null;
+    conteudosDisponiveis.value = [];
+    busca.value = "";
+    filtroTipo.value = null;
+    filtroMeus.value = false;
     filtroEstado.value = null;
+    pastaAberta.componentes = false;
+    pastaAberta.modulos = false;
     loadingEstrutura.value = true;
 
     try {
       const id_entidade = await deps.garantirEntidade();
-
-      // Carrega estrutura
-      const [estruturaRes, ativosRes] = await Promise.all([
-        $fetch("/api/programacao_atividades/curriculo", {
-          params: { id_programa: prog.id, id_entidade },
-        }) as any,
-        $fetch("/api/programacao_atividades/curriculo/ativos", {
-          params: { id_programa: prog.id, id_entidade },
-        }) as any,
-      ]);
-      estrutura.value = estruturaRes;
-
-      // Monta mapa de ativos
-      const map = new Map<string, {
-        ativo: boolean;
-        op_id?: string;
-        data_disponivel?: string | null;
-        data_entrega_limite?: string | null;
-        duracao_minutos?: number | null;
-        tentativas_permitidas?: number | null;
-        pontuacao_maxima?: number | null;
-      }>();
-      if (Array.isArray(ativosRes?.itens)) {
-        for (const a of ativosRes.itens) {
-          map.set(a.id_conteudo, {
-            ativo: a.ativo,
-            op_id: a.id,
-            data_disponivel: a.data_disponivel || null,
-            data_entrega_limite: a.data_entrega_limite || null,
-            duracao_minutos: a.duracao_minutos ?? null,
-            tentativas_permitidas: a.tentativas_permitidas ?? null,
-            pontuacao_maxima: a.pontuacao_maxima ?? null,
-          });
-        }
-      }
-      ativosMap.value = map;
-
-      // Carrega conteúdos do painel direito
-      await fetchConteudosRepositorio();
+      estrutura.value = await $fetch("/api/programacao_atividades/curriculo", {
+        params: { id_programa: prog.id, id_entidade },
+      });
     } catch (e: any) {
       deps.toast.showToast(e?.message || "Erro ao carregar currículo", { type: "error" });
     } finally {
@@ -381,286 +371,203 @@ export function useProgAtividadesCurriculo(deps: {
     }
   }
 
-  // ── Fetch conteúdos (painel direito) ───────────────────
-  async function fetchConteudosRepositorio() {
-    loadingConteudos.value = true;
-    try {
-      const id_entidade = await deps.garantirEntidade();
-      const params: any = { id_entidade, page: 1, limit: 200 };
-      if (busca.value) params.busca = busca.value;
-      if (filtroTipo.value) params.tipo = filtroTipo.value;
-      if (filtroMeus.value) params.criado_por = store.user_expandido_id;
-
-      const res = (await $fetch("/api/programacao_atividades/conteudos", { params })) as any;
-      const itens = Array.isArray(res?.itens) ? res.itens : [];
-
-      conteudosDisponiveis.value = itens.map((c: any) => {
-        const at = ativosMap.value.get(c.id);
-        const associado = !!at?.op_id;
-        return {
-          id: c.id,
-          titulo: c.titulo,
-          tipo: c.tipo,
-          descricao: c.descricao,
-          blocos: c.blocos,
-          // Sem linha = herdado = visível (aluno vê)
-          ativo: associado ? !!at!.ativo : true,
-          op_id: associado ? at!.op_id : null,
-          data_disponivel: at?.data_disponivel ?? null,
-          data_entrega_limite: at?.data_entrega_limite ?? null,
-          duracao_minutos: at?.duracao_minutos ?? null,
-          tentativas_permitidas: at?.tentativas_permitidas ?? null,
-          pontuacao_maxima: at?.pontuacao_maxima ?? null,
-          criado_por_nome: c.criado_por_nome,
-          id_arquivo: c.id_arquivo,
-          url: c.url,
-          criado_em: c.criado_em,
-        };
-      });
-    } catch (e: any) {
-      deps.toast.showToast(e?.message || "Erro ao carregar conteúdos", { type: "error" });
-    } finally {
-      loadingConteudos.value = false;
-    }
-  }
-
-  // ── Toggle ativo (na árvore) ───────────────────────────
+  // ── Mutação na árvore ─────────────────────────────────
   async function toggleAtivo(item: ConteudoItem, escopoKey: string) {
     if (!programaSelecionado.value) return;
     try {
       const id_entidade = await deps.garantirEntidade();
-      // Escopo da seção da árvore (usado para ciclo/aula)
-      const escopoAntigo = selectedScopeKey.value;
-      selectedScopeKey.value = escopoKey;
-      try {
-        if (item.herdado && item.ativo) {
-          const body = montarBodyOperacional({
-            id_entidade, id_conteudo: item.id_conteudo,
-            ativo: false, usuario_id: store.user_expandido_id,
-          });
-          await $fetch("/api/programacao_atividades/curriculo", {
-            method: "POST", body,
-          });
-        } else if (!item.herdado && !item.ativo) {
-          const body = montarBodyOperacional({
-            id_entidade, id_conteudo: item.id_conteudo,
-            ativo: true, usuario_id: store.user_expandido_id,
-          });
-          await $fetch("/api/programacao_atividades/curriculo", {
-            method: "POST", body,
-          });
-        } else if (!item.herdado && item.op_id) {
-          await $fetch("/api/programacao_atividades/curriculo", {
-            method: "DELETE",
-            body: { id: item.op_id, id_entidade },
-          });
-        }
-      } finally {
-        selectedScopeKey.value = escopoAntigo;
-      }
-      // Recarrega conteúdos deste escopo
-      conteudosMap.value.delete(escopoKey);
-      await carregarConteudosSeNecessario(escopoKey);
-    } catch (e: any) {
-      deps.toast.showToast(e.message || "Erro ao alterar", { type: "error" });
-    }
-  }
+      let painelPatch: Partial<ConteudoPanel> | null = null;
 
-  // ── Radio: associa/desassocia (cria/remove linha no operacional) ──
-  async function toggleAssociacaoPainel(conteudo: ConteudoPanel) {
-    if (!programaSelecionado.value) return;
-    // Regra: associação exige escopo alvo — sem escopo não há "com o quê" associar
-    if (!selectedScopeKey.value) {
-      deps.toast.showToast("Selecione primeiro o escopo — botão 'Adicionar' na árvore", { type: "error" });
-      return;
-    }
-    try {
-      const id_entidade = await deps.garantirEntidade();
-
-      if (conteudo.op_id) {
-        // Desassocia: remove a linha (volta à herança = ativo)
+      if (item.herdado && item.ativo) {
+        const res = (await $fetch("/api/programacao_atividades/curriculo", {
+          method: "POST",
+          body: montarBodyOperacional({
+            id_entidade, id_conteudo: item.id_conteudo, ativo: false,
+            usuario_id: store.user_expandido_id,
+          }, escopoKey),
+        })) as any;
+        if (!res?.id) throw new Error(res?.message || "Não foi possível ocultar o conteúdo");
+        painelPatch = { op_id: res.id, ativo: false };
+      } else if (!item.herdado && !item.ativo) {
+        const res = (await $fetch("/api/programacao_atividades/curriculo", {
+          method: "POST",
+          body: montarBodyOperacional({
+            id_entidade, id_conteudo: item.id_conteudo, ativo: true,
+            usuario_id: store.user_expandido_id,
+          }, escopoKey),
+        })) as any;
+        if (!res?.id) throw new Error(res?.message || "Não foi possível mostrar o conteúdo");
+        painelPatch = { op_id: res.id, ativo: true };
+      } else if (!item.herdado && item.op_id) {
         await $fetch("/api/programacao_atividades/curriculo", {
-          method: "DELETE",
-          body: { id: conteudo.op_id, id_entidade },
+          method: "DELETE", body: { id: item.op_id, id_entidade },
         });
-        conteudo.op_id = null;
-        conteudo.ativo = true;
-        ativosMap.value.delete(conteudo.id);
-        deps.toast.showToast("Associação removida", { type: "success" });
-      } else {
-        // Associa: cria linha ativa
-        const body = montarBodyOperacional({
-          id_entidade, id_conteudo: conteudo.id,
-          ativo: true, usuario_id: store.user_expandido_id,
-        });
-        const res = (await $fetch("/api/programacao_atividades/curriculo", {
-          method: "POST", body,
-        })) as any;
-        conteudo.op_id = res?.id;
-        conteudo.ativo = true;
-        if (res?.id) ativosMap.value.set(conteudo.id, { ativo: true, op_id: res.id });
-        deps.toast.showToast("Conteúdo associado!", { type: "success" });
+        painelPatch = { op_id: null, ativo: true };
       }
-      selectedScopeKey.value = null;
+
+      if (painelPatch && selectedScopeKey.value === escopoKey) {
+        atualizarConteudoNoPainel(item.id_conteudo, painelPatch);
+      }
+      await recarregarArvoreDoEscopo(escopoKey);
     } catch (e: any) {
-      deps.toast.showToast(e.message || "Erro ao alterar", { type: "error" });
+      deps.toast.showToast(e?.message || "Erro ao alterar", { type: "error" });
     }
   }
 
-  // ── Toggle: só muda visibilidade (ativo) — aluno vê ou não ──
-  async function toggleAtivoPainel(conteudo: ConteudoPanel) {
-    if (!programaSelecionado.value) return;
-    // Sem escopo alvo não há onde aplicar a linha (evita fallback silencioso p/ programa)
-    if (!selectedScopeKey.value) {
-      deps.toast.showToast("Selecione primeiro o escopo — botão 'Adicionar' na árvore", { type: "error" });
-      return;
-    }
-    try {
-      const id_entidade = await deps.garantirEntidade();
-
-      if (conteudo.op_id) {
-        // Linha existe: upsert com ativo invertido
-        const body = montarBodyOperacional({
-          id_entidade, id_conteudo: conteudo.id,
-          ativo: !conteudo.ativo, usuario_id: store.user_expandido_id,
-        });
-        const res = (await $fetch("/api/programacao_atividades/curriculo", {
-          method: "POST", body,
-        })) as any;
-        conteudo.ativo = !conteudo.ativo;
-        if (res?.id) ativosMap.value.set(conteudo.id, { ativo: conteudo.ativo, op_id: res.id });
-      } else if (conteudo.ativo) {
-        // Herdado ativo → desliga: cria linha com ativo:false (override)
-        const body = montarBodyOperacional({
-          id_entidade, id_conteudo: conteudo.id,
-          ativo: false, usuario_id: store.user_expandido_id,
-        });
-        const res = (await $fetch("/api/programacao_atividades/curriculo", {
-          method: "POST", body,
-        })) as any;
-        conteudo.op_id = res?.id;
-        conteudo.ativo = false;
-        if (res?.id) ativosMap.value.set(conteudo.id, { ativo: false, op_id: res.id });
-      }
-      selectedScopeKey.value = null;
-    } catch (e: any) {
-      deps.toast.showToast(e.message || "Erro ao alterar", { type: "error" });
-    }
-  }
-
-  // ── Toggle destaque ────────────────────────────────────
   async function toggleDestaque(item: ConteudoItem, escopoKey: string) {
     if (!programaSelecionado.value) return;
     try {
       const id_entidade = await deps.garantirEntidade();
-      await $fetch("/api/programacao_atividades/curriculo", {
+      const res = (await $fetch("/api/programacao_atividades/curriculo", {
         method: "POST",
-        body: {
-          id_entidade, id_conteudo: item.id_conteudo,
-          id_programa: programaSelecionado.value.id,
-          destaque: !item.destaque, ativo: item.ativo,
+        body: montarBodyOperacional({
+          id_entidade,
+          id_conteudo: item.id_conteudo,
+          destaque: !item.destaque,
+          ativo: item.ativo,
           usuario_id: store.user_expandido_id,
-        },
-      });
-      // Recarrega
-      conteudosMap.value.delete(escopoKey);
-      await carregarConteudosSeNecessario(escopoKey);
+        }, escopoKey),
+      })) as any;
+      if (!res?.id) throw new Error(res?.message || "Não foi possível alterar o destaque");
+
+      if (selectedScopeKey.value === escopoKey) {
+        atualizarConteudoNoPainel(item.id_conteudo, { op_id: res.id });
+      }
+      await recarregarArvoreDoEscopo(escopoKey);
     } catch (e: any) {
-      deps.toast.showToast(e.message || "Erro ao destacar", { type: "error" });
+      deps.toast.showToast(e?.message || "Erro ao destacar", { type: "error" });
     }
   }
 
-  // ── Conteúdos filtrados (painel direito) ──────────────
-  const conteudosExibidos = computed(() => {
-    return conteudosDisponiveis.value.filter((c) => {
-      if (busca.value) {
-        const q = busca.value.toLowerCase();
-        if (!c.titulo.toLowerCase().includes(q) && !(c.descricao || "").toLowerCase().includes(q)) return false;
+  // ── Mutação no navegador ──────────────────────────────
+  async function toggleAssociacaoPainel(conteudo: ConteudoPanel) {
+    const scopeKey = selectedScopeKey.value;
+    if (!scopeKey || !programaSelecionado.value) {
+      deps.toast.showToast("Selecione primeiro o escopo — botão 'Adicionar' na árvore", { type: "error" });
+      return;
+    }
+
+    try {
+      const id_entidade = await deps.garantirEntidade();
+      if (conteudo.op_id) {
+        await $fetch("/api/programacao_atividades/curriculo", {
+          method: "DELETE", body: { id: conteudo.op_id, id_entidade },
+        });
+        atualizarConteudoNoPainel(conteudo.id, { op_id: null, ativo: true });
+        deps.toast.showToast("Associação removida", { type: "success" });
+      } else {
+        const res = (await $fetch("/api/programacao_atividades/curriculo", {
+          method: "POST",
+          body: montarBodyOperacional({
+            id_entidade, id_conteudo: conteudo.id, ativo: true,
+            usuario_id: store.user_expandido_id,
+          }, scopeKey),
+        })) as any;
+        if (!res?.id) throw new Error(res?.message || "Não foi possível associar o conteúdo");
+        atualizarConteudoNoPainel(conteudo.id, { op_id: res.id, ativo: true });
+        deps.toast.showToast("Conteúdo associado!", { type: "success" });
       }
-      if (filtroEstado.value) {
-        const associado = !!c.op_id;
-        if (filtroEstado.value === "associados" && !associado) return false;
-        if (filtroEstado.value === "livres" && associado) return false;
-        if (filtroEstado.value === "ocultos" && !(associado && !c.ativo)) return false;
-      }
-      return true;
-    });
-  });
+
+      // O painel conserva o catálogo em memória; só a lista curta da árvore é recarregada.
+      await recarregarArvoreDoEscopo(scopeKey);
+    } catch (e: any) {
+      deps.toast.showToast(e?.message || "Erro ao alterar", { type: "error" });
+    }
+  }
+
+  async function toggleAtivoPainel(conteudo: ConteudoPanel) {
+    const scopeKey = selectedScopeKey.value;
+    if (!scopeKey || !programaSelecionado.value) {
+      deps.toast.showToast("Selecione primeiro o escopo — botão 'Adicionar' na árvore", { type: "error" });
+      return;
+    }
+
+    try {
+      const id_entidade = await deps.garantirEntidade();
+      const proximoAtivo = !conteudo.ativo;
+      const res = (await $fetch("/api/programacao_atividades/curriculo", {
+        method: "POST",
+        body: montarBodyOperacional({
+          id_entidade, id_conteudo: conteudo.id, ativo: proximoAtivo,
+          usuario_id: store.user_expandido_id,
+        }, scopeKey),
+      })) as any;
+      if (!res?.id) throw new Error(res?.message || "Não foi possível alterar a visibilidade");
+
+      atualizarConteudoNoPainel(conteudo.id, { op_id: res.id, ativo: proximoAtivo });
+      await recarregarArvoreDoEscopo(scopeKey);
+    } catch (e: any) {
+      deps.toast.showToast(e?.message || "Erro ao alterar", { type: "error" });
+    }
+  }
+
+  // ── Filtros locais (sem novas chamadas) ───────────────
+  const conteudosExibidos = computed(() => conteudosDisponiveis.value.filter((conteudo) => {
+    if (busca.value) {
+      const termo = busca.value.toLowerCase();
+      if (!conteudo.titulo.toLowerCase().includes(termo)
+        && !(conteudo.descricao || "").toLowerCase().includes(termo)) return false;
+    }
+    if (filtroTipo.value && conteudo.tipo !== filtroTipo.value) return false;
+    if (filtroMeus.value && conteudo.criado_por !== store.user_expandido_id) return false;
+    if (filtroEstado.value === "associados" && !conteudo.op_id) return false;
+    if (filtroEstado.value === "livres" && conteudo.op_id) return false;
+    if (filtroEstado.value === "ocultos" && !(conteudo.op_id && !conteudo.ativo)) return false;
+    return true;
+  }));
 
   function toggleFiltroEstado(estado: string) {
     filtroEstado.value = filtroEstado.value === estado ? null : estado;
   }
 
-  // ── Resumo do programa (dashboard) ─────────────────────
   const resumoCurriculo = computed(() => {
-    const e = estrutura.value;
-    const repos = conteudosDisponiveis.value;
-    const associados = repos.filter((c) => !!c.op_id).length;
-    const ocultos = repos.filter((c) => !!c.op_id && !c.ativo).length;
+    const repositorio = conteudosDisponiveis.value;
+    const associados = repositorio.filter((conteudo) => !!conteudo.op_id).length;
+    const ocultos = repositorio.filter((conteudo) => !!conteudo.op_id && !conteudo.ativo).length;
     return {
       escopos: {
-        componentes: (e?.componentes || []).length,
-        modulos: (e?.modulos || []).length,
-        ciclos: (e?.ciclos || []).length,
-        aulas: (e?.aulas || []).length,
+        componentes: (estrutura.value?.componentes || []).length,
+        modulos: (estrutura.value?.modulos || []).length,
+        ciclos: (estrutura.value?.ciclos || []).length,
+        aulas: (estrutura.value?.aulas || []).length,
       },
       repositorio: {
-        total: repos.length,
+        total: repositorio.length,
         associados,
         ocultos,
-        livres: repos.length - associados,
+        livres: repositorio.length - associados,
       },
     };
   });
 
-  // ── Helpers para o template ────────────────────────────
   function aulasDoCiclo(idCiclo: string): any[] {
-    if (!estrutura.value?.aulas) return [];
-    return estrutura.value.aulas.filter((a: any) => a.id_ciclo === idCiclo);
+    return estrutura.value?.aulas?.filter((aula: any) => aula.id_ciclo === idCiclo) || [];
   }
 
   function aulasDoModulo(idModulo: string): any[] {
-    if (!estrutura.value?.ciclos || !estrutura.value?.aulas) return [];
-    const ciclosDoMod = estrutura.value.ciclos.filter((c: any) => c.id_modulo === idModulo);
-    const idsCiclos = new Set(ciclosDoMod.map((c: any) => c.id));
-    return estrutura.value.aulas.filter((a: any) => idsCiclos.has(a.id_ciclo));
+    const ciclos = estrutura.value?.ciclos || [];
+    const idsCiclos = new Set(ciclos.filter((ciclo: any) => ciclo.id_modulo === idModulo).map((ciclo: any) => ciclo.id));
+    return estrutura.value?.aulas?.filter((aula: any) => idsCiclos.has(aula.id_ciclo)) || [];
   }
 
   function ciclosDoModulo(idModulo: string): any[] {
-    if (!estrutura.value?.ciclos) return [];
-    return estrutura.value.ciclos.filter((c: any) => c.id_modulo === idModulo);
+    return estrutura.value?.ciclos?.filter((ciclo: any) => ciclo.id_modulo === idModulo) || [];
   }
 
   return {
-    // Programa
     programas, loadingProgramas, programaSelecionado,
     fetchProgramas, selecionarPrograma,
-
-    // Estrutura
     estrutura, loadingEstrutura,
-
-    // Lazy contents
-    toggleSection, isExpanded,
-    getConteudos, isLoadingConteudos,
+    toggleSection, isExpanded, getConteudos, isLoadingConteudos,
     carregarConteudosSeNecessario,
-
-    // Toggles (árvore)
     toggleAtivo, toggleDestaque,
-
-    // Escopo alvo
     selectedScopeKey, definirEscopoAlvo,
-
-    // Painel direito
     busca, filtroTipo, filtroMeus, filtroEstado, toggleFiltroEstado,
     conteudosDisponiveis, conteudosExibidos, loadingConteudos,
-    fetchConteudosRepositorio, toggleAtivoPainel, toggleAssociacaoPainel,
+    toggleAtivoPainel, toggleAssociacaoPainel,
     resumoCurriculo,
-
-    // Modal de timing
     showModalTiming, timingAlvo, formTiming, savingTiming,
     abrirConfigTiming, salvarTiming, limparTiming,
-
-    // Helpers
     aulasDoCiclo, aulasDoModulo, ciclosDoModulo,
     pastaAberta, togglePasta, irParaPasta,
   };

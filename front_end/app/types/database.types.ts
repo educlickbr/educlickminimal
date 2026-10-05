@@ -3611,11 +3611,14 @@ export type Database = {
           destaque: boolean | null
           duracao_minutos: number | null
           id: string
+          id_area: string | null
           id_calendario: string | null
           id_ciclo: string | null
+          id_componente: string | null
           id_conteudo: string
           id_distribuicao_origem: string | null
           id_entidade: string
+          id_modulo: string | null
           id_programa: string | null
           modificado_em: string | null
           modificado_por: string | null
@@ -3631,11 +3634,14 @@ export type Database = {
           destaque?: boolean | null
           duracao_minutos?: number | null
           id?: string
+          id_area?: string | null
           id_calendario?: string | null
           id_ciclo?: string | null
+          id_componente?: string | null
           id_conteudo: string
           id_distribuicao_origem?: string | null
           id_entidade: string
+          id_modulo?: string | null
           id_programa?: string | null
           modificado_em?: string | null
           modificado_por?: string | null
@@ -3651,11 +3657,14 @@ export type Database = {
           destaque?: boolean | null
           duracao_minutos?: number | null
           id?: string
+          id_area?: string | null
           id_calendario?: string | null
           id_ciclo?: string | null
+          id_componente?: string | null
           id_conteudo?: string
           id_distribuicao_origem?: string | null
           id_entidade?: string
+          id_modulo?: string | null
           id_programa?: string | null
           modificado_em?: string | null
           modificado_por?: string | null
@@ -3663,6 +3672,13 @@ export type Database = {
           tentativas_permitidas?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lms_conteudo_operacional_id_area_fkey"
+            columns: ["id_area"]
+            isOneToOne: false
+            referencedRelation: "aca_area"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lms_conteudo_operacional_criado_por_fkey"
             columns: ["criado_por"]
@@ -3685,6 +3701,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "lms_conteudo_operacional_id_componente_fkey"
+            columns: ["id_componente"]
+            isOneToOne: false
+            referencedRelation: "aca_componente"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "lms_conteudo_operacional_id_conteudo_fkey"
             columns: ["id_conteudo"]
             isOneToOne: false
@@ -3703,6 +3726,13 @@ export type Database = {
             columns: ["id_entidade"]
             isOneToOne: false
             referencedRelation: "user_entidades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_conteudo_operacional_id_modulo_fkey"
+            columns: ["id_modulo"]
+            isOneToOne: false
+            referencedRelation: "aca_modulo"
             referencedColumns: ["id"]
           },
           {
@@ -5968,6 +5998,7 @@ export type Database = {
       }
       lms_get_curriculo_conteudos: {
         Args: {
+          p_incluir_catalogo?: boolean
           p_escopo_id: string
           p_escopo_tipo: string
           p_id_entidade: string
@@ -6121,10 +6152,13 @@ export type Database = {
           p_data_entrega_limite?: string
           p_destaque?: boolean
           p_duracao_minutos?: number
+          p_id_area?: string
           p_id_calendario?: string
           p_id_ciclo?: string
+          p_id_componente?: string
           p_id_conteudo: string
           p_id_entidade: string
+          p_id_modulo?: string
           p_id_programa?: string
           p_pontuacao_maxima?: number
           p_tentativas_permitidas?: number

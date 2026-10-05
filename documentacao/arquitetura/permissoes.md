@@ -1,7 +1,7 @@
 # Arquitetura de Permissões — EduClick
 
 > **Status:** design decidido (2026-08-21) — pronto para a Fase A do plano de multientidade
-> **Fonte da decisão:** `documentacao/planos/plano-multientidade-permissoes.md`
+> **Fonte da decisão:** `documentacao/planos/a_fazer/plano-multientidade-permissoes.md`
 > **Escopo:** permissões por **entidade × papel × produto** para controlar sessão, menu, telas, primeira página e branding por domínio.
 
 ---

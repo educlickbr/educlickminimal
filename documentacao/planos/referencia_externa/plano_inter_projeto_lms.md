@@ -4,7 +4,7 @@
 >
 > **Como usar:** siga as fases da seção [11. Passo a passo de recriação](#11-passo-a-passo-de-recriação) na ordem. As seções 4–10 são a especificação; a seção 12 mostra como estender com novas features (ex.: pré-requisitos de conteúdo).
 >
-> **Fonte:** implementação real em `supabase/migrations/`, `front_end/server/api/`, `front_end/app/` + docs `documentacao/paginas/{programacao_atividades,minhas_atividades,portal-docente}.md` e `documentacao/planos/arquitetura_lms.md`.
+> **Fonte:** implementação real em `supabase/migrations/`, `front_end/server/api/`, `front_end/app/` + docs `documentacao/paginas/{programacao_atividades,minhas_atividades,portal-docente}.md` e `documentacao/arquitetura/lms.md`.
 
 ---
 
@@ -60,7 +60,7 @@ O LMS **não cria** a estrutura acadêmica — ela vem do módulo acadêmico:
 
 > O nome do tenant no EduClick é **`user_entidades`** (não `empresa`). Adaptar ao equivalente do outro projeto.
 >
-> **Dinâmica de sub-abas da Distribuição (essencial):** ver `documentacao/planos/padrao_subabas_distribuicao.md` — as abas são independentes e a associação é direta a qualquer item; não confundir com navegação em cascata.
+> **Dinâmica de sub-abas da Distribuição (essencial):** ver `padrao_subabas_distribuicao.md` — as abas são independentes e a associação é direta a qualquer item; não confundir com navegação em cascata.
 
 ---
 
@@ -205,7 +205,7 @@ Pipeline: **Orquestrador (página) → Componente de página → Composable → 
 - **Layout `base.vue`:** header (pageTitle) + `<slot/>` + `<aside #sidebar>` (dashboard/painel da página). Mobile: drawers (overlay + painel slide da direita) para navegação/filtros. **Dashboards do quadrante direito — receitas completas:** `padrao_dashboard_curriculo.md` (admin — filtro por estado do currículo), `padrao_dashboard_aluno.md` (filtros por tipo/status/escopo) e `padrao_dashboard_docente.md` (resumo + progresso). Nota: nas tabs **Repositório/Distribuição** a sidebar é um card informativo simples ("Programação de Atividades" com instruções das 3 tabs) — sem dashboard interativa.
 - **FullPageMenu:** overlay com **ilhas** (Acadêmico violeta, Comercial esmeralda, Portal do Aluno sky, Portal Docente âmbar) e botões que navegam.
 - **Sessão:** store `useAppStore` (`initSession` → `/api/me`), `user_expandido_id`, `entidades`, `hash_base` (assinatura de storage). Helpers `lms_user_expandido_id()`/`eh_gestor` no banco.
-- **Animação de navegação (refinamento opcional):** transições "painel desliza" (YAZI/Niri) entre níveis de lista→detalhe. **Receita completa ponto a ponto em `documentacao/planos/padrao_animacao_yazi_niri.md`** (código exato: computed de classes, CSS de transição, easing, gatilhos, mobile).
+- **Animação de navegação (refinamento opcional):** transições "painel desliza" (YAZI/Niri) entre níveis de lista→detalhe. **Receita completa ponto a ponto em `padrao_animacao_yazi_niri.md`** (código exato: computed de classes, CSS de transição, easing, gatilhos, mobile).
 
 ---
 
@@ -268,7 +268,7 @@ O modelo foi desenhado para crescer sem quebrar. Padrão geral para uma feature 
 - Banco de questões reutilizável (hoje o editor de avaliação faz REPLACE e apaga tudo).
 - Notificações in-app ("avaliação disponível", "prazo em 24h", "entrega corrigida").
 - Relatórios por entidade (% conclusão via `lms_progresso_aluno`, notas via submissões) — **depende de permissões por entidade**.
-- Permissões multientidade (menu/telas por entidade × papel) — ver `documentacao/planos/plano-multientidade-permissoes.md`.
+- Permissões multientidade (menu/telas por entidade × papel) — ver `documentacao/planos/a_fazer/plano-multientidade-permissoes.md`.
 
 ---
 
