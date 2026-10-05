@@ -13,7 +13,7 @@
 import { defineAsyncComponent, type Component } from "vue";
 
 type TenantName = "Institucional" | "Ensi";
-type ComponentName =
+export type ComponentName =
     | "LandingHeader"
     | "LandingHero"
     | "LandingDor"

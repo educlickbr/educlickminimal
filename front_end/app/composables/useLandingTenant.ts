@@ -1,6 +1,5 @@
-import { type Component } from "vue";
-import type { ComponentName } from "~/components/landing/registry";
-import { getLandingComponent } from "~/components/landing/registry";
+import type { Component } from "vue";
+import { getLandingComponent, type ComponentName } from "../components/landing/registry";
 
 /**
  * Resolve o tenant da landing page a partir do hostname.

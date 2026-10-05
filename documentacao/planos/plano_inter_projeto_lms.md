@@ -177,6 +177,7 @@ lms_status_submissao       -- 'em_andamento' | 'entregue' (avaliação: + 'final
 - `lms_list_entregas_conteudo(p_id_conteudo, p_id_entidade, p_id_usuario)` → entregas por aluno (UNION atividade+avaliação, `aluno_nome`, nota, comentário, tentativa, corrigido_em, corrigido_por_nome).
 - `lms_get_entrega_detalhe(p_id_submissao, p_tipo, p_id_entidade, p_id_usuario)` → entrega + **gabarito** (correta + escolhida) p/ docente.
 - `lms_salvar_correcao(p_tipo, p_id_submissao, p_nota, p_comentario, p_id_entidade, p_id_usuario)` → **só o criador**; grava `corrigido_por`/`corrigido_em`.
+- **Fluxo completo do Portal Docente (3 níveis, payloads, gabarito, auditoria) em `padrao_portal_docente_entregas.md`.**
 
 > **Assinatura exata importa** — em Postgres, parâmetro com DEFAULT seguido de parâmetros sem DEFAULT é erro; e `CREATE OR REPLACE` não troca assinatura. Ao refazer, decida a assinatura final de uma vez (a história deste projeto teve overloads órfãos por isso).
 

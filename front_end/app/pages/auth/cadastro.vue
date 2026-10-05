@@ -69,14 +69,14 @@ const handleSignup = async () => {
         if (!authData.user) throw new Error('Falha ao criar usuário')
 
         // 2) Fazer upsert em user_expandido usando a função
-        const { data: upsertData, error: upsertError } = await supabase
+        const { data: upsertData, error: upsertError } = await (supabase as any)
             .rpc('nxt_upsert_user_expandido', {
                 p_user_id: authData.user.id,
                 p_nome: nome.value,
                 p_sobrenome: sobrenome.value,
                 p_email: email.value,
                 p_papel_id: 'd19ba89e-9a15-4194-929a-db47695fb2be' // Ajuste este ID de papel conforme sua estrutura
-            } as any)
+            })
 
         if (upsertError) throw upsertError
 

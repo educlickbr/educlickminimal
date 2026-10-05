@@ -1,4 +1,9 @@
 {
+  "private": true,
+  "scripts": {
+    "db:type": "env SUPABASE_ACCESS_TOKEN=\"${SUPABASE_ACCESS_TOKEN:-$SUPABASE_EDK_ACCESS_TOKEN}\" supabase gen types typescript --project-id uipgyvlmcvvvadguyjsa > front_end/app/types/database.types.ts",
+    "db:typecheck": "npm run db:type && npm --prefix front_end run typecheck"
+  },
   "devDependencies": {
     "supabase": "^2.72.8"
   },

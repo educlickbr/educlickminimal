@@ -40,11 +40,9 @@ const getValue = (option: any): any => {
 };
 
 const selectedLabel = computed(() => {
-	if (!props.modelValue) return props.placeholder || "Selecione...";
 	const selected = props.options.find((o) => getValue(o) === props.modelValue);
-	return selected
-		? getSelectedLabelRaw(selected)
-		: props.placeholder || "Selecione...";
+	if (selected) return getSelectedLabelRaw(selected);
+	return props.placeholder || "Selecione...";
 });
 
 const toggle = () => {

@@ -125,9 +125,9 @@
                             <div v-if="c.blocos && c.blocos.length > 0" class="assoc-blocos">
                                 <span v-for="b in c.blocos" :key="b.id" class="assoc-bloco-tag">{{ b.titulo }}</span>
                             </div>
-                        </div>
                             <span v-if="c.criado_por_nome" class="assoc-autor">{{ c.criado_por_nome }}</span>
                             <span v-if="c.criado_em" class="assoc-data">{{ new Date(c.criado_em).toLocaleDateString() }}</span>
+                        </div>
                     </div>
                 </template>
             </div>
@@ -177,7 +177,7 @@ onMounted(() => ctx.fetchEscopos());
 </script>
 
 <style scoped>
-/* ── Sub-abas ──────────────────────────────── */
+/* ── Sub-abas ─────────────────────────────────────────────────── */
 .escopo-btn {
     padding: 6px 16px; border-radius: 8px;
     font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
@@ -188,7 +188,7 @@ onMounted(() => ctx.fetchEscopos());
 .escopo-btn:hover { color: rgba(255,255,255,0.6); }
 .escopo-btn--active { background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.3); color: #a78bfa; }
 
-/* ── Busca ─────────────────────────────────── */
+/* ── Busca ─────────────────────────────────────────────────────── */
 .busca-input {
     width: 100%; padding: 8px 12px 8px 32px; border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.08);
@@ -199,7 +199,7 @@ onMounted(() => ctx.fetchEscopos());
 .busca-input:focus { border-color: rgba(139,92,246,0.35); }
 .busca-input::placeholder { color: rgba(255,255,255,0.2); }
 
-/* ── Filtro tipo (cores) ───────────────────── */
+/* ── Filtro tipo (cores) ───────────────────────── */
 .filtro-chip {
     padding: 5px 12px; border-radius: 7px;
     font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
@@ -226,7 +226,7 @@ onMounted(() => ctx.fetchEscopos());
 .toggle-btn:hover { color: rgba(255,255,255,0.5); }
 .toggle-btn--on { background: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.3); color: #a78bfa; }
 
-/* ── Item do escopo ────────────────────────── */
+/* ── Item do escopo ────────────────────────────────────────── */
 .escopo-item-btn {
     display: flex; align-items: center; gap: 10px;
     padding: 9px 12px; border-radius: 10px;
@@ -247,7 +247,7 @@ onMounted(() => ctx.fetchEscopos());
 .escopo-item-nome { font-size: 12px; font-weight: 700; color: rgba(232,230,240,0.8); display: block; }
 .escopo-item-desc { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.25); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* ── Conteúdos ─────────────────────────────── */
+/* ── Conteúdos ─────────────────────────────────────────────── */
 .assoc-row {
     display: flex; align-items: center; gap: 10px;
     padding: 9px 12px; border-radius: 10px;

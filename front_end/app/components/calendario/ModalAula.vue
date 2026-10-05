@@ -34,24 +34,24 @@
 
             <!-- Content -->
             <div class="p-6 flex flex-col gap-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                <!-- Componente Curricular -->
+                <!-- Componente Curricular (Enriquecido com Busca & Carga Horária) -->
                 <div class="flex flex-col gap-1.5">
                     <label class="text-[10px] font-black text-secondary/60 uppercase tracking-widest">
-                        Componente Curricular
+                        Componente Curricular (Módulo do Ciclo)
                     </label>
-                    <select
+                    <BaseSelect
                         v-model="form.id_componente"
-                        @change="onComponenteChange"
-                        class="w-full px-3.5 py-2.5 rounded-xl border border-field-border bg-field-bg text-xs font-bold text-field-text outline-none focus:border-primary/50"
-                    >
-                        <option :value="null">— Nenhum componente atribuído —</option>
-                        <option v-for="c in componentes" :key="c.id" :value="c.id">
-                            {{ c.nome_componente }} ({{ c.carga_horaria || 0 }}h)
-                        </option>
-                    </select>
+                        :options="componentesSelectOptions"
+                        labelKey="label"
+                        valueKey="value"
+                        :searchable="true"
+                        searchPlaceholder="Buscar componente..."
+                        placeholder="— Selecione o componente —"
+                        @update:modelValue="onComponenteChange"
+                    />
                 </div>
 
-                <!-- Professor / Docente -->
+                <!-- Professor / Docente (Filtrado por Docentes Atribuídos ao Componente) -->
                 <div class="flex flex-col gap-1.5">
                     <div class="flex items-center justify-between">
                         <label class="text-[10px] font-black text-secondary/60 uppercase tracking-widest">
@@ -65,17 +65,15 @@
                         </span>
                     </div>
 
-                    <select
+                    <BaseSelect
                         v-model="form.id_docente_override"
-                        class="w-full px-3.5 py-2.5 rounded-xl border border-field-border bg-field-bg text-xs font-bold text-field-text outline-none focus:border-primary/50"
-                    >
-                        <option :value="null">
-                            {{ docenteAutoNome ? `Padrao (${docenteAutoNome})` : '— Selecione um Professor —' }}
-                        </option>
-                        <option v-for="d in docentes" :key="d.id" :value="d.id">
-                            {{ d.nome }} ({{ d.email }})
-                        </option>
-                    </select>
+                        :options="docentesSelectOptions"
+                        labelKey="label"
+                        valueKey="value"
+                        :searchable="true"
+                        searchPlaceholder="Buscar professor..."
+                        placeholder="— Selecione o professor —"
+                    />
                 </div>
 
                 <!-- Sub-turma / Dividir Aula (Turma A / B) -->
@@ -107,27 +105,27 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
                                 <label class="text-[9px] font-black text-secondary/60 uppercase">Componente Turma B</label>
-                                <select
+                                <BaseSelect
                                     v-model="divisaoForm.id_componente_b"
-                                    class="w-full mt-1 px-3 py-2 rounded-lg border border-field-border bg-field-bg text-xs font-bold text-field-text"
-                                >
-                                    <option :value="null">Mesmo da Turma A</option>
-                                    <option v-for="c in componentes" :key="'b_'+c.id" :value="c.id">
-                                        {{ c.nome_componente }}
-                                    </option>
-                                </select>
+                                    :options="componentesSelectOptions"
+                                    labelKey="label"
+                                    valueKey="value"
+                                    :searchable="true"
+                                    searchPlaceholder="Buscar componente..."
+                                    placeholder="Mesmo da Turma A"
+                                />
                             </div>
                             <div>
                                 <label class="text-[9px] font-black text-secondary/60 uppercase">Professor Turma B</label>
-                                <select
+                                <BaseSelect
                                     v-model="divisaoForm.id_docente_b"
-                                    class="w-full mt-1 px-3 py-2 rounded-lg border border-field-border bg-field-bg text-xs font-bold text-field-text"
-                                >
-                                    <option :value="null">Mesmo da Turma A</option>
-                                    <option v-for="d in docentes" :key="'b_'+d.id" :value="d.id">
-                                        {{ d.nome }}
-                                    </option>
-                                </select>
+                                    :options="docentesSelectOptions"
+                                    labelKey="label"
+                                    valueKey="value"
+                                    :searchable="true"
+                                    searchPlaceholder="Buscar professor..."
+                                    placeholder="Mesmo da Turma A"
+                                />
                             </div>
                         </div>
                         <button
@@ -142,7 +140,7 @@
                     </div>
                 </div>
 
-                <!-- Observação / Pauta -->
+                <!-- Observação / Plano da Aula -->
                 <div class="flex flex-col gap-1.5">
                     <label class="text-[10px] font-black text-secondary/60 uppercase tracking-widest">
                         Observações / Plano da Aula
@@ -157,24 +155,37 @@
             </div>
 
             <!-- Footer -->
-            <div class="ds-modal-footer">
-                <button
-                    @click="$emit('update:modelValue', false)"
-                    class="ds-btn-cancel"
-                >
-                    Fechar
-                </button>
-                <button
-                    @click="handleSave"
-                    :disabled="loading"
-                    class="ds-btn-save"
-                >
-                    <div
-                        v-if="loading"
-                        class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"
-                    ></div>
-                    <span>{{ loading ? "Salvar..." : "Salvar Alterações" }}</span>
-                </button>
+            <div class="ds-modal-footer flex items-center justify-between w-full">
+                <div>
+                    <button
+                        v-if="aulaData?.status !== 'cancelada' && onCancelarAula"
+                        type="button"
+                        @click="handleCancelar"
+                        class="px-3.5 py-2 rounded-xl text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/30 transition-all flex items-center gap-1.5"
+                    >
+                        <Icon name="ph:prohibit-bold" class="w-4 h-4" />
+                        <span>Cancelar Aula</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button
+                        @click="$emit('update:modelValue', false)"
+                        class="ds-btn-cancel"
+                    >
+                        Fechar
+                    </button>
+                    <button
+                        @click="handleSave"
+                        :disabled="loading"
+                        class="ds-btn-save"
+                    >
+                        <div
+                            v-if="loading"
+                            class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                        ></div>
+                        <span>{{ loading ? "Salvar..." : "Salvar Alterações" }}</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -183,6 +194,8 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from "vue";
 import { useToast } from "~/composables/useToast";
+import { useAppStore } from "~~/stores/app";
+import BaseSelect from "~/components/global/BaseSelect.vue";
 
 const props = defineProps<{
     modelValue: boolean;
@@ -190,6 +203,7 @@ const props = defineProps<{
     idEntidade: string | null;
     onSaveDetails?: (payload: any) => Promise<boolean>;
     onDividirAula?: (payload: any) => Promise<boolean>;
+    onCancelarAula?: (aula: any) => void;
 }>();
 
 const emit = defineEmits<{
@@ -218,17 +232,50 @@ const form = reactive({
     sub_turma: null as string | null,
 });
 
+const componentesSelectOptions = computed(() => {
+    return [
+        { value: null, label: "— Nenhum componente atribuído —" },
+        ...componentes.value.map((c: any) => ({
+            value: c.id,
+            label: c.label_enriquecido || c.nome_componente,
+        })),
+    ];
+});
+
 const docenteAutoNome = computed(() => {
     if (props.aulaData?.nome_docente && !props.aulaData?.is_docente_override) {
         return props.aulaData.nome_docente;
     }
     if (!form.id_componente) return "";
     const atr = atribuicoes.value.find(
-        (a: any) => a.id_modulo_componente === form.id_componente && a.tipo === "titular",
+        (a: any) => (a.id_componente === form.id_componente || a.id_modulo_componente === form.id_componente) && a.tipo === "titular",
     );
     if (!atr) return "";
     const doc = docentes.value.find((d: any) => d.id === atr.id_docente);
     return doc ? doc.nome : "";
+});
+
+const docentesSelectOptions = computed(() => {
+    const titularNome = docenteAutoNome.value;
+
+    const defaultLabel = titularNome
+        ? `Prof. Titular: ${titularNome} (Automático)`
+        : "— Selecione um Professor —";
+
+    const baseList: any[] = [{ value: null, label: defaultLabel }];
+
+    const substitutos: any[] = [];
+
+    docentes.value.forEach((d: any) => {
+        if (titularNome && d.nome === titularNome) return;
+
+        substitutos.push({
+            value: d.id,
+            label: `Substituto: ${d.nome}${d.email ? ' (' + d.email + ')' : ''}`,
+        });
+    });
+
+    return [...baseList, ...substitutos];
 });
 
 watch(
@@ -250,11 +297,16 @@ watch(
 );
 
 async function fetchOpcoes() {
-    if (!props.idEntidade) return;
+    const store = useAppStore();
+    const idEntidade =
+        props.idEntidade ||
+        (store as any).entidades?.[0]?.id ||
+        (store as any).company?.id;
+    if (!idEntidade) return;
     try {
         const res = (await $fetch("/api/programas/opcoes_aula", {
             params: {
-                id_entidade: props.idEntidade,
+                id_entidade: idEntidade,
                 id_ciclo: props.aulaData?.id_ciclo,
             },
         })) as any;
@@ -269,13 +321,12 @@ async function fetchOpcoes() {
 }
 
 function onComponenteChange() {
-    // Ao mudar o componente, se não houver override manual, tenta puxar o professor titular atribuído
     if (!form.id_docente_override && form.id_componente) {
         const atr = atribuicoes.value.find(
-            (a: any) => a.id_modulo_componente === form.id_componente && a.tipo === "titular",
+            (a: any) => (a.id_componente === form.id_componente || a.id_modulo_componente === form.id_componente) && a.tipo === "titular",
         );
         if (atr) {
-            form.id_docente_override = null; // Mantém fallback no automático
+            form.id_docente_override = null;
         }
     }
 }
@@ -283,6 +334,13 @@ function onComponenteChange() {
 function formatDate(dateStr?: string) {
     if (!dateStr) return "-";
     return dateStr.split("-").reverse().join("/");
+}
+
+function handleCancelar() {
+    if (props.aulaData && props.onCancelarAula) {
+        emit("update:modelValue", false);
+        props.onCancelarAula(props.aulaData);
+    }
 }
 
 async function handleSave() {
