@@ -27,6 +27,7 @@ export interface ConteudoItem {
   destaque: boolean;
   herdado: boolean;
   op_id?: string | null;
+  dist_id?: string | null;
   data_disponivel?: string | null;
   data_entrega_limite?: string | null;
   duracao_minutos?: number | null;
@@ -42,6 +43,7 @@ export interface ConteudoPanel {
   blocos?: { id: string; titulo: string }[];
   ativo: boolean;
   op_id?: string | null;
+  dist_id?: string | null;
   id_arquivo?: string | null;
   url?: string | null;
   data_disponivel?: string | null;
@@ -52,6 +54,8 @@ export interface ConteudoPanel {
   criado_por?: string | null;
   criado_por_nome?: string | null;
   criado_em?: string;
+  // Pertence ao escopo via distribuição (Blueprint), sem linha operacional própria.
+  herdado?: boolean;
 }
 
 type EscopoOperacional = {
@@ -137,7 +141,24 @@ export function useProgAtividadesCurriculo(deps: {
 
       // Não deixa uma resposta de escopo anterior substituir o navegador atual.
       if (incluirCatalogo && selectedScopeKey.value === key) {
-        conteudosDisponiveis.value = Array.isArray(res?.catalogo) ? res.catalogo : [];
+        // O mesmo retorno já traz a lista curta do escopo em `conteudos`.
+        // Marca no catálogo o que pertence ao escopo: operacional (op_id) OU
+        // distribuição (herdado). Sem isso, conteúdo herdado aparece na árvore
+        // mas fica desmarcado no navegador.
+        const escopoPorId = new Map<string, ConteudoItem>();
+        for (const item of conteudos as ConteudoItem[]) escopoPorId.set(item.id_conteudo, item);
+
+        const catalogo = Array.isArray(res?.catalogo) ? res.catalogo : [];
+        conteudosDisponiveis.value = catalogo.map((c: ConteudoPanel) => {
+          const itemEscopo = escopoPorId.get(c.id);
+          const herdado = c.herdado !== undefined ? c.herdado : (!c.op_id && !!itemEscopo?.herdado);
+          const dist_id = c.dist_id || itemEscopo?.dist_id || null;
+          return {
+            ...c,
+            herdado,
+            dist_id,
+          };
+        });
       }
     } catch (e: any) {
       deps.toast.showToast(e?.message || "Erro ao carregar conteúdos", { type: "error" });
@@ -245,7 +266,7 @@ export function useProgAtividadesCurriculo(deps: {
     );
   }
 
-  // ── Modal de timing ───────────────────────────────────
+  // ── Modal de timing ──────────────────────────────────
   const showModalTiming = ref(false);
   const timingAlvo = ref<ConteudoPanel | null>(null);
   const formTiming = reactive({
@@ -449,11 +470,22 @@ export function useProgAtividadesCurriculo(deps: {
 
     try {
       const id_entidade = await deps.garantirEntidade();
-      if (conteudo.op_id) {
-        await $fetch("/api/programacao_atividades/curriculo", {
-          method: "DELETE", body: { id: conteudo.op_id, id_entidade },
-        });
-        atualizarConteudoNoPainel(conteudo.id, { op_id: null, ativo: true });
+      const estaNoEscopo = !!conteudo.op_id || !!conteudo.herdado;
+
+      if (estaNoEscopo) {
+        // Se tem op_id, remove do operacional
+        if (conteudo.op_id) {
+          await $fetch("/api/programacao_atividades/curriculo", {
+            method: "DELETE", body: { id: conteudo.op_id, id_entidade },
+          });
+        }
+        // Se veio da distribuição (herdado), remove também da distribuição do escopo
+        if (conteudo.dist_id) {
+          await $fetch("/api/programacao_atividades/distribuicao", {
+            method: "DELETE", body: { id: conteudo.dist_id, id_entidade },
+          });
+        }
+        atualizarConteudoNoPainel(conteudo.id, { op_id: null, dist_id: null, herdado: false, ativo: true });
         deps.toast.showToast("Associação removida", { type: "success" });
       } else {
         const res = (await $fetch("/api/programacao_atividades/curriculo", {
@@ -510,8 +542,9 @@ export function useProgAtividadesCurriculo(deps: {
     }
     if (filtroTipo.value && conteudo.tipo !== filtroTipo.value) return false;
     if (filtroMeus.value && conteudo.criado_por !== store.user_expandido_id) return false;
-    if (filtroEstado.value === "associados" && !conteudo.op_id) return false;
-    if (filtroEstado.value === "livres" && conteudo.op_id) return false;
+    const noEscopo = !!conteudo.op_id || !!conteudo.herdado;
+    if (filtroEstado.value === "associados" && !noEscopo) return false;
+    if (filtroEstado.value === "livres" && noEscopo) return false;
     if (filtroEstado.value === "ocultos" && !(conteudo.op_id && !conteudo.ativo)) return false;
     return true;
   }));
@@ -522,7 +555,7 @@ export function useProgAtividadesCurriculo(deps: {
 
   const resumoCurriculo = computed(() => {
     const repositorio = conteudosDisponiveis.value;
-    const associados = repositorio.filter((conteudo) => !!conteudo.op_id).length;
+    const associados = repositorio.filter((conteudo) => !!conteudo.op_id || !!conteudo.herdado).length;
     const ocultos = repositorio.filter((conteudo) => !!conteudo.op_id && !conteudo.ativo).length;
     return {
       escopos: {

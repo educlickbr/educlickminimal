@@ -110,7 +110,7 @@
                         </div>
                     </div>
 
-                    <!-- ── Módulos/Ciclos ───────────────── -->
+                    <!-- ── Módulos/Ciclos ────────────────── -->
                     <div v-if="(ctx.estrutura.value?.modulos || []).length > 0" class="flex flex-col">
                         <button @click="ctx.togglePasta('modulos')" class="accordion-trigger">
                             <Icon name="ph:caret-down-bold" :class="{ 'rotated': ctx.pastaAberta.modulos }" class="accordion-arrow w-3 h-3" />
@@ -250,8 +250,8 @@
 
                         <button @click="ctx.toggleAssociacaoPainel(c)" class="assoc-toggle"
                             :disabled="!ctx.selectedScopeKey.value"
-                            :title="ctx.selectedScopeKey.value ? (c.op_id ? 'Desassociar' : 'Associar ao escopo') : 'Selecione o escopo primeiro (Adicionar na árvore)'">
-                            <Icon v-if="c.op_id" name="ph:check-square-fill" class="w-4 h-4 text-primary" />
+                            :title="!ctx.selectedScopeKey.value ? 'Selecione o escopo primeiro (Adicionar na árvore)' : (c.op_id || c.herdado ? 'Desassociar do escopo' : 'Associar ao escopo')">
+                            <Icon v-if="c.op_id || c.herdado" name="ph:check-square-fill" class="w-4 h-4 text-primary" />
                             <div v-else class="w-3.5 h-3.5 rounded border border-divider transition-colors group-hover:border-primary/40" />
                         </button>
 
@@ -264,6 +264,7 @@
                             <span class="assoc-titulo" :class="{ 'assoc-titulo--off': c.op_id && !c.ativo }">{{ c.titulo }}</span>
                             <div class="tags-container">
                                 <span class="assoc-tipo" :class="'tipo--' + c.tipo">{{ c.tipo }}</span>
+                                <span v-if="c.herdado && !c.op_id" class="assoc-herdado-tag">da distribuição</span>
                                 <div v-if="c.blocos && c.blocos.length > 0" class="assoc-blocos">
                                     <span v-for="b in c.blocos" :key="b.id" class="assoc-bloco-tag">{{ b.titulo }}</span>
                                 </div>
@@ -468,7 +469,7 @@ onMounted(() => props.ctx.fetchProgramas());
 .info-container { display: flex; flex-direction: column; flex: 1; overflow: hidden; gap: 3px; justify-content: center; margin-left: 2px; }
 .tags-container { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .file-placeholder { width: 22px; height: 22px; flex-shrink: 0; }
-.assoc-toggle { flex-shrink: 0; cursor: pointer; background: none; border: none; padding: 0; }
+.assoc-toggle { flex-shrink: 0; cursor: pointer; background: none; border: none; padding: 0; display: flex; align-items: center; justify-content: center; }
 .assoc-toggle:disabled { opacity: 0.3; cursor: not-allowed; }
 .assoc-titulo--off { opacity: 0.4; text-decoration: line-through; }
 
@@ -491,6 +492,7 @@ onMounted(() => props.ctx.fetchProgramas());
 .file-btn:hover { color: #3b82f6; background: rgba(59,130,246,0.1); }
 .assoc-blocos { display: flex; gap: 4px; flex-wrap: wrap; }
 .assoc-bloco-tag { font-size: 8px; font-weight: 700; color: var(--color-primary); background: rgba(139,92,246,0.08); padding: 2px 5px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+.assoc-herdado-tag { font-size: 8px; font-weight: 800; color: #60a5fa; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.25); padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
 .assoc-autor { font-size: 9px; font-weight: 600; color: var(--color-primary); opacity: 0.8; }
 .assoc-data { font-size: 9px; font-weight: 600; color: var(--color-secondary); opacity: 0.5; }
 

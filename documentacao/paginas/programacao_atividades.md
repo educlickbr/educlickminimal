@@ -79,7 +79,10 @@ supabase/migrations/
 ├── 20260819100000_fix_rls_lms_resposta_aluno.sql         ← policy gestor faltante + delete own
 ├── 20260819100001_lms_fase2_dividas_rapidas.sql          ← rascunho, upload dissertativa, ordem aleatória
 ├── 20260819100002_lms_fase23_avaliacao_avancada.sql      ← ambiente_seguro/autoavaliacao + nota automática
-└── 20260819100003_drop_lms_upsert_avaliacao_overload.sql ← drop overload órfão (7 params)
+├── 20260819100003_drop_lms_upsert_avaliacao_overload.sql ← drop overload órfão (7 params)
+├── 20261005100000_fix_curriculo_operacional_por_escopo.sql ← escopo operacional granular (área/componente/módulo)
+├── 20261005120000_saneamento_operacional_por_escopo.sql  ← saneamento das associações legadas
+└── 20261005193000_curriculo_catalogo_herdado_e_dist_id.sql ← unificação do catálogo com distribuição + dist_id
 ```
 
 ---
@@ -153,12 +156,16 @@ GET /api/programacao_atividades/curriculo?id_programa=X&id_entidade=Y
 
 ### Aba Currículo — conteúdos de um escopo (lazy)
 ```
-GET /api/programacao_atividades/curriculo/conteudos?id_programa=X&id_entidade=Y&escopo_tipo=programa|area|componente|modulo|ciclo|calendario&escopo_id=Z
+GET /api/programacao_atividades/curriculo/conteudos?id_programa=X&id_entidade=Y&escopo_tipo=programa|area|componente|modulo|ciclo|calendario&escopo_id=Z[&incluir_catalogo=true]
   → RPC lms_get_curriculo_conteudos(...)
-    → programa: lms_conteudo_operacional (sem ciclo/calendario)
-    → area/componente/modulo: lms_distribuicao + LEFT JOIN operacional (herança)
+    → programa: lms_conteudo_operacional (id_programa, sem subescopo)
+    → area/componente/modulo: operacional do subescopo ∪ lms_distribuicao (herança)
     → ciclo/calendario: lms_conteudo_operacional (com vínculo)
-    → retorna { conteudos[{ id_conteudo, titulo, tipo, id_arquivo, url, ativo, destaque, herdado, op_id }] }
+    → retorna { conteudos[{ id_conteudo, titulo, tipo, id_arquivo, url, ativo, destaque, herdado, op_id, dist_id }] }
+
+  incluir_catalogo=true → mesma chamada também devolve o catálogo do escopo:
+    → { conteudos: [...], catalogo[{ id, titulo, tipo, blocos, ativo, op_id, dist_id, herdado, ... }] }
+    (o navegador usa o catalogo; o check reflete presença no escopo)
 ```
 
 ### Aba Currículo — associar / ativar / destacar (painel direito)
@@ -169,17 +176,25 @@ GET /api/programacao_atividades/curriculo/conteudos?id_programa=X&id_entidade=Y&
    e o navegador surge à direita (slideInRight + borda violeta).
 
 RADIO (associação):
-  POST /api/programacao_atividades/curriculo { id_entidade, id_conteudo, id_programa | id_ciclo | id_calendario, ativo:true, usuario_id }
+  POST /api/programacao_atividades/curriculo { id_entidade, id_conteudo, id_programa, <subescopo>, ativo:true, usuario_id }
     → RPC lms_upsert_operacional(...) — cria linha (override)
   DELETE /api/programacao_atividades/curriculo { id: op_id, id_entidade }
-    → RPC lms_delete_operacional(...) — remove linha (volta à herança = ativo)
+    → RPC lms_delete_operacional(...) — remove linha operacional
+  DELETE /api/programacao_atividades/distribuicao { id: dist_id, id_entidade }
+    → RPC lms_delete_distribuicao(...) — remove da distribuição do escopo
 
 TOGGLE (visibilidade):
-  POST /api/programacao_atividades/curriculo { id_entidade, id_conteudo, id_programa | id_ciclo | id_calendario, ativo: !atual, usuario_id }
+  POST /api/programacao_atividades/curriculo { id_entidade, id_conteudo, id_programa, <subescopo>, ativo: !atual, usuario_id }
     → RPC lms_upsert_operacional(...) — ON CONFLICT atualiza a linha existente
 
-⚠️ CONSTRAINT EXCLUSIVA: exatamente UM de (id_programa, id_ciclo, id_calendario) preenchido.
-   Ciclo/aula substituem o programa no body (helper montarBodyOperacional).
+⚠️ ESCOPO DA LINHA (migration 20261005100000): id_programa é sempre o dono, e a linha
+   pode ter NO MÁXIMO UM subescopo — id_area | id_componente | id_modulo | id_ciclo | id_calendario
+   (constraint lms_conteudo_operacional_um_escopo).
+   Helper montarBodyOperacional monta o body (id_programa + subescopo do escopo alvo).
+
+⚠️ CHECK DO NAVEGADOR (migration 20261005193000): marca como "no escopo" tanto a associação operacional (op_id)
+   quanto o conteúdo herdado da distribuição (herdado + dist_id). Ambos aparecem com o check roxo pleno.
+   Se desmarcado, remove do operacional (DELETE curriculo) e/ou da distribuição (DELETE distribuicao).
 ```
 
 ---
@@ -287,10 +302,11 @@ lms_distribuicao            -- blueprint: conteúdo → escopo
 
 lms_conteudo_operacional    -- execução: override por programa
   id, id_entidade, id_conteudo,
-  id_programa | id_ciclo | id_calendario,           -- CHECK: exatamente 1
+  id_programa,                                       -- sempre preenchido
+  id_area | id_componente | id_modulo | id_ciclo | id_calendario, -- CHECK: no máximo 1
   id_distribuicao_origem, ativo, destaque,
   criado_por, criado_em, modificado_por, modificado_em   -- (auditoria)
-  UNIQUE funcional (id_conteudo, id_programa, id_ciclo, id_calendario)
+  UNIQUE funcional (id_conteudo, id_programa, subescopo)
 ```
 
 ### Tabelas complementares (submissões — criadas, uso futuro)
@@ -377,6 +393,18 @@ lms_progresso_aluno         -- progresso por conteúdo/aluno
 
 ## Histórico de Mudanças
 
+### 2026-10-05 — Currículo: escopo por coluna + saneamento + herança e check do catálogo
+
+**Banco:**
+- Migration `20261005100000`: `lms_conteudo_operacional` ganhou `id_area`/`id_componente`/`id_modulo`; constraint `lms_conteudo_operacional_um_escopo` refeita (id_programa + no máximo 1 subescopo); índice único recalculado; `lms_upsert_operacional` e `lms_get_curriculo_conteudos` atualizadas (catálogo opcional em 1 chamada); `lms_get_conteudos_do_aluno` alinhada
+- Migration `20261005120000`: saneamento — re-escopou linhas operacionais nível-programa antigas pela distribuição (componente > módulo > área)
+- Migration `20261005193000`: unificação do catálogo com a distribuição na RPC `lms_get_curriculo_conteudos` (retorna `herdado: true` e `dist_id` nativamente no catálogo e conteudos)
+
+**Frontend:**
+- `useProgAtividadesCurriculo`: `escopoKeyToParams`/`montarBodyOperacional` gravam o subescopo correto; catálogo em 1 chamada; árvore recarrega após mutação; desassociação dupla (operacional via DELETE curriculo e distribuição via DELETE distribuicao)
+- `ProgAtividadesTabCurriculo`: check roxo pleno para itens operacionais e herdados; selo "da distribuição" nítido; desassociar interativo; filtros/resumo contam herdado
+- Issue/plano: [`plano_curriculo_heranca_e_check.md`](../planos/realizados/plano_curriculo_heranca_e_check.md)
+
 ### 2026-08-19 — Fase 2.3 (avaliação avançada) + recolhimento dinâmico + fix RLS
 
 **Banco:**
@@ -436,6 +464,27 @@ lms_progresso_aluno         -- progresso por conteúdo/aluno
 **Frontend:**
 - `ProgAtividadesTabRepositorio`: CRUD de conteúdos (material/atividade/avaliação) + blocos, busca, filtros, paginação
 - `ModalProgAtividadesConteudo` 3 passos, `ModalProgAtividadesBloco`, `UploadArquivo`, `ConteudoRow`
+
+---
+
+## Issues conhecidas
+
+### Currículo — check do navegador não refletia conteúdo herdado (2026-10-05)
+
+**Sintoma:** ao abrir um escopo (ex.: Componente), um conteúdo que pertence ao escopo pela **distribuição** (Blueprint) aparece na árvore mas fica **desmarcado** no navegador; só marca depois de reassociar.
+
+**Causa:** duas noções de "pertence ao escopo" — a árvore mostra `operacional ∪ distribuição` (com `herdado: true`), mas o check do navegador olhava **só o operacional** (`op_id`).
+
+**Histórico de tentativas:**
+1. Associação gravava sempre nível-programa (front colapsava componente/módulo/área em `id_programa`) → base do problema.
+2. Migration `20261005100000` (Opção B): `lms_conteudo_operacional` ganhou `id_area`/`id_componente`/`id_modulo`; constraint e RPCs ajustadas; catálogo em 1 chamada (`p_incluir_catalogo`).
+3. Migration `20261005120000` (saneamento): re-escopou linhas nível-programa antigas pela distribuição.
+4. Fix no front: check passou a marcar também o `herdado` (mesclando a lista `conteudos` no `catalogo`); selo "da distribuição".
+5. Descartado: materializar distribuição em operacional (falta `id_programa` — distribuição é por entidade).
+
+**Status:** ✅ Concluído e testado — migrations `20261005100000`, `20261005120000` e `20261005193000` aplicadas; check do herdado nítido e interativo; desassociação dupla implementada.
+
+→ **Plano completo:** [`plano_curriculo_heranca_e_check.md`](../planos/realizados/plano_curriculo_heranca_e_check.md)
 
 ---
 

@@ -5,6 +5,7 @@ import { useAppStore } from '~~/stores/app'
 const store = useAppStore()
 const supabase = useSupabaseClient()
 const router = useRouter()
+const route = useRoute()
 const { showToast } = useToast()
 
 const nome = ref('')
@@ -18,10 +19,13 @@ const loading = ref(false)
 const errorMsg = ref('')
 
 // Aplica o tema/branding da entidade (via BFF) quando deslogado;
+// suporta ID de entidade/empresa recebido via URL (?id_entidade=, ?id_empresa= ou ?id=);
 // se não houver entidade resolvida, respeita a preferência manual.
+const { aplicarTemaDaEntidadePublica, entidadePublica } = useTemaEntidade()
+
 onMounted(async () => {
-    const { aplicarTemaDaEntidadePublica } = useTemaEntidade();
-    const aplicouEntidade = await aplicarTemaDaEntidadePublica();
+    const idDaUrl = (route.query.id_entidade as string) || (route.query.id_empresa as string) || (route.query.id as string) || undefined
+    const aplicouEntidade = await aplicarTemaDaEntidadePublica(idDaUrl)
     if (!aplicouEntidade?.success) store.initTheme()
 })
 
@@ -55,12 +59,12 @@ const handleSignup = async () => {
     try {
         // 1) Registrar usuário no Supabase Auth
         const { data: authData, error: authError } = await supabase.auth.signUp({
-            email: email.value,
+            email: email.value.trim(),
             password: password.value,
             options: {
                 data: {
-                    nome: nome.value,
-                    sobrenome: sobrenome.value
+                    nome: nome.value.trim(),
+                    sobrenome: sobrenome.value.trim()
                 }
             }
         })
@@ -68,17 +72,30 @@ const handleSignup = async () => {
         if (authError) throw authError
         if (!authData.user) throw new Error('Falha ao criar usuário')
 
-        // 2) Fazer upsert em user_expandido usando a função
-        const { data: upsertData, error: upsertError } = await (supabase as any)
-            .rpc('nxt_upsert_user_expandido', {
-                p_user_id: authData.user.id,
-                p_nome: nome.value,
-                p_sobrenome: sobrenome.value,
-                p_email: email.value,
-                p_papel_id: 'd19ba89e-9a15-4194-929a-db47695fb2be' // Ajuste este ID de papel conforme sua estrutura
-            })
+        // 2) Completar cadastro provisionando vínculos (user_expandido, papel e entidade)
+        // Prioriza a entidade resolvida dinamicamente ou passada via URL
+        const idEntidadeFinal =
+            entidadePublica.value?.id ||
+            (route.query.id_entidade as string) ||
+            (route.query.id_empresa as string) ||
+            (route.query.id as string) ||
+            null
 
-        if (upsertError) throw upsertError
+        // Chama a rota BFF /api/auth/cadastro (sem UUIDs hardcoded)
+        const res = await $fetch<{ success: boolean; message?: string }>('/api/auth/cadastro', {
+            method: 'POST',
+            body: {
+                id_user: authData.user.id,
+                nome: nome.value.trim(),
+                sobrenome: sobrenome.value.trim(),
+                email: email.value.trim(),
+                id_entidade: idEntidadeFinal
+            }
+        })
+
+        if (!res?.success) {
+            throw new Error(res?.message || 'Erro ao processar vínculos de cadastro')
+        }
 
         // 3) Sucesso! Mostrar toast
         showToast('Inscrição realizada com sucesso! 🎉', { type: 'info' })
@@ -90,11 +107,10 @@ const handleSignup = async () => {
         password.value = ''
         confirmPassword.value = ''
 
-        // Aguardar um pouco e redirecionar se necessário
+        // Aguardar e redirecionar para a página de login
         setTimeout(() => {
-            // Por enquanto fica na página, depois você pode redirecionar
-            // router.push('/')
-        }, 2000)
+            router.push('/auth/login')
+        }, 1500)
 
     } catch (err: any) {
         console.error('Erro no cadastro:', err)
@@ -262,14 +278,18 @@ const handleSignup = async () => {
         </div>
 
     </div>
+
   </div>
 </template>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s ease;
 }
-.fade-enter-from, .fade-leave-to {
+
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>

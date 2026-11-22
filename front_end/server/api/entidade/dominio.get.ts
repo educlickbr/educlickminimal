@@ -2,10 +2,13 @@ import { serverSupabaseClient } from "#supabase/server";
 import { getRequestHost, getRequestURL } from "h3";
 
 /**
- * BFF público: resolve a entidade pelo domínio (host) da requisição.
+ * BFF público: resolve a entidade pelo domínio (host) da requisição ou ID via query.
  *
  * Usado por páginas DESLOGADAS (auth/landing) para aplicar o tema e o
  * branding da entidade (ex.: ensi abre claro + laranja).
+ *
+ * Suporta parâmetro de query (?id=, ?id_entidade= ou ?id_empresa=) para páginas
+ * que recebem a entidade diretamente na URL (ex: oferta, cadastro).
  *
  * Segurança (acordo servidor_ssr_bff.md §5.2): o client anônimo NUNCA
  * chama a RPC direto. Aqui o BFF (service_role) chama
@@ -13,9 +16,9 @@ import { getRequestHost, getRequestURL } from "h3";
  * service_role) e expõe apenas o necessário para a página pública.
  */
 export default defineEventHandler(async (event) => {
-    // 0. Query params — página pode já saber a entidade (ex.: oferta?ID=entidade)
+    // 0. Query params — página pode já saber a entidade (ex.: oferta?id_entidade=..., cadastro?id_empresa=...)
     const query = getQuery(event);
-    const p_id = (query.id as string) || (query.id_entidade as string) || "".trim();
+    const p_id = (query.id as string) || (query.id_entidade as string) || (query.id_empresa as string) || "".trim();
 
     // 1. Resolve o host (remove a porta)
     const url = getRequestURL(event);

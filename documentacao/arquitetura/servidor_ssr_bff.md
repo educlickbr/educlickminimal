@@ -245,7 +245,12 @@ server/api/
 | `programas.get.ts` | GET | Programas (compartilhado) |
 | `programas.post.ts` | POST | Criar/atualizar programa |
 | `me.get.ts` | GET | Sessão do usuário logado |
-| `entidade/dominio.get.ts` | GET | Resolve a entidade pelo domínio (BFF → RPC DEFINER). Usado em páginas DESLOGADAS para aplicar tema/branding da entidade. Sem exposição ao client. |
+| `entidade/dominio.get.ts` | GET | Resolve a entidade pelo domínio (host) ou query (?id_entidade=, ?id_empresa=, ?id=) via RPC DEFINER. Usado em páginas DESLOGADAS (oferta, landing, auth) para aplicar tema/branding da entidade. |
+| `auth/cadastro.post.ts` | POST | Autocadastro de usuário e vínculos (user_expandido, papel, entidade) |
+| `auth/vincular-conta.post.ts` | POST | Vincula conta auth a user_expandido existente |
+| `auth/criar-conta.post.ts` | POST | Validação de código e preparação de signup |
+| `auth/verificar-email.get.ts` | GET | Verifica status do email e onboarding |
+| `auth/enviar-codigo.post.ts` | POST | Envio de código de verificação por email |
 | `odoo-lead.post.ts` | POST | Integração com Odoo (leads) |
 | `r2/sign.get.ts` | GET | Signed URL para Cloudflare R2 |
 | `debug.ts` | GET | Debug |
@@ -344,6 +349,27 @@ sequenceDiagram
 | `/confirm` | 🔓 Callback de confirmação |
 | `/` | 🔓 Pública (landing) |
 | Demais rotas | 🔒 Requer login |
+
+### 4.4 Resolução de Entidade / Empresa em Páginas Públicas e Cadastro
+
+Em páginas deslogadas/públicas (como `/oferta` e `/auth/cadastro`), a aplicação precisa identificar a qual entidade/empresa o visitante pertence para carregar a identidade visual correta e vincular os registros à entidade certa.
+
+#### Parâmetros de Query Suportados (Deep Linking)
+As páginas e o endpoint `/api/entidade/dominio` aceitam o identificador da entidade via query string da URL:
+- `?id_entidade=<uuid>`
+- `?id_empresa=<uuid>` (suporte a links externos legados do ecossistema)
+- `?id=<uuid>`
+
+#### Ordem de Precedência na Resolução (`server/api/entidade/dominio.get.ts`):
+1. **Query Param (`?id_entidade=`, `?id_empresa=`, `?id=`):** Se fornecido na URL, chama a RPC `app_resolver_entidade_por_id(p_id)`.
+2. **Fallback de Desenvolvimento (`localhost`):** Se estiver em localhost/dev e configurado `EDUCLICK_FALLBACK_ENTIDADE_ID` no `.env`, resolve por esse ID.
+3. **Domínio/Host da Requisição:** Em produção/white-label, resolve o domínio do host via `app_resolver_entidade_por_dominio(p_dominio)`.
+
+#### Fluxo no Autocadastro (`/auth/cadastro`):
+1. No `onMounted`, a página obtém o parâmetro da URL (`route.query.id_entidade || route.query.id_empresa || route.query.id`) e chama `useTemaEntidade().aplicarTemaDaEntidadePublica(idDaUrl)`.
+2. O tema, logo e cores de marca da entidade são aplicados dinamicamente na interface.
+3. No envio do formulário, o ID resolvido é enviado no payload para `POST /api/auth/cadastro`.
+4. A RPC `nxt_upsert_user_expandido` cria `user_expandido`, vincula `user_entidade_user` e atribui `user_papeis_auth`, assegurando que o Auth Hook `jwt_custom_claims` emita os claims de papel e entidades no momento do login.
 
 ---
 

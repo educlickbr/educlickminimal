@@ -5,6 +5,16 @@ description: Padrão obrigatório para criar funções (RPCs) PostgreSQL no Supa
 
 # Padrão de Segurança para RPCs (Supabase / PostgreSQL)
 
+## MCP Supabase Configurado (Exclusivo Antigravity)
+
+> **Nota de ambiente (Antigravity):**
+> O acesso remoto via MCP está configurado exclusivamente para o Antigravity sob o servidor **`supabase_edk`**.
+> - **Project Ref:** `uipgyvlmcvvvadguyjsa` (EduClick Minimal)
+> - **Configuração global:** `~/.gemini/config/mcp_config.json`
+> - **Atenção:** Este acesso é exclusivo da stack Antigravity / Gemini CLI. O assistente Codex não utiliza nem deve ter acesso a esse MCP.
+
+---
+
 ## Regra Absoluta: SECURITY INVOKER
 
 **TODA função criada deve usar `SECURITY INVOKER`.**
@@ -77,8 +87,7 @@ CREATE POLICY "nome_tabela: select para membros da entidade"
     FOR SELECT
     USING (
         ((auth.jwt() ->> 'papel'::text) = 'admin'::text)
-        OR (EXISTS (
-            SELECT 1
+        OR (EXISTS (\n            SELECT 1
             FROM jsonb_array_elements_text(auth.jwt() -> 'entidades') e(ent)
             WHERE nome_tabela.id_entidade = e.ent::uuid
         ))
@@ -93,8 +102,8 @@ Criar policies separadas para SELECT, INSERT, UPDATE, DELETE.
 
 ```json
 {
-  "papel": "admin",         // role do usuário
-  "entidades": ["uuid-1", "uuid-2"]  // UUIDs das entidades
+  \"papel\": \"admin\",         // role do usuário
+  \"entidades\": [\"uuid-1\", \"uuid-2\"]  // UUIDs das entidades
 }
 ```
 

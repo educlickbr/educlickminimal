@@ -3673,17 +3673,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "lms_conteudo_operacional_id_area_fkey"
-            columns: ["id_area"]
-            isOneToOne: false
-            referencedRelation: "aca_area"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "lms_conteudo_operacional_criado_por_fkey"
             columns: ["criado_por"]
             isOneToOne: false
             referencedRelation: "user_expandido"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_conteudo_operacional_id_area_fkey"
+            columns: ["id_area"]
+            isOneToOne: false
+            referencedRelation: "aca_area"
             referencedColumns: ["id"]
           },
           {
@@ -5998,11 +5998,11 @@ export type Database = {
       }
       lms_get_curriculo_conteudos: {
         Args: {
-          p_incluir_catalogo?: boolean
           p_escopo_id: string
           p_escopo_tipo: string
           p_id_entidade: string
           p_id_programa: string
+          p_incluir_catalogo?: boolean
         }
         Returns: Json
       }
@@ -6194,6 +6194,18 @@ export type Database = {
           p_nome_area: string
         }
         Returns: string
+      }
+      nxt_upsert_user_expandido: {
+        Args: {
+          p_email?: string
+          p_id_entidade?: string
+          p_nome: string
+          p_papel?: string
+          p_papel_id?: string
+          p_sobrenome?: string
+          p_user_id: string
+        }
+        Returns: Json
       }
       salvar_lead_mensagem: {
         Args: {
